@@ -1,5 +1,43 @@
 # CHANGELOG_AI
 
+## 2026-05-13 小程序 Phase 2.2 — 图标弱化与数据仪表盘风
+
+### 本轮修改
+- `miniprogram/app.wxss`
+  - 新增数据仪表盘组件类：`.index-mark`（编号标记）、`.data-label`（大写英文标签）、`.data-value`（数值）、`.section-num`（表单区块绿色编号）。
+  - 新增 `.data-label-*` 五种事件颜色标签（training/supplement/sleep/warning/recovery）。
+  - 新增 `.data-value-warning` 黄色数值变体。
+  - 新增 `.index-mark-muted` 灰化编号变体。
+- `miniprogram/pages/index/index.wxml`
+  - 入口卡片图标全部移除：将 ✦/◈/⊗ 图标换成 `01` / `02` / `RST` 编号标记。
+  - 说明文案精简："填写今天训练..." → "只规划今天 · 生成今日作战图"。
+  - 页面副标题文案精简。
+- `miniprogram/pages/index/index.wxss`
+  - 删除整套 icon 样式：`.entry-icon` / `.icon-symbol` / `.accent-icon` / `.info-icon` / `.danger-icon`。
+- `miniprogram/pages/single-day/index.wxml`
+  - 表单区块标题改为编号式：`01 今日训练` / `02 今日时间` / `03 补剂清单`，使用 `.section-num` 绿色数字前缀。
+- `miniprogram/pages/dashboard/index.wxml`
+  - 摘要卡图标全部移除：将 ◈/◆/○/△ 图标换成 uppercase 英文标签：`TRAINING` / `SUPPLEMENT` / `SLEEP` / `ALERT`。
+  - 取消颜色 icon 容器，改用 `.data-label-*` 文字颜色分类。
+  - 空状态移除圆形图标容器。
+- `miniprogram/pages/dashboard/index.wxss`
+  - 删除整套 icon 容器样式：`.summary-icon-wrap` / `.summary-icon` / `.type-bg-* .summary-icon`。
+  - 删除空状态图标容器：`.empty-icon-wrap` / `.empty-icon`。
+  - 简化 summary-item 布局，移除非必要的 flex 对齐。
+
+### 视觉效果
+- 首页入口从"图标卡片"改为"编号入口"，更接近专业工具风格。
+- 摘要卡从"图标+文字"改为"英文标签+数值"，更接近数据面板。
+- 页面整体 -62 行代码，更简洁。
+
+### 保持不变
+- 未迁移完整 H5。
+- 未修改 H5 页面业务逻辑。
+- 未改 H5 现有 localStorage key。
+- 未修改核心算法和规则引擎。
+- 未读取全部 docx。
+- 未写入 AppSecret、token 或密钥。
+
 ## 2026-05-13 小程序 Phase 2.1 — 视觉重设计
 
 ### 本轮修改

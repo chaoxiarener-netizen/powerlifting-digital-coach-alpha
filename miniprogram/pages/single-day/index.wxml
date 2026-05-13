@@ -5,10 +5,10 @@
     <text class="page-subtitle">只规划今天 · 保存后生成今日作战图</text>
   </view>
 
-  <!-- ─── 今日训练 ─── -->
+  <!-- ─── 01 今日训练 ─── -->
   <view class="panel">
     <view class="panel-head">
-      <text class="section-title">今日训练</text>
+      <text class="section-title"><text class="section-num">01</text>今日训练</text>
       <text class="section-desc">设置今天的训练类型和强度</text>
     </view>
 
@@ -42,10 +42,10 @@
     </view>
   </view>
 
-  <!-- ─── 今日时间 ─── -->
+  <!-- ─── 02 今日时间 ─── -->
   <view class="panel">
     <view class="panel-head">
-      <text class="section-title">今日时间</text>
+      <text class="section-title"><text class="section-num">02</text>今日时间</text>
       <text class="section-desc">起床、训练和入睡时间安排</text>
     </view>
 
@@ -78,10 +78,10 @@
     </view>
   </view>
 
-  <!-- ─── 补剂清单 ─── -->
+  <!-- ─── 03 补剂清单 ─── -->
   <view class="panel">
     <view class="panel-head">
-      <text class="section-title">补剂清单</text>
+      <text class="section-title"><text class="section-num">03</text>补剂清单</text>
       <text class="section-desc">选择今天想补充的营养补剂</text>
     </view>
     <checkbox-group bindchange="handleSupplementChange">

@@ -3,7 +3,7 @@
     <view class="accent-bar"></view>
     <text class="hero-eyebrow">今日总控台</text>
     <text class="page-title">力量举全景数字教练</text>
-    <text class="page-subtitle">Alpha 小程序迁移验证版 · 总控台、轻量单日计划和今日作战图闭环。</text>
+    <text class="page-subtitle">Alpha · 总控台、轻量单日计划和今日作战图闭环。</text>
   </view>
 
   <view class="action-panel">
@@ -39,34 +39,28 @@
 
   <view class="entry-list">
     <view class="entry-card primary" bindtap="goSingleDay">
-      <view class="entry-icon accent-icon">
-        <text class="icon-symbol">✦</text>
-      </view>
+      <text class="index-mark">01</text>
       <view class="entry-body">
         <text class="entry-title">轻量单日计划</text>
-        <text class="entry-desc">填写今天训练、作息和常用补剂，保存后生成今日作战图。</text>
+        <text class="entry-desc">只规划今天 · 生成今日作战图</text>
       </view>
       <text class="entry-arrow">›</text>
     </view>
 
     <view class="entry-card" bindtap="goDashboard">
-      <view class="entry-icon info-icon">
-        <text class="icon-symbol">◈</text>
-      </view>
+      <text class="index-mark">02</text>
       <view class="entry-body">
         <text class="entry-title">今日作战图</text>
-        <text class="entry-desc">读取 singleDayPlan，展示今日摘要和时间流。</text>
+        <text class="entry-desc">查看今日摘要与完整时间流</text>
       </view>
       <text class="entry-arrow">›</text>
     </view>
 
     <view class="entry-card danger" bindtap="clearData">
-      <view class="entry-icon danger-icon">
-        <text class="icon-symbol">⊗</text>
-      </view>
+      <text class="index-mark index-mark-muted">RST</text>
       <view class="entry-body">
         <text class="entry-title">清空本地数据</text>
-        <text class="entry-desc">仅清空 appUsageMode / singleDayPlan，用于重新验收。</text>
+        <text class="entry-desc">重置本地缓存</text>
       </view>
     </view>
   </view>

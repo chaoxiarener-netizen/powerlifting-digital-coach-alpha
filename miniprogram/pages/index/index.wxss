@@ -211,40 +211,6 @@
   border-color: rgba(255, 68, 68, 0.15);
 }
 
-/* ─── Entry icon square ─── */
-
-.entry-icon {
-  width: 72rpx;
-  height: 72rpx;
-  border-radius: 18rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.icon-symbol {
-  font-size: 30rpx;
-}
-
-.accent-icon {
-  background: rgba(0, 255, 136, 0.1);
-  border: 1rpx solid rgba(0, 255, 136, 0.2);
-  color: #00ff88;
-}
-
-.info-icon {
-  background: rgba(91, 141, 239, 0.1);
-  border: 1rpx solid rgba(91, 141, 239, 0.2);
-  color: #5b8def;
-}
-
-.danger-icon {
-  background: rgba(255, 68, 68, 0.1);
-  border: 1rpx solid rgba(255, 68, 68, 0.2);
-  color: #ff6b6b;
-}
-
 /* ─── Entry body ─── */
 
 .entry-body {

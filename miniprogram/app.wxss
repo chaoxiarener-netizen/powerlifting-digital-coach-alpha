@@ -278,3 +278,65 @@ page {
 .smooth {
   transition: all 0.2s ease-out;
 }
+
+/* ─── Data dashboard components ─── */
+
+.index-mark {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 800;
+  color: #00ff88;
+  font-family: "SF Mono", "Roboto Mono", monospace;
+  width: 56rpx;
+  flex-shrink: 0;
+  line-height: 1.2;
+  letter-spacing: 0.5rpx;
+}
+
+.index-mark-muted {
+  color: #666666;
+  font-size: 22rpx;
+}
+
+.data-label {
+  display: block;
+  font-size: 20rpx;
+  font-weight: 700;
+  color: #777777;
+  letter-spacing: 1.5rpx;
+  text-transform: uppercase;
+  margin-bottom: 4rpx;
+}
+
+.data-label-training { color: #00ff88; }
+.data-label-supplement { color: #b885ea; }
+.data-label-sleep { color: #7c5bef; }
+.data-label-warning { color: #ffd166; }
+.data-label-recovery { color: #6bcb9a; }
+.data-label-wake { color: #5b8def; }
+
+.data-value {
+  display: block;
+  color: #f5f5f5;
+  font-size: 26rpx;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.data-value-warning {
+  color: #ffd166;
+}
+
+.data-unit {
+  display: block;
+  font-size: 20rpx;
+  color: #666666;
+  margin-top: 2rpx;
+}
+
+.section-num {
+  color: #00ff88;
+  font-size: 26rpx;
+  font-weight: 700;
+  margin-right: 8rpx;
+}

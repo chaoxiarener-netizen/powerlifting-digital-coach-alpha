@@ -14,31 +14,27 @@
       </view>
       <view class="summary-grid">
         <view class="summary-item">
-          <view class="summary-icon-wrap type-bg-training"><text class="summary-icon">◈</text></view>
           <view class="summary-body">
-            <text class="summary-label">今日训练</text>
-            <text class="summary-value">{{summary.training}}</text>
+            <text class="data-label data-label-training">TRAINING</text>
+            <text class="data-value">{{summary.training}}</text>
           </view>
         </view>
         <view class="summary-item">
-          <view class="summary-icon-wrap type-bg-supplement"><text class="summary-icon">◆</text></view>
           <view class="summary-body">
-            <text class="summary-label">今日补剂</text>
-            <text class="summary-value">{{summary.supplements}}</text>
+            <text class="data-label data-label-supplement">SUPPLEMENT</text>
+            <text class="data-value">{{summary.supplements}}</text>
           </view>
         </view>
         <view class="summary-item">
-          <view class="summary-icon-wrap type-bg-sleep"><text class="summary-icon">○</text></view>
           <view class="summary-body">
-            <text class="summary-label">计划入睡</text>
-            <text class="summary-value">{{summary.sleep}}</text>
+            <text class="data-label data-label-sleep">SLEEP</text>
+            <text class="data-value">{{summary.sleep}}</text>
           </view>
         </view>
         <view class="summary-item">
-          <view class="summary-icon-wrap type-bg-warning"><text class="summary-icon">△</text></view>
           <view class="summary-body">
-            <text class="summary-label">关键提醒</text>
-            <text class="summary-value warning-text">{{summary.warning}}</text>
+            <text class="data-label data-label-warning">ALERT</text>
+            <text class="data-value data-value-warning">{{summary.warning}}</text>
           </view>
         </view>
       </view>
@@ -73,9 +69,6 @@
 
   <block wx:else>
     <view class="card empty-panel text-center">
-      <view class="empty-icon-wrap">
-        <text class="empty-icon">◈</text>
-      </view>
       <text class="empty-panel-title">还没有轻量单日计划</text>
       <text class="empty-desc">先创建今天的训练、作息和补剂清单，再查看今日作战图。</text>
       <view class="btn btn-primary" bindtap="goCreate">去创建</view>
