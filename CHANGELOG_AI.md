@@ -1,5 +1,24 @@
 # CHANGELOG_AI
 
+## 2026-05-13 微信小程序 Phase 1 — 真机预览验收通过
+
+### 手动验收（真机预览）
+- 真机可打开小程序首页，显示正常。
+- 可进入轻量单日计划，填写并保存 `singleDayPlan`。
+- 今日作战图可读取 `singleDayPlan`，显示训练来源：轻量单日计划。
+- 跨天睡眠显示为 `次日 00:30`，未排在时间轴第一项。
+- 晚间 caffeine 进入 warning，未进入正常补剂时间流。
+- 真机页面无明显错位。
+- H5 Alpha v0.2 未受影响。
+
+### 保持不变
+- 未迁移完整 H5。
+- 未修改 H5 页面业务逻辑。
+- 未改 H5 现有 localStorage key。
+- 未修改 `macro_rule_engine.js / supplement_rule_engine.js`。
+- 未读取全部 docx。
+- 未写入 AppSecret、token 或密钥。
+
 ## 2026-05-13 微信小程序 Phase 1 — 微信开发者工具手动验收通过
 
 ### 手动验收（微信开发者工具模拟器）
