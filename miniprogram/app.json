@@ -1,6 +1,8 @@
 {
   "pages": [
-    "pages/index/index"
+    "pages/index/index",
+    "pages/single-day/index",
+    "pages/dashboard/index"
   ],
   "window": {
     "navigationBarTitleText": "力量举全景数字教练",

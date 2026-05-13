@@ -1,24 +1,53 @@
 <view class="page index-page">
   <view class="hero">
     <text class="eyebrow">Alpha 小程序迁移验证版</text>
-    <text class="title">力量举全景数字教练</text>
-    <text class="subtitle">先验证小程序骨架，再逐步迁移总控台、单日计划和今日作战图。</text>
+    <text class="page-title">力量举全景数字教练</text>
+    <text class="page-subtitle">Phase 1 先验证总控台、轻量单日计划和今日作战图闭环。</text>
+  </view>
+
+  <view class="panel action-panel">
+    <text class="panel-title">现在该做什么？</text>
+    <view class="now-row">
+      <text class="now-time">{{nextAction.nowTime}}</text>
+      <text class="pill">{{nextAction.currentLabel}}</text>
+    </view>
+
+    <block wx:if="{{nextAction.hasData && nextAction.nextEvent}}">
+      <view class="next-block">
+        <text class="eyebrow">下一步 · 还有 {{nextAction.nextEvent.minutesUntil}} 分钟</text>
+        <text class="next-title">{{nextAction.nextEvent.time}} {{nextAction.nextEvent.title}}</text>
+        <text class="next-meta">{{nextAction.nextEvent.meta}}</text>
+      </view>
+      <view class="following" wx:if="{{nextAction.followingEvent}}">
+        <text>随后：{{nextAction.followingEvent.time}} {{nextAction.followingEvent.title}} · {{nextAction.followingEvent.meta}}</text>
+      </view>
+    </block>
+
+    <block wx:elif="{{nextAction.status === 'done_for_day'}}">
+      <text class="empty-title">今日关键事件已完成</text>
+      <text class="empty-desc">{{nextAction.message}}</text>
+    </block>
+
+    <block wx:else>
+      <text class="empty-title">还没有今日作战提示</text>
+      <text class="empty-desc">请先创建轻量单日计划，验证 wx storage 与事件流是否跑通。</text>
+    </block>
   </view>
 
   <view class="entry-list">
-    <view class="entry-card" bindtap="handleEntryTap" data-mode="single_day">
+    <view class="entry-card primary" bindtap="goSingleDay">
       <text class="entry-title">轻量单日计划</text>
-      <text class="entry-desc">快速规划今天的训练、作息和补剂。</text>
+      <text class="entry-desc">填写今天训练、作息和常用补剂，保存后生成今日作战图。</text>
     </view>
 
-    <view class="entry-card" bindtap="handleEntryTap" data-mode="weekly">
-      <text class="entry-title">周计划模式</text>
-      <text class="entry-desc">后续迁移本周训练和营养预算。</text>
-    </view>
-
-    <view class="entry-card" bindtap="handleEntryTap" data-mode="dashboard">
+    <view class="entry-card" bindtap="goDashboard">
       <text class="entry-title">今日作战图</text>
-      <text class="entry-desc">后续接入 daily_flow_engine 事件流。</text>
+      <text class="entry-desc">读取 singleDayPlan，展示今日摘要和时间流。</text>
+    </view>
+
+    <view class="entry-card danger" bindtap="clearData">
+      <text class="entry-title">清空本地数据</text>
+      <text class="entry-desc">仅清空 appUsageMode / singleDayPlan，用于重新验收。</text>
     </view>
   </view>
 </view>

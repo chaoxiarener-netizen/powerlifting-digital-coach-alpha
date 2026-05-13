@@ -1,5 +1,66 @@
 # CHANGELOG_AI
 
+## 2026-05-13 微信小程序 Phase 1 — 微信开发者工具手动验收通过
+
+### 手动验收（微信开发者工具模拟器）
+- 首页可正常打开，显示阶段标题和入口。
+- 轻量单日计划页面可正常创建：
+  - 填写 `21:00` 训练、`90` 分钟、`00:30` 入睡、RPE `8`，勾选 `caffeine / creatine / magnesium`。
+  - 保存后 `singleDayPlan` 写入 wx storage，`appUsageMode` 设为 `single_day`。
+  - 自动跳转至今日作战图。
+- 今日作战图可读取 `singleDayPlan`：
+  - 显示训练来源：轻量单日计划。
+  - 跨天睡眠显示为 `次日 00:30`。
+  - `00:30` 未排在时间轴第一项。
+  - 晚间 caffeine 进入 warning，未进入正常补剂时间流。
+- H5 Alpha v0.2 未受影响。
+
+### 保持不变
+- 未迁移完整 H5。
+- 未修改 H5 页面业务逻辑。
+- 未改 H5 现有 localStorage key。
+- 未修改 `macro_rule_engine.js / supplement_rule_engine.js`。
+- 未读取全部 docx。
+- 未写入 AppSecret、token 或密钥。
+
+## 2026-05-13 微信小程序 Phase 1 最小闭环
+
+### 本轮修改
+- `miniprogram/app.json`
+  - 注册 `pages/index/index`、`pages/single-day/index`、`pages/dashboard/index` 三个页面。
+- `miniprogram/utils/storage.js`
+  - 新增 wx storage 适配层，暴露 `getStorage / setStorage / removeStorage / clearAppStorage / getSingleDayPlan / saveSingleDayPlan / getAppUsageMode / setAppUsageMode`。
+  - 本轮只读写 `appUsageMode` 与 `singleDayPlan`，保持 key 名称兼容。
+- `miniprogram/utils/daily_flow_engine.js`
+  - 新增小程序版纯函数事件生成器，去掉 `window` 依赖，使用 CommonJS 导出。
+  - 支持起床、训练、训练结束/恢复、简化补剂、睡前恢复、睡眠和晚间咖啡因 warning。
+  - 支持 `00:30` 跨天显示为 `次日 00:30`，并用 `absoluteMinute` 排序。
+- `miniprogram/pages/index/*`
+  - 总控台显示当前时间、下一步作战提示、轻量单日计划入口、今日作战图入口和清空本地数据入口。
+- `miniprogram/pages/single-day/*`
+  - 新增轻量单日计划表单，支持是否训练、训练类型、主项、训练时间、训练时长、起床时间、计划入睡、RPE、`caffeine / creatine / magnesium` 补剂选择。
+  - 保存后写入 `singleDayPlan`，设置 `appUsageMode = single_day`，并跳转今日作战图。
+- `miniprogram/pages/dashboard/*`
+  - 新增今日作战图页面，读取 `singleDayPlan`，展示今日摘要、时间流和“训练来源：轻量单日计划”。
+  - 无 `singleDayPlan` 时显示空状态和“去创建”按钮。
+
+### 本地校验
+- `miniprogram/app.json` JSON 解析通过。
+- 小程序 JS 文件语法检查通过。
+- 使用 Node 直接校验小程序版 `daily_flow_engine`：
+  - `21:00` 训练、`90` 分钟、`00:30` 入睡时，睡眠事件 `absoluteMinute = 1470`
+  - 时间显示为 `次日 00:30`
+  - `00:30` 未排在时间流第一项
+  - 晚间 `caffeine` 进入 warning，不进入正常补剂事件
+
+### 保持不变
+- 未迁移全部 H5。
+- 未修改 H5 页面业务逻辑。
+- 未改 H5 现有 localStorage key。
+- 未修改 `macro_rule_engine.js / supplement_rule_engine.js`。
+- 未读取全部 docx。
+- 未写入 AppSecret、token 或密钥。
+
 ## 2026-05-13 微信小程序迁移评估与骨架
 
 ### 本轮修改

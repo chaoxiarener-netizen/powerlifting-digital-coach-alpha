@@ -39,3 +39,7 @@ macro_docx_repair_report.json
 .DS_Store
 Thumbs.db
 Desktop.ini
+
+# WeChat DevTools private config (contains appid)
+project.private.config.json
+miniprogram/project.private.config.json

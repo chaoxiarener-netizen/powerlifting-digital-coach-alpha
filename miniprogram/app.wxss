@@ -16,6 +16,8 @@ page {
   border: 1rpx solid #2a2a2a;
   border-radius: 16rpx;
   padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-sizing: border-box;
 }
 
 .text-dim {
@@ -24,4 +26,105 @@ page {
 
 .accent {
   color: #00ff88;
+}
+
+.page-title {
+  display: block;
+  color: #ffffff;
+  font-size: 52rpx;
+  font-weight: 800;
+  letter-spacing: -1rpx;
+  line-height: 1.08;
+}
+
+.page-subtitle {
+  display: block;
+  margin-top: 16rpx;
+  color: #9a9a9a;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+
+.panel-title {
+  display: block;
+  margin-bottom: 18rpx;
+  color: #f5f5f5;
+  font-size: 32rpx;
+  font-weight: 700;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1rpx solid rgba(0, 255, 136, 0.35);
+  border-radius: 999rpx;
+  padding: 8rpx 18rpx;
+  color: #00ff88;
+  font-size: 24rpx;
+  background: rgba(0, 255, 136, 0.08);
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 88rpx;
+  border-radius: 16rpx;
+  padding: 0 28rpx;
+  box-sizing: border-box;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.btn-primary {
+  color: #061108;
+  background: #00ff88;
+}
+
+.btn-secondary {
+  color: #e5e5e5;
+  background: #1f1f1f;
+  border: 1rpx solid #333333;
+}
+
+.btn-danger {
+  color: #ffdddd;
+  background: rgba(255, 68, 68, 0.12);
+  border: 1rpx solid rgba(255, 68, 68, 0.35);
+}
+
+.field {
+  margin-bottom: 24rpx;
+}
+
+.field-label {
+  display: block;
+  margin-bottom: 12rpx;
+  color: #cfcfcf;
+  font-size: 26rpx;
+}
+
+.input {
+  width: 100%;
+  min-height: 84rpx;
+  border: 1rpx solid #2a2a2a;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+  box-sizing: border-box;
+  color: #f5f5f5;
+  background: #101010;
+  font-size: 30rpx;
+}
+
+.picker-value {
+  display: flex;
+  align-items: center;
+  min-height: 84rpx;
+  border: 1rpx solid #2a2a2a;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+  color: #f5f5f5;
+  background: #101010;
+  font-size: 30rpx;
 }

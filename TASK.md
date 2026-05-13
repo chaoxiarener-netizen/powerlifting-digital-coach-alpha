@@ -1,16 +1,21 @@
 # TASK
 
 ## 本轮目标
-基于 MINIPROGRAM_MIGRATION_PLAN.md，决定是否先做小程序 Phase 1：总控台 + 单日计划 + 今日作战图。
+小程序 Phase 1 真机预览体验收口。
 
 ## 禁止
-- 不迁移全部 H5
-- 不改核心算法
+- 不迁移完整 H5
+- 不改 H5 核心逻辑
 - 不读取全部 docx
-- 不写入 AppSecret 或 token
+- 不写 AppSecret 或 token
+- 不做登录、云同步、支付
 
 ## 验收标准
-- 迁移方案明确
-- 小程序骨架可用
-- H5 版本不受影响
-- 明确 Phase 1 范围
+- 微信开发者工具预览二维码可在真机打开
+- 首页显示正常
+- 轻量单日计划可保存
+- 今日作战图可读取 singleDayPlan
+- 21:00 训练 + 00:30 入睡显示为"次日 00:30"
+- 晚间 caffeine warning 正常
+- iPhone / 安卓屏幕无明显错位
+- H5 Alpha v0.2 不受影响

@@ -1,0 +1,62 @@
+<view class="page dashboard-page">
+  <view class="hero">
+    <text class="pill">训练来源：轻量单日计划</text>
+    <text class="page-title">今日作战图</text>
+    <text class="page-subtitle">Phase 1 从 singleDayPlan 生成今日摘要和关键时间流。</text>
+  </view>
+
+  <block wx:if="{{hasPlan}}">
+    <view class="panel summary-panel">
+      <text class="panel-title">今日摘要</text>
+      <view class="summary-grid">
+        <view class="summary-item">
+          <text class="summary-label">今日训练</text>
+          <text class="summary-value">{{summary.training}}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">今日补剂</text>
+          <text class="summary-value">{{summary.supplements}}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">计划入睡</text>
+          <text class="summary-value">{{summary.sleep}}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">关键提醒</text>
+          <text class="summary-value warning-text">{{summary.warning}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="panel">
+      <text class="panel-title">单日时间流</text>
+      <view class="timeline">
+        <view class="timeline-item {{item.type}}" wx:for="{{events}}" wx:key="id">
+          <view class="time-col">
+            <text class="time-text">{{item.displayTime}}</text>
+          </view>
+          <view class="event-col">
+            <text class="event-title">{{item.title}}</text>
+            <text class="event-meta">{{item.meta}}</text>
+            <view class="tags" wx:if="{{item.tags.length}}">
+              <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+            </view>
+            <text class="event-detail">{{item.detail}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="panel empty-panel">
+      <text class="panel-title">还没有轻量单日计划</text>
+      <text class="empty-desc">先创建今天的训练、作息和补剂清单，再查看今日作战图。</text>
+      <view class="btn btn-primary" bindtap="goCreate">去创建</view>
+    </view>
+  </block>
+
+  <view class="actions">
+    <view class="btn btn-secondary" bindtap="goHome">返回总控台</view>
+  </view>
+</view>
