@@ -1,17 +1,16 @@
 # TASK
 
 ## 本轮目标
-根据 daily_flow_engine 收口版线上验收结果，决定下一轮方向：继续体验打磨，或恢复长期计划功能开发。
+基于 MINIPROGRAM_MIGRATION_PLAN.md，决定是否先做小程序 Phase 1：总控台 + 单日计划 + 今日作战图。
 
 ## 禁止
-- 不直接开发新功能
+- 不迁移全部 H5
 - 不改核心算法
 - 不读取全部 docx
-- 不改 localStorage key
+- 不写入 AppSecret 或 token
 
 ## 验收标准
-- 首页和模块四事件展示一致
-- 跨天时间正确
-- single_day / weekly 模式正常
-- 晚间咖啡因阻断正常
-- 明确下一轮产品优先级
+- 迁移方案明确
+- 小程序骨架可用
+- H5 版本不受影响
+- 明确 Phase 1 范围

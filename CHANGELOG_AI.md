@@ -1,5 +1,39 @@
 # CHANGELOG_AI
 
+## 2026-05-13 微信小程序迁移评估与骨架
+
+### 本轮修改
+- 新增 `MINIPROGRAM_MIGRATION_PLAN.md`
+  - 总结当前 H5 Alpha v0.2 架构。
+  - 规划小程序目标页面结构。
+  - 明确 `localStorage` 到 `wx.getStorageSync / wx.setStorageSync` 的替换方案。
+  - 列出可复用逻辑、需要适配的模块、不建议直接迁移的内容。
+  - 说明 `web-view` 方案风险。
+  - 给出原生小程序 Phase 1 到 Phase 4 的迁移路径。
+  - 明确 MVP 小程序第一版范围。
+- 新增 `miniprogram/` 最小骨架：
+  - `app.json`
+  - `app.js`
+  - `app.wxss`
+  - `pages/index/index.wxml`
+  - `pages/index/index.wxss`
+  - `pages/index/index.js`
+- 首页骨架显示：
+  - `力量举全景数字教练`
+  - `Alpha 小程序迁移验证版`
+  - `轻量单日计划 / 周计划模式 / 今日作战图` 三个入口占位
+
+### 保持不变
+- 未正式迁移全部 H5 页面。
+- 未删除 H5 版本。
+- 未改核心算法。
+- 未改现有 localStorage key。
+- 未读取全部 docx。
+- 未写入 AppSecret、token 或密钥。
+
+### 下一步建议
+- 基于 `MINIPROGRAM_MIGRATION_PLAN.md` 决定是否启动小程序 Phase 1：总控台 + 单日计划 + 今日作战图。
+
 ## 2026-05-13 daily_flow_engine 收口版 Alpha 线上验收
 
 ### 线上链接

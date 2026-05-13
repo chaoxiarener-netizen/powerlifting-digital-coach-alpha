@@ -1,6 +1,30 @@
 # PROJECT_STATE
 
 ## 当前阶段
+H5 Alpha v0.2 已完成稳定收口，并开始进入微信小程序迁移评估阶段。本轮没有正式迁移业务功能，只完成了迁移方案文档和最小小程序骨架，用于判断是否启动 Phase 1。
+
+## 本轮已完成
+- 新增 `MINIPROGRAM_MIGRATION_PLAN.md`，明确 H5 架构、小程序目标页面、存储替换、可复用逻辑、web-view 风险、原生分阶段路线和 MVP 范围。
+- 新增 `miniprogram/` 基础骨架：
+  - `app.json`
+  - `app.js`
+  - `app.wxss`
+  - `pages/index/index.wxml`
+  - `pages/index/index.wxss`
+  - `pages/index/index.js`
+- 骨架首页仅包含总控台验证版标题和三个入口占位，不承载正式业务逻辑。
+- H5 版本、核心算法、localStorage key、规则引擎均未修改。
+
+## 当前风险
+- 小程序正式迁移时，`app_state.js` 需要做 `localStorage` 到 `wx` storage 的适配层，不能直接照搬。
+- `daily_flow_engine.js`、`macro_rule_engine.js`、`supplement_rule_engine.js` 可复用价值高，但仍要检查浏览器 API 依赖。
+- web-view 虽然快，但受业务域名、备案、体验和审核约束，不建议作为正式主方案。
+
+## 下一步建议
+- 下一轮先决策是否启动小程序 Phase 1。
+- 如果启动 Phase 1，建议只做总控台 + 轻量单日计划 + 今日作战图，并优先迁移本地存储适配层和 `daily_flow_engine.js`。
+
+## 当前阶段
 daily_flow_engine 收口版 Alpha 已完成线上验收。线上地址 `https://charming-baklava-9ecd7b.netlify.app/` 中，首页“下一步作战提示”和模块四“今日作战图”已经确认共用 `daily_flow_engine.js` 事件生成逻辑，主链路表现一致。
 
 ## 本轮已完成
