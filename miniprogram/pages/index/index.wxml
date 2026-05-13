@@ -1,11 +1,12 @@
 <view class="page index-page">
   <view class="hero">
+    <view class="accent-bar"></view>
     <text class="eyebrow">Alpha 小程序迁移验证版</text>
     <text class="page-title">力量举全景数字教练</text>
     <text class="page-subtitle">Phase 1 先验证总控台、轻量单日计划和今日作战图闭环。</text>
   </view>
 
-  <view class="panel action-panel">
+  <view class="panel action-panel panel-elevated">
     <text class="panel-title">现在该做什么？</text>
     <view class="now-row">
       <text class="now-time">{{nextAction.nowTime}}</text>
@@ -14,12 +15,14 @@
 
     <block wx:if="{{nextAction.hasData && nextAction.nextEvent}}">
       <view class="next-block">
-        <text class="eyebrow">下一步 · 还有 {{nextAction.nextEvent.minutesUntil}} 分钟</text>
+        <text class="next-eyebrow">下一步 · 还有 {{nextAction.nextEvent.minutesUntil}} 分钟</text>
         <text class="next-title">{{nextAction.nextEvent.time}} {{nextAction.nextEvent.title}}</text>
         <text class="next-meta">{{nextAction.nextEvent.meta}}</text>
       </view>
-      <view class="following" wx:if="{{nextAction.followingEvent}}">
-        <text>随后：{{nextAction.followingEvent.time}} {{nextAction.followingEvent.title}} · {{nextAction.followingEvent.meta}}</text>
+      <view class="next-following" wx:if="{{nextAction.followingEvent}}">
+        <text class="following-label">随后</text>
+        <text class="following-text">{{nextAction.followingEvent.time}} {{nextAction.followingEvent.title}}</text>
+        <text class="following-meta">{{nextAction.followingEvent.meta}}</text>
       </view>
     </block>
 
@@ -36,18 +39,35 @@
 
   <view class="entry-list">
     <view class="entry-card primary" bindtap="goSingleDay">
-      <text class="entry-title">轻量单日计划</text>
-      <text class="entry-desc">填写今天训练、作息和常用补剂，保存后生成今日作战图。</text>
+      <view class="entry-icon accent-icon">
+        <text class="icon-symbol">✦</text>
+      </view>
+      <view class="entry-body">
+        <text class="entry-title">轻量单日计划</text>
+        <text class="entry-desc">填写今天训练、作息和常用补剂，保存后生成今日作战图。</text>
+      </view>
+      <text class="entry-arrow">›</text>
     </view>
 
     <view class="entry-card" bindtap="goDashboard">
-      <text class="entry-title">今日作战图</text>
-      <text class="entry-desc">读取 singleDayPlan，展示今日摘要和时间流。</text>
+      <view class="entry-icon info-icon">
+        <text class="icon-symbol">◈</text>
+      </view>
+      <view class="entry-body">
+        <text class="entry-title">今日作战图</text>
+        <text class="entry-desc">读取 singleDayPlan，展示今日摘要和时间流。</text>
+      </view>
+      <text class="entry-arrow">›</text>
     </view>
 
     <view class="entry-card danger" bindtap="clearData">
-      <text class="entry-title">清空本地数据</text>
-      <text class="entry-desc">仅清空 appUsageMode / singleDayPlan，用于重新验收。</text>
+      <view class="entry-icon danger-icon">
+        <text class="icon-symbol">⊗</text>
+      </view>
+      <view class="entry-body">
+        <text class="entry-title">清空本地数据</text>
+        <text class="entry-desc">仅清空 appUsageMode / singleDayPlan，用于重新验收。</text>
+      </view>
     </view>
   </view>
 </view>

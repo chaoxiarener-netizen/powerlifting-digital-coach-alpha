@@ -1,5 +1,48 @@
 # CHANGELOG_AI
 
+## 2026-05-13 小程序 Phase 2 — UI 收口
+
+### 本轮修改
+- `miniprogram/app.wxss`
+  - 新增 `.smooth` / `.gap-*` / `.text-warning` / `.text-danger` 等布局和色彩工具类。
+  - 新增 `.btn:active` 按压态，优化按钮反馈。
+  - 新增 `.accent-bar` / `.divider` / `.panel-elevated` 装饰与层级组件。
+- `miniprogram/pages/index/index.wxml`
+  - 首页英雄区新增 `.accent-bar` 装饰条。
+  - 作战卡片控制台添加 `.panel-elevated` 提升层级感。
+  - 功能入口卡改为图标 + 文本 + 箭头三栏布局，使用 `.entry-icon` / `.entry-body` / `.entry-arrow` 结构。
+  - 随后事件改为独立卡片结构，增加 `following-label` / `following-text` / `following-meta` 层级。
+- `miniprogram/pages/index/index.wxss`
+  - 完全重写入口卡样式：圆形图标区、flex 三栏布局、按压缩放。
+  - 时间显示从 `64rpx` 加大至 `72rpx`，倒计时卡片加深背景。
+  - 新增 `.next-eyebrow` 小标题样式和 `.next-following` 卡片结构。
+- `miniprogram/pages/single-day/index.wxml`
+  - 各表单区块增加 `.panel-head` 带底部分割线。
+  - 按钮添加 `.smooth` 过渡类。
+  - 训练时长 input 添加 `placeholder="90"` 提升输入引导。
+- `miniprogram/pages/single-day/index.wxss`
+  - 新增 `.panel-head` 带 `border-bottom` 的分割标题样式。
+  - 优化 `.field:last-child` 去除多余间距。
+  - 调整整体 `gap` 从 `24rpx` 到 `28rpx`。
+- `miniprogram/pages/dashboard/index.wxml`
+  - 从 H5 风格改为原生小程序时间轴：新增 `.timeline-dot` + `.timeline-content` 结构。
+  - 摘要卡新增 `.summary-icon-wrap` 图标区，按训练/补剂/睡眠/提醒分类着色。
+  - 时间流每条事件新增 `.type-tag` 类型徽章和 `.time-row` 行布局。
+  - 空状态改为居中布局，新增 `.empty-icon-wrap` 装饰圆和 `.empty-panel-title`。
+- `miniprogram/pages/dashboard/index.wxss`
+  - 时间轴改为带竖线连接线的 `.timeline::before` + 圆点指示器 `.timeline-dot`，按事件类型着色（training=绿 / wake=蓝 / sleep=紫 / warning=黄 / recovery=青 / supplement=粉）。
+  - 新增 `.type-tag` / `.type-*` 六种类型标签。
+  - Summary 可视化：每个字段前增加带边框背景的图标区。
+  - 空状态居中卡片，带圆形图标容器。
+
+### 保持不变
+- 未迁移完整 H5。
+- 未修改 H5 页面业务逻辑。
+- 未改 H5 现有 localStorage key。
+- 未修改核心算法和规则引擎。
+- 未读取全部 docx。
+- 未写入 AppSecret、token 或密钥。
+
 ## 2026-05-13 微信小程序 Phase 1 — 真机预览验收通过
 
 ### 手动验收（真机预览）

@@ -128,3 +128,65 @@ page {
   background: #101010;
   font-size: 30rpx;
 }
+
+/* ─── Utility ─── */
+
+.smooth {
+  transition: all 0.2s ease-out;
+}
+
+.gap-xs { gap: 8rpx; }
+.gap-sm { gap: 16rpx; }
+.gap-md { gap: 24rpx; }
+.gap-lg { gap: 36rpx; }
+
+.text-warning {
+  color: #ffd166;
+}
+
+.text-danger {
+  color: #ff6b6b;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* ─── Button active states ─── */
+
+.btn:active {
+  opacity: 0.88;
+}
+
+.btn-primary:active {
+  background: #00dd74;
+}
+
+.btn-secondary:active {
+  background: #2a2a2a;
+}
+
+/* ─── Divider ─── */
+
+.divider {
+  height: 1rpx;
+  background: #242424;
+  margin: 8rpx 0;
+  border: none;
+}
+
+/* ─── Accent bar ─── */
+
+.accent-bar {
+  width: 64rpx;
+  height: 4rpx;
+  background: #00ff88;
+  border-radius: 4rpx;
+  margin-bottom: 12rpx;
+}
+
+/* ─── Elevated panel ─── */
+
+.panel-elevated {
+  box-shadow: 0 8rpx 40rpx rgba(0, 0, 0, 0.35);
+}

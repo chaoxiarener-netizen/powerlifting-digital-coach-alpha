@@ -1,15 +1,18 @@
 <view class="page single-day-page">
   <view class="hero">
+    <view class="accent-bar"></view>
     <text class="pill">Phase 1</text>
     <text class="page-title">轻量单日计划</text>
     <text class="page-subtitle">只规划今天 · 保存后生成今日作战图</text>
   </view>
 
   <view class="panel">
-    <text class="panel-title">今日训练</text>
+    <view class="panel-head">
+      <text class="panel-title">今日训练</text>
+    </view>
 
     <view class="switch-row">
-      <view>
+      <view class="switch-info">
         <text class="switch-title">今天训练</text>
         <text class="switch-desc">关闭后自动作为恢复日处理</text>
       </view>
@@ -37,7 +40,9 @@
   </view>
 
   <view class="panel">
-    <text class="panel-title">今日时间</text>
+    <view class="panel-head">
+      <text class="panel-title">今日时间</text>
+    </view>
 
     <view class="field">
       <text class="field-label">起床时间</text>
@@ -55,7 +60,7 @@
 
     <view class="field">
       <text class="field-label">训练时长（分钟）</text>
-      <input class="input {{!form.isTrainingDay ? 'muted' : ''}}" type="number" value="{{form.workoutDurationMinutes}}" bindinput="handleInput" data-field="workoutDurationMinutes" />
+      <input class="input {{!form.isTrainingDay ? 'muted' : ''}}" type="number" value="{{form.workoutDurationMinutes}}" placeholder="90" bindinput="handleInput" data-field="workoutDurationMinutes" />
     </view>
 
     <view class="field">
@@ -67,7 +72,9 @@
   </view>
 
   <view class="panel">
-    <text class="panel-title">补剂清单</text>
+    <view class="panel-head">
+      <text class="panel-title">补剂清单</text>
+    </view>
     <checkbox-group bindchange="handleSupplementChange">
       <label class="checkbox-row" wx:for="{{supplementOptions}}" wx:key="value">
         <checkbox value="{{item.value}}" checked="{{item.checked}}" color="#00ff88" />
@@ -80,7 +87,7 @@
   </view>
 
   <view class="actions">
-    <view class="btn btn-primary" bindtap="savePlan">保存并生成今日作战图</view>
-    <view class="btn btn-secondary" bindtap="goHome">返回总控台</view>
+    <view class="btn btn-primary smooth" bindtap="savePlan">保存并生成今日作战图</view>
+    <view class="btn btn-secondary smooth" bindtap="goHome">返回总控台</view>
   </view>
 </view>
