@@ -1,0 +1,1742 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app_ui.css">
+  <title>力量举全景数字教练 - 单日仪表盘</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --panel-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-dim: #666;
+      --accent: #00ff88;
+      --accent-dim: #00cc6a;
+      --warn: #ff4444;
+      --info: #4488ff;
+      --carbs: #ffaa00;
+      --protein: #ff6b6b;
+      --fat: #9b59b6;
+      --light: #5ac8fa;
+      --medium: #ffd700;
+      --heavy: #ff6b6b;
+      --rest: #666;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .header .subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Panel */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title::before {
+      content: '';
+      width: 3px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Day Selector */
+    .day-grid {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .day-btn {
+      width: 44px;
+      height: 60px;
+      border: 2px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg);
+      padding: 6px 4px;
+    }
+
+    .day-btn:hover {
+      border-color: var(--text-dim);
+    }
+
+    .day-btn.active {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .day-btn.type-light { border-color: var(--light); background: rgba(90, 200, 250, 0.1); }
+    .day-btn.type-light.active { border-color: var(--light); }
+    .day-btn.type-medium { border-color: var(--medium); background: rgba(255, 215, 0, 0.1); }
+    .day-btn.type-medium.active { border-color: var(--medium); }
+    .day-btn.type-heavy { border-color: var(--heavy); background: rgba(255, 107, 107, 0.1); }
+    .day-btn.type-heavy.active { border-color: var(--heavy); }
+
+    .day-label {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .day-num {
+      font-size: 16px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    .day-type-badge {
+      font-size: 8px;
+      margin-top: 2px;
+      padding: 1px 4px;
+      border-radius: 3px;
+      background: var(--border);
+    }
+
+    .day-btn.type-light .day-type-badge { background: var(--light); color: #000; }
+    .day-btn.type-medium .day-type-badge { background: var(--medium); color: #000; }
+    .day-btn.type-heavy .day-type-badge { background: var(--heavy); color: #fff; }
+
+    /* Summary */
+    .summary-panel {
+      padding: 18px;
+      border-color: rgba(0, 255, 136, 0.28);
+      background:
+        linear-gradient(180deg, rgba(0, 255, 136, 0.08), rgba(0, 255, 136, 0.02)),
+        var(--panel);
+      box-shadow: 0 18px 42px rgba(0, 0, 0, 0.28);
+    }
+
+    .summary-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+    }
+
+    .summary-date {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .summary-mode {
+      font-size: 11px;
+      color: var(--accent);
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(0, 255, 136, 0.28);
+      background: rgba(0, 255, 136, 0.08);
+      white-space: nowrap;
+    }
+
+    .summary-note {
+      font-size: 11px;
+      color: #b8b8b8;
+      line-height: 1.55;
+      margin-bottom: 14px;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .summary-item {
+      background: rgba(10, 10, 10, 0.88);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      min-height: 104px;
+    }
+
+    .summary-item.warning {
+      border-color: rgba(255, 68, 68, 0.35);
+      background: rgba(255, 68, 68, 0.06);
+    }
+
+    .summary-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+    }
+
+    .summary-main {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .summary-sub {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.55;
+      margin-top: 6px;
+    }
+
+    .summary-day-strip {
+      padding-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+
+    /* Macro Display */
+    .macro-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .macro-item {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .macro-item.carbs { border-left: 3px solid var(--carbs); }
+    .macro-item.protein { border-left: 3px solid var(--protein); }
+    .macro-item.fat { border-left: 3px solid var(--fat); }
+
+    .macro-value {
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .macro-item.carbs .macro-value { color: var(--carbs); }
+    .macro-item.protein .macro-value { color: var(--protein); }
+    .macro-item.fat .macro-value { color: var(--fat); }
+
+    .macro-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .macro-unit {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* Training Section */
+    .training-card {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .training-title {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .exercise-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .exercise-item:last-child {
+      border-bottom: none;
+    }
+
+    .exercise-name {
+      font-size: 13px;
+    }
+
+    .exercise-sets {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Carb Timing */
+    .timing-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .timing-card {
+      background: var(--bg);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .timing-card.pre { border: 1px solid rgba(74, 144, 217, 0.5); }
+    .timing-card.intra { border: 1px solid rgba(90, 200, 250, 0.5); }
+    .timing-card.post { border: 1px solid rgba(0, 212, 170, 0.5); }
+
+    .timing-phase {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .timing-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .timing-card.pre .timing-value { color: #4a90d9; }
+    .timing-card.intra .timing-value { color: #5ac8fa; }
+    .timing-card.post .timing-value { color: #00d4aa; }
+
+    .timing-desc {
+      font-size: 9px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Supplement List */
+    .supplement-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
+    }
+
+    .supplement-item.warning {
+      border-color: rgba(255, 68, 68, 0.45);
+      background: rgba(255, 68, 68, 0.08);
+    }
+
+    .supplement-clock {
+      min-width: 48px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      padding-top: 3px;
+    }
+
+    .supplement-icon {
+      font-size: 18px;
+      line-height: 1.2;
+      padding-top: 1px;
+    }
+
+    .supplement-info {
+      flex: 1;
+    }
+
+    .supplement-name {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .supplement-timing {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .supplement-note {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .supplement-amount {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      white-space: nowrap;
+      padding-top: 2px;
+    }
+
+    /* Daily Flow */
+    .flow-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .flow-item {
+      display: grid;
+      grid-template-columns: 56px 1fr;
+      gap: 12px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .flow-time {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      padding-top: 2px;
+    }
+
+    .flow-title {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .flow-meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .flow-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .flow-tag {
+      font-size: 10px;
+      color: var(--text);
+      padding: 3px 6px;
+      border-radius: 999px;
+      background: #1d1d1d;
+      border: 1px solid var(--border);
+    }
+
+    .flow-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+
+    .flow-sub-item + .flow-sub-item {
+      margin-top: 8px;
+    }
+
+    .flow-detail {
+      margin-top: 10px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.08);
+      padding-top: 8px;
+    }
+
+    .flow-detail summary {
+      list-style: none;
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .flow-detail summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .flow-detail-body {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .flow-detail-line {
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--text-dim);
+    }
+
+    .detail-panel {
+      overflow: hidden;
+    }
+
+    .detail-panel > summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .detail-panel > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .detail-panel > summary::after {
+      content: '展开';
+      font-size: 11px;
+      color: var(--text-dim);
+      font-weight: 500;
+    }
+
+    .detail-panel[open] > summary::after {
+      content: '收起';
+      color: var(--accent);
+    }
+
+    .detail-content {
+      margin-top: 14px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .detail-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .detail-item-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      margin-bottom: 6px;
+    }
+
+    .detail-item-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.45;
+    }
+
+    .detail-section-title {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin: 14px 0 8px;
+    }
+
+    .detail-inline-note {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+
+    .detail-link-row {
+      margin-bottom: 12px;
+    }
+
+    .detail-link-row .btn {
+      width: 100%;
+    }
+
+    /* Calories Summary */
+    .calories-card {
+      background: var(--bg);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .calories-value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .calories-label {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .calories-breakdown {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text-dim);
+      flex-wrap: wrap;
+    }
+
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dim);
+    }
+
+    .empty-state-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .empty-state-text {
+      font-size: 13px;
+    }
+
+    .hint-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .hint-item {
+      padding: 12px;
+      border-radius: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+    }
+
+    .hint-item.warning {
+      border-color: rgba(255, 68, 68, 0.4);
+      background: rgba(255, 68, 68, 0.08);
+    }
+
+    .hint-title {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .hint-meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 13px 16px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: #000;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .info-box {
+      background: rgba(68, 136, 255, 0.1);
+      border: 1px solid rgba(68, 136, 255, 0.35);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .info-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--info);
+      margin-bottom: 6px;
+    }
+
+    .info-box-content {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .global-nav {
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .global-nav-list {
+      display: flex;
+      gap: 8px;
+      min-width: max-content;
+    }
+
+    .global-nav-link {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--text-dim);
+      font-size: 12px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .global-nav-link.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    @media (max-width: 420px) {
+      .container {
+        padding: 16px 12px 96px;
+      }
+
+      .summary-head,
+      .summary-grid,
+      .detail-grid,
+      .macro-row,
+      .timing-row {
+        grid-template-columns: 1fr;
+      }
+
+      .summary-head {
+        display: grid;
+      }
+
+      .day-grid {
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+
+      .day-btn {
+        min-width: 44px;
+        flex: 0 0 auto;
+      }
+
+      .flow-item {
+        grid-template-columns: 48px 1fr;
+      }
+
+      .calories-breakdown {
+        flex-direction: column;
+        gap: 8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="global-nav">
+      <div class="global-nav-list">
+        <a class="global-nav-link" href="index.html">总控台</a>
+        <a class="global-nav-link" href="单日计划_轻量模式.html">单日</a>
+        <a class="global-nav-link" href="模块一_用户档案.html">档案</a>
+        <a class="global-nav-link" href="模块三_每周训练安排.html">训练</a>
+        <a class="global-nav-link" href="模块二_碳水预算引擎.html">营养</a>
+        <a class="global-nav-link" href="补剂时序生成器.html">补剂</a>
+        <a class="global-nav-link active" href="模块四_单日仪表盘.html">作战图</a>
+        <a class="global-nav-link" href="模块五_长期计划.html">长期</a>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>📅 今日作战图</h1>
+      <div class="subtitle">今日作战图 · 最终训练营养补剂时间线 · <a href="index.html" style="color:var(--accent);text-decoration:none;">返回首页</a></div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-title">最终结果页</div>
+      <div class="info-box-content">今日作战图是最终结果页，补剂、训练和营养会在这里合并成一条时间线。</div>
+    </div>
+
+    <div class="panel" id="missingDataPanel" style="display:none;">
+      <div class="panel-title">数据不足引导</div>
+      <div class="hint-list">
+        <div class="hint-item warning">
+          <div class="hint-title" id="missingDataTitle">当前数据不足</div>
+          <div class="hint-meta" id="missingDataText"></div>
+        </div>
+        <a class="btn" id="missingDataBtn" href="模块一_用户档案.html">去补齐数据</a>
+      </div>
+    </div>
+
+    <div class="panel summary-panel" id="summaryPanel">
+      <div class="panel-title">今日摘要</div>
+      <div class="summary-head">
+        <div class="summary-date" id="summaryDate">--</div>
+        <div class="summary-mode" id="summaryMode">--</div>
+      </div>
+      <div class="summary-note">先看今天最重要的安排。训练、营养和补剂细节都收在下方，想看时再展开。</div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">今日训练</div>
+          <div class="summary-main" id="summaryTrainingMain">--</div>
+          <div class="summary-sub" id="summaryTrainingSub">--</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">今日营养</div>
+          <div class="summary-main" id="summaryNutritionMain">--</div>
+          <div class="summary-sub" id="summaryNutritionSub">--</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">今日补剂</div>
+          <div class="summary-main" id="summarySupplementMain">--</div>
+          <div class="summary-sub" id="summarySupplementSub">--</div>
+        </div>
+        <div class="summary-item" id="summaryReminderCard">
+          <div class="summary-label">关键提醒</div>
+          <div class="summary-main" id="summaryReminderMain">--</div>
+          <div class="summary-sub" id="summaryReminderSub">--</div>
+        </div>
+      </div>
+      <div class="summary-day-strip">
+        <div class="panel-title" style="margin-bottom:10px;">选择日期</div>
+        <div class="day-grid" id="dayGrid">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="flowPanel">
+      <div class="panel-title">单日时间流</div>
+      <div class="detail-inline-note">默认只显示关键节点，剂量和规则说明可按需展开。</div>
+      <div class="flow-list" id="dailyFlowContent">
+        <!-- 动态加载 -->
+      </div>
+    </div>
+
+    <details class="panel detail-panel" id="trainingDetailPanel">
+      <summary>训练详情</summary>
+      <div class="detail-content" id="trainingDetailContent"></div>
+    </details>
+
+    <details class="panel detail-panel" id="nutritionDetailPanel">
+      <summary>营养详情</summary>
+      <div class="detail-content">
+        <div class="detail-inline-note" id="nutritionDetailContent">当天宏量、餐次分配和 EA / RED-S 状态集中放在这里查看。</div>
+        <div class="detail-link-row" id="nutritionDetailAction" style="display:none;">
+          <a class="btn" href="模块二_碳水预算引擎.html">去生成营养预算</a>
+        </div>
+        <div class="macro-row">
+          <div class="macro-item carbs">
+            <div class="macro-value" id="dayCarb">--</div>
+            <div class="macro-label">碳水</div>
+            <div class="macro-unit">g</div>
+          </div>
+          <div class="macro-item protein">
+            <div class="macro-value" id="dayProtein">--</div>
+            <div class="macro-label">蛋白质</div>
+            <div class="macro-unit">g</div>
+          </div>
+          <div class="macro-item fat">
+            <div class="macro-value" id="dayFat">--</div>
+            <div class="macro-label">脂肪</div>
+            <div class="macro-unit">g</div>
+          </div>
+        </div>
+        <div class="timing-row">
+          <div class="timing-card pre">
+            <div class="timing-phase">PRE</div>
+            <div class="timing-value" id="preCarb">--g</div>
+            <div class="timing-desc">训练前2-3h</div>
+          </div>
+          <div class="timing-card intra">
+            <div class="timing-phase">INTRA</div>
+            <div class="timing-value" id="intraCarb">--g</div>
+            <div class="timing-desc">训练中</div>
+          </div>
+          <div class="timing-card post">
+            <div class="timing-phase">POST</div>
+            <div class="timing-value" id="postCarb">--g</div>
+            <div class="timing-desc">训练后30min</div>
+          </div>
+        </div>
+        <div class="detail-section-title">热量总览</div>
+        <div class="calories-card">
+          <div class="calories-value" id="totalCalories">--</div>
+          <div class="calories-label">kcal / 日</div>
+          <div class="calories-breakdown">
+            <span>碳水 <span id="carbCals">--</span> kcal</span>
+            <span>蛋白 <span id="proCals">--</span> kcal</span>
+            <span>脂肪 <span id="fatCals">--</span> kcal</span>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <details class="panel detail-panel" id="supplementDetailPanel">
+      <summary>补剂详情</summary>
+      <div class="detail-content">
+        <div class="detail-section-title">已纳入时间流</div>
+        <div class="hint-list" id="ownedSupplementContent"></div>
+        <div class="detail-section-title">可选建议</div>
+        <div class="hint-list" id="optionalSuggestionContent"></div>
+        <div class="detail-section-title">风险与阻断</div>
+        <div class="hint-list" id="warningSuggestionContent"></div>
+      </div>
+    </details>
+  </div>
+
+  <script src="app_state.js"></script>
+  <script src="daily_flow_engine.js"></script>
+  <script src="supplement_rule_engine.js"></script>
+  <script>
+    // ============ State ============
+    let state = {
+      selectedDay: null,
+      usageMode: window.AppState ? window.AppState.getUsageMode() : 'weekly',
+      dayTypes: {},
+      macros: {
+        rest: { carb: 0, protein: 0, fat: 0 },
+        light: { carb: 0, protein: 0, fat: 0 },
+        medium: { carb: 0, protein: 0, fat: 0 },
+        heavy: { carb: 0, protein: 0, fat: 0 }
+      },
+      carbTiming: { pre: 0, intra: 0, post: 0 },
+      mealPlans: { rest: [], light: [], medium: [], heavy: [] },
+      trainingPlan: null,
+      supplements: [],
+      singleDayPlan: null,
+      supplementConfig: {},
+      profile: {},
+      dashboardContext: null
+    };
+
+    let supplementRuleCache = window.SupplementRuleEngine ? window.SupplementRuleEngine.getRulesSync() : { byKey: {} };
+
+    const DAY_LABELS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    const DAY_SHORT = ['一', '二', '三', '四', '五', '六', '日'];
+    const TYPE_NAMES = { rest: '休息日', light: '轻训日', medium: '常规日', heavy: '重训日' };
+    const TYPE_ICONS = { rest: '😴', light: '🚶', medium: '🏋️', heavy: '💪' };
+
+    const SUPPLEMENT_LIBRARY = {
+      d3k2: { icon: '☀️', name: '维生素 D3+K2', timing: '早餐', desc: '随含脂早餐服用', calcType: 'absolute', dose: 3000, unit: 'IU' },
+      omega3: { icon: '🐟', name: 'Omega-3', timing: '早餐/正餐', desc: '随含脂正餐补充', calcType: 'absolute', dose: 2000, unit: 'mg' },
+      creatine: { icon: '💪', name: '一水肌酸', timing: '训练后', desc: '力量恢复基础补剂', calcType: 'absolute', dose: 5, unit: 'g' },
+      protein: { icon: '🥛', name: '乳清蛋白/EAA', timing: '训练后', desc: '用于补足蛋白窗口', calcType: 'relative', multiplier: 0.4, unit: 'g' },
+      caffeine: { icon: '⚡', name: '咖啡因', timing: '训练前 45min', desc: '高强度日前激活中枢', calcType: 'relative', multiplier: 4, unit: 'mg' },
+      betaAlanine: { icon: '🔁', name: 'β-丙氨酸', timing: '白天分次', desc: '更偏长期连续补充', calcType: 'absolute', dose: 3.2, unit: 'g' },
+      citrulline: { icon: '🫀', name: 'L-瓜氨酸', timing: '训练前 45min', desc: '训练表现支持', calcType: 'absolute', dose: 8, unit: 'g' },
+      nitrate: { icon: '🥤', name: '甜菜根/硝酸盐', timing: '训练前 150min', desc: '需要提前预留转化时间', calcType: 'absolute', dose: 400, unit: 'mg' },
+      magnesium: { icon: '🌙', name: '镁', timing: '睡前 60min', desc: '恢复和睡眠支持', calcType: 'absolute', dose: 300, unit: 'mg' },
+      zinc: { icon: '🧪', name: '锌', timing: '晚餐/正餐', desc: '避免与高钙同服', calcType: 'absolute', dose: 15, unit: 'mg' },
+      zincMagnesium: { icon: '🌙', name: 'ZMA', timing: '睡前 60min', desc: '夜间恢复支持', calcType: 'label', amount: '30mg / 400mg' },
+      collagen: { icon: '🦴', name: '胶原蛋白肽', timing: '训练前 60min', desc: '关节和结缔组织支持', calcType: 'absolute', dose: 15, unit: 'g' },
+      turmeric: { icon: '🟡', name: '姜黄素', timing: '训练后 90min', desc: '恢复期可选', calcType: 'absolute', dose: 500, unit: 'mg' },
+      tartCherry: { icon: '🍒', name: '酸樱桃提取物', timing: '训练后 120min', desc: '高疲劳恢复期可选', calcType: 'absolute', dose: 480, unit: 'mg' },
+      melatonin: { icon: '😴', name: '褪黑素', timing: '睡前 30min', desc: '仅在确有需要时使用', calcType: 'absolute', dose: 0.5, unit: 'mg' },
+      alphaGPC: { icon: '🧠', name: 'Alpha-GPC', timing: '训练前 45min', desc: '认知/专注支持', calcType: 'absolute', dose: 300, unit: 'mg' },
+      lTheanine: { icon: '🍵', name: 'L-茶氨酸', timing: '训练前 45min', desc: '偏和咖啡因协同', calcType: 'absolute', dose: 200, unit: 'mg' },
+      sodiumBicarbonate: { icon: '🧂', name: '碳酸氢钠', timing: '训练前 90/60min', desc: '高强度缓冲', calcType: 'relative', multiplier: 300, unit: 'mg' },
+      lionsMane: { icon: '🍄', name: '狮鬃菇提取物', timing: '早餐', desc: '白天认知支持', calcType: 'absolute', dose: 500, unit: 'mg' },
+      alphaLipoicAcid: { icon: '🧬', name: 'α-硫辛酸', timing: '早餐后', desc: '代谢支持', calcType: 'absolute', dose: 300, unit: 'mg' },
+      glutamine: { icon: '🧃', name: '谷氨酰胺', timing: '训练后 30min', desc: '高疲劳恢复可选', calcType: 'absolute', dose: 5, unit: 'g' },
+      hmb: { icon: '🛡️', name: 'HMB', timing: '白天分次', desc: '保守展示的恢复条目', calcType: 'absolute', dose: 3, unit: 'g' },
+      betaEcdysterone: { icon: '🧪', name: 'β-蜕皮甾酮', timing: '早餐', desc: '争议/进阶条目', calcType: 'absolute', dose: 500, unit: 'mg' },
+      chromium: { icon: '⚙️', name: '吡啶甲酸铬', timing: '早餐后', desc: '代谢支持条目', calcType: 'absolute', dose: 200, unit: 'mcg' },
+      berberine: { icon: '🌿', name: '小檗碱', timing: '正餐', desc: '餐时型代谢支持', calcType: 'absolute', dose: 500, unit: 'mg' }
+    };
+
+    const OPTIONAL_SUGGESTIONS = {
+      rest: ['omega3', 'magnesium'],
+      light: ['collagen', 'citrulline'],
+      medium: ['caffeine', 'creatine'],
+      heavy: ['caffeine', 'tartCherry']
+    };
+
+    const RULE_SECTION_LABELS = {
+      'Baseline': '基础营养',
+      'Pre-workout': '训练前',
+      'Recovery': '恢复期',
+      'Night recovery': '夜间恢复',
+      'Suggestion': '建议',
+      'Supplement': '补剂'
+    };
+
+    const RULE_NOTE_MAP = {
+      d3k2: { primary: '放在第一顿含脂早餐或正餐。', optional: '基础营养支持。', warning: '' },
+      omega3: { primary: '放在第一顿正餐，减少胃部不适。', optional: '恢复支持可选。', warning: '' },
+      vitaminC: { primary: '更适合放在恢复窗口，避免贴训练结束即刻。', optional: '高恢复需求日可选。', warning: '避免把大剂量维生素 C 贴着训练结束即刻使用。' },
+      caffeine: { primary: '高强度日前使用，距入睡不足 6 小时时会阻断。', optional: '重训日可选。', warning: '距离入睡过近，当前不建议加入咖啡因。' },
+      alphaGPC: { primary: '常放在训练前，偏专注支持。', optional: '高专注训练日可选。', warning: '' },
+      lTheanine: { primary: '更适合作为咖啡因协同条目。', optional: '与咖啡因搭配时可选。', warning: '未搭配咖啡因时，先保留为建议项。' },
+      lionsMane: { primary: '更适合安排在白天较早时段。', optional: '白天认知支持可选。', warning: '' },
+      sodiumBicarbonate: { primary: '高强度日前分批摄入，降低胃肠压力。', optional: '极高强度日可选。', warning: '训练时间缺失时先保留为建议项。' },
+      betaAlanine: { primary: '偏长期连续补充，不是一次性赛前补剂。', optional: '长期缓冲支持可选。', warning: '建议分次以减少刺痒感。' },
+      citrulline: { primary: '更贴近训练开始，偏表现支持。', optional: '中高强度训练日可选。', warning: '' },
+      nitrate: { primary: '需要更长提前量，适合训练前较早安排。', optional: '中高强度训练日可选。', warning: '' },
+      creatine: { primary: '每日一致性比精确分钟更重要。', optional: '基础力量支持。', warning: '' },
+      protein: { primary: '训练后优先补足蛋白窗口。', optional: '正餐蛋白不足时可选。', warning: '若同时选择 BCAA，建议错峰安排。' },
+      collagen: { primary: '更适合训练前安排，偏结缔组织支持。', optional: '关节和肌腱支持可选。', warning: '' },
+      magnesium: { primary: '更适合夜间恢复窗口。', optional: '夜间恢复支持。', warning: '' },
+      zinc: { primary: '更适合作为晚餐或夜间正餐的一部分。', optional: '夜间恢复支持。', warning: '' },
+      zincMagnesium: { primary: '作为简单的夜间恢复组合使用。', optional: '夜间恢复可选。', warning: '' },
+      ashwagandha: { primary: '偏长期压力恢复支持，不是急性兴奋补剂。', optional: '夜间恢复可选。', warning: '' },
+      turmeric: { primary: '更适合放在恢复窗口，而不是训练结束即刻。', optional: '高疲劳日可选。', warning: '' },
+      tartCherry: { primary: '更适合训练后 2 小时左右的恢复场景。', optional: '高疲劳恢复可选。', warning: '' },
+      alphaLipoicAcid: { primary: '更适合早些随餐安排。', optional: '代谢支持可选。', warning: '' },
+      bcaa: { primary: '总蛋白充足时价值更保守。', optional: '正餐或乳清延后时可选。', warning: '若同时安排乳清，建议错峰而不是同一时间堆叠。' },
+      glutamine: { primary: '更适合训练后 30 分钟附近的恢复窗口。', optional: '高疲劳恢复可选。', warning: '' },
+      melatonin: { primary: '仅在确有睡眠支持需求时使用。', optional: '睡眠支持可选。', warning: '' },
+      hmb: { primary: '更像日常支持条目，表达保持保守。', optional: '保守展示的恢复条目。', warning: '' },
+      betaEcdysterone: { primary: '证据仍偏有限，表达保持保守。', optional: '进阶尝试条目。', warning: '' },
+      chromium: { primary: '作为保守的代谢支持条目处理。', optional: '代谢支持可选。', warning: '' },
+      berberine: { primary: '更适合放在正餐而不是训练前窗口。', optional: '代谢支持可选。', warning: '' }
+    };
+
+    function getMonday(date = new Date()) {
+      const base = new Date(date);
+      const offset = -((base.getDay() + 6) % 7);
+      base.setDate(base.getDate() + offset);
+      return base;
+    }
+
+    // ============ Init ============
+    document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+      initDayGrid();
+      const mondayIndex = window.AppState ? window.AppState.getTodayDayIndex() : ((new Date().getDay() + 6) % 7);
+      selectDay(mondayIndex);
+    });
+
+    function normalizeDayTypes(value) {
+      if (Array.isArray(value)) {
+        return value.slice(0, 7).concat(Array(Math.max(0, 7 - value.length)).fill('rest'));
+      }
+      return Array.from({ length: 7 }, (_, index) => (value && value[index]) || 'rest');
+    }
+
+    function loadData() {
+      state.usageMode = window.AppState ? window.AppState.getUsageMode() : 'weekly';
+      const profile = window.AppState ? window.AppState.getProfile() : null;
+      const singleDayPlan = window.AppState ? window.AppState.getSingleDayPlan() : null;
+      if (profile && profile.exists) {
+        state.profile = Object.assign({}, profile.raw || profile, {
+          squat: profile.squat1RM || profile.raw?.squat,
+          bench: profile.bench1RM || profile.raw?.bench,
+          deadlift: profile.deadlift1RM || profile.raw?.deadlift
+        });
+      }
+      if (singleDayPlan && singleDayPlan.exists) {
+        state.singleDayPlan = singleDayPlan;
+      }
+
+      const plan = window.AppState ? window.AppState.getWeeklyTrainingPlan() : null;
+      if (plan && plan.exists) {
+        state.trainingPlan = plan.byDayIndex || {};
+      }
+
+      const rawDayTypes = window.AppState
+        ? window.AppState.safeJsonParse(localStorage.getItem('module3_dayTypes'), [])
+        : JSON.parse(localStorage.getItem('module3_dayTypes') || '[]');
+      if (rawDayTypes && (Array.isArray(rawDayTypes) || typeof rawDayTypes === 'object')) {
+        state.dayTypes = normalizeDayTypes(rawDayTypes);
+      }
+
+      const macroPlan = window.AppState ? window.AppState.getMacroPlan() : null;
+      if (macroPlan && macroPlan.exists && macroPlan.raw && macroPlan.raw.macros) {
+        if (macroPlan.raw.macros.byType) {
+          state.macros = macroPlan.raw.macros.byType;
+        }
+        state.carbTiming = macroPlan.raw.carbTiming || { pre: 0, intra: 0, post: 0 };
+        state.mealPlans = macroPlan.raw.mealPlans?.byType || state.mealPlans;
+        if ((!state.dayTypes || !Object.keys(state.dayTypes).length) && macroPlan.raw.dayTypes) {
+          state.dayTypes = normalizeDayTypes(macroPlan.raw.dayTypes);
+        }
+      } else {
+        generateDefaultMacros();
+      }
+
+      const supplementState = window.AppState ? window.AppState.getSupplementState() : null;
+      if (supplementState && supplementState.exists) {
+        state.supplementConfig = supplementState.raw || {};
+        state.supplements = supplementState.selectedSupplements || [];
+      }
+
+      if (!Object.keys(state.dayTypes).length) {
+        state.dayTypes = getDefaultDayTypes();
+      }
+    }
+
+    function getDefaultDayTypes() {
+      return { 0: 'rest', 1: 'rest', 2: 'medium', 3: 'rest', 4: 'medium', 5: 'rest', 6: 'rest' };
+    }
+
+    function generateDefaultMacros() {
+      // 基于体重估算默认宏量
+      const weight = parseFloat(state.profile.weight) || parseFloat(state.supplementConfig.bodyWeight) || 70;
+      const protein = Math.round(weight * 2);
+      const fat = Math.round(weight * 1);
+      const baseCarb = 250;
+      state.macros = {
+        rest: { carb: Math.round(baseCarb * 0.6), protein, fat },
+        light: { carb: Math.round(baseCarb * 0.75), protein, fat },
+        medium: { carb: baseCarb, protein, fat },
+        heavy: { carb: Math.round(baseCarb * 1.3), protein, fat }
+      };
+      state.carbTiming = { pre: Math.round(baseCarb * 0.4), intra: Math.round(baseCarb * 0.2), post: Math.round(baseCarb * 0.4) };
+      state.mealPlans = { rest: [], light: [], medium: [], heavy: [] };
+    }
+
+    function initDayGrid() {
+      const grid = document.getElementById('dayGrid');
+      const monday = getMonday();
+
+      grid.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        const dayNum = date.getDate();
+        const type = state.dayTypes[i] || 'rest';
+
+        const btn = document.createElement('div');
+        btn.className = `day-btn type-${type}`;
+        btn.dataset.day = i;
+        btn.onclick = () => selectDay(i);
+        btn.innerHTML = `
+          <span class="day-label">${DAY_SHORT[i]}</span>
+          <span class="day-num">${dayNum}</span>
+          <span class="day-type-badge">${type === 'rest' ? '' : type === 'light' ? '轻' : type === 'medium' ? '常' : '重'}</span>
+        `;
+        grid.appendChild(btn);
+      }
+    }
+
+    function selectDay(dayIndex) {
+      state.selectedDay = dayIndex;
+      state.dashboardContext = window.AppState ? window.AppState.getTodayDashboardContext({ mode: state.usageMode, dayIndex: dayIndex }) : null;
+      const readiness = state.dashboardContext ? state.dashboardContext.readiness : null;
+      const todayTraining = state.dashboardContext ? state.dashboardContext.todayTraining : null;
+      const type = resolveDisplayDayType(dayIndex, todayTraining);
+      state.supplements = resolveSupplementSelection(state.dashboardContext, todayTraining);
+      const macros = state.macros[type] || { carb: 0, protein: 0, fat: 0 };
+
+      updateMissingDataGuide(readiness);
+
+      document.querySelectorAll('.day-btn').forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.day) === dayIndex) {
+          btn.classList.add('active');
+        }
+      });
+
+      const monday = getMonday();
+      const selectedDate = new Date(monday);
+      selectedDate.setDate(monday.getDate() + dayIndex);
+      const dateStr = `${selectedDate.getMonth() + 1}月${selectedDate.getDate()}日 ${DAY_LABELS[dayIndex]}`;
+
+      // 更新宏量
+      document.getElementById('dayCarb').textContent = macros.carb;
+      document.getElementById('dayProtein').textContent = macros.protein;
+      document.getElementById('dayFat').textContent = macros.fat;
+
+      // 更新碳水时序（训练日有，休息日没有）
+      if (type === 'rest') {
+        document.getElementById('preCarb').textContent = '--';
+        document.getElementById('intraCarb').textContent = '--';
+        document.getElementById('postCarb').textContent = '--';
+      } else {
+        const mult = type === 'light' ? 0.75 : type === 'heavy' ? 1.3 : 1.0;
+        document.getElementById('preCarb').textContent = `${Math.round(state.carbTiming.pre * mult)}g`;
+        document.getElementById('intraCarb').textContent = `${Math.round(state.carbTiming.intra * mult)}g`;
+        document.getElementById('postCarb').textContent = `${Math.round(state.carbTiming.post * mult)}g`;
+      }
+
+      // 更新热量总览
+      const totalCals = macros.carb * 4 + macros.protein * 4 + macros.fat * 9;
+      document.getElementById('totalCalories').textContent = totalCals;
+      document.getElementById('carbCals').textContent = macros.carb * 4;
+      document.getElementById('proCals').textContent = macros.protein * 4;
+      document.getElementById('fatCals').textContent = macros.fat * 9;
+
+      const result = buildDailyFlow(dayIndex, type, macros);
+      renderSummary(dayIndex, dateStr, type, macros, result);
+      updateDailyFlow(result);
+      renderTrainingDetails(result);
+      renderNutritionDetails(result, macros);
+      renderSupplementDetails(result);
+    }
+
+    function updateMissingDataGuide(readiness) {
+      const panel = document.getElementById('missingDataPanel');
+      if (!readiness || readiness.dashboard === 'ready') {
+        panel.style.display = 'none';
+        return;
+      }
+
+      const missing = [];
+      if (readiness.profile === 'missing') missing.push('用户档案');
+      if (readiness.training === 'missing') missing.push(state.usageMode === 'single_day' ? '轻量单日计划' : '本周训练');
+      if (readiness.macro === 'missing') missing.push('宏量预算');
+      if (readiness.supplement === 'missing') missing.push('补剂设置');
+
+      document.getElementById('missingDataTitle').textContent = '当前作战图仍缺数据';
+      document.getElementById('missingDataText').textContent = '缺少：' + missing.join('、') + '。' + readiness.nextAction;
+      document.getElementById('missingDataBtn').href = readiness.nextActionHref;
+      document.getElementById('missingDataBtn').textContent = readiness.nextAction.replace('下一步：', '去');
+      panel.style.display = 'block';
+    }
+
+    function parseTime(timeStr) {
+      return window.AppState ? window.AppState.parseTimeToMinutes(timeStr) : 0;
+    }
+
+    function formatTime(minutes) {
+      return window.AppState ? window.AppState.formatMinutesToClock(minutes) : '--:--';
+    }
+
+    function toOperationalMinute(time, wakeMin, options) {
+      return window.AppState ? window.AppState.toOperationalMinute(time, wakeMin, options) : parseTime(time);
+    }
+
+    function formatOperationalTime(minutes) {
+      return window.AppState ? window.AppState.formatOperationalTime(minutes) : formatTime(minutes);
+    }
+
+    function getTrainingSourceLabel(source) {
+      const sourceMap = {
+        singleDayPlan: '轻量单日计划',
+        weeklyTrainingPlan: '本周训练计划',
+        supplementGenerator: '单日覆盖',
+        module3_dayTypes: '训练日类型',
+        none: '未提供'
+      };
+      return sourceMap[source] || '未提供';
+    }
+
+    function getModeSummaryLabel(trainingState) {
+      if (state.usageMode === 'single_day') return '轻量单日计划';
+      if (state.usageMode === 'weekly') return '本周训练计划';
+      if (state.usageMode === 'long_term') return '长期计划模式';
+      return getTrainingSourceLabel(trainingState ? trainingState.source : 'none');
+    }
+
+    function getLiftLabel(lift) {
+      const map = {
+        squat: '深蹲',
+        bench: '卧推',
+        deadlift: '硬拉',
+        accessory: '辅助',
+        rest: '恢复'
+      };
+      return map[lift] || '训练';
+    }
+
+    function formatMaybeNumber(value, suffix) {
+      if (value === null || value === undefined || value === '' || Number.isNaN(Number(value))) return '--';
+      return `${value}${suffix || ''}`;
+    }
+
+    function getPlanDayIndex(plan) {
+      if (!plan || !plan.date) return null;
+      const parsed = new Date(plan.date + 'T12:00:00');
+      if (Number.isNaN(parsed.getTime())) return null;
+      return window.AppState ? window.AppState.getTodayDayIndex(parsed) : ((parsed.getDay() + 6) % 7);
+    }
+
+    function isSingleDayPlanActive(dayIndex, dashboardContext, trainingState) {
+      if (trainingState && trainingState.source === 'singleDayPlan') return true;
+      const plan = dashboardContext && dashboardContext.singleDayPlan ? dashboardContext.singleDayPlan : state.singleDayPlan;
+      if (!plan || !plan.exists || state.usageMode !== 'single_day') return false;
+      return getPlanDayIndex(plan) === dayIndex;
+    }
+
+    function resolveDisplayDayType(dayIndex, todayTraining) {
+      if (state.usageMode === 'single_day' && todayTraining && todayTraining.source === 'singleDayPlan' && todayTraining.type) {
+        return todayTraining.type;
+      }
+      return state.dayTypes[dayIndex] || 'rest';
+    }
+
+    function resolveSupplementSelection(dashboardContext, trainingState) {
+      const singleDayPlan = dashboardContext && dashboardContext.singleDayPlan ? dashboardContext.singleDayPlan : state.singleDayPlan;
+      const fromSingleDay = singleDayPlan && singleDayPlan.exists && isSingleDayPlanActive(state.selectedDay, dashboardContext, trainingState)
+        ? (singleDayPlan.selectedSupplements || [])
+        : [];
+      if (fromSingleDay.length) return fromSingleDay;
+      return (state.supplementConfig && Array.isArray(state.supplementConfig.selectedSupplements))
+        ? state.supplementConfig.selectedSupplements
+        : (state.supplements || []);
+    }
+
+    function formatDose(key, bodyWeight) {
+      const supplement = SUPPLEMENT_LIBRARY[key];
+      if (!supplement) return '';
+      if (supplement.calcType === 'relative') {
+        const dose = Math.round(bodyWeight * supplement.multiplier * 10) / 10;
+        return `${dose}${supplement.unit}`;
+      }
+      if (supplement.calcType === 'label') {
+        return supplement.amount;
+      }
+      return `${supplement.dose}${supplement.unit}`;
+    }
+
+    function buildMealTags(carb, protein, fat) {
+      const tags = [];
+      if (carb > 0) tags.push(`${carb}g 碳水`);
+      if (protein > 0) tags.push(`${protein}g 蛋白`);
+      if (fat > 0) tags.push(`${fat}g 脂肪`);
+      return tags;
+    }
+
+    function resolveMealTime(context, meal) {
+      if (meal.time === '训练中') return context.workoutStartMin;
+      if (/^\d{2}:\d{2}$/.test(meal.time || '')) {
+        return toOperationalMinute(meal.time, context.wakeMin, {
+          kind: 'event',
+          referenceMin: context.workoutStartRaw,
+          allowNextDay: true
+        });
+      }
+      return context.wakeMin + 30;
+    }
+
+    async function ensureSupplementRules() {
+      if (window.SupplementRuleEngine) {
+        supplementRuleCache = await window.SupplementRuleEngine.primeRules();
+      }
+      return supplementRuleCache;
+    }
+
+    function getDayContext(dayIndex, type) {
+      const dashboardContext = state.dashboardContext || (window.AppState ? window.AppState.getTodayDashboardContext({ mode: state.usageMode, dayIndex: dayIndex }) : null);
+      const trainingState = dashboardContext && dashboardContext.todayTraining ? dashboardContext.todayTraining : null;
+      const dayPlan = trainingState && trainingState.raw ? trainingState.raw : (state.trainingPlan ? state.trainingPlan[dayIndex] : null);
+      const singleDayPlan = dashboardContext && dashboardContext.singleDayPlan ? dashboardContext.singleDayPlan : state.singleDayPlan;
+      const supplementConfig = state.supplementConfig || {};
+      const singleDayActive = isSingleDayPlanActive(dayIndex, dashboardContext, trainingState);
+      const selectedSupplements = resolveSupplementSelection(dashboardContext, trainingState);
+      const bodyWeight = singleDayActive
+        ? (parseFloat(singleDayPlan?.bodyWeightKg) || parseFloat(state.profile.weight) || parseFloat(supplementConfig.bodyWeightKg) || parseFloat(supplementConfig.bodyWeight) || 70)
+        : (parseFloat(state.profile.weight) || parseFloat(supplementConfig.bodyWeightKg) || parseFloat(supplementConfig.bodyWeight) || 70);
+      const wakeUpTime = singleDayActive
+        ? (singleDayPlan?.wakeUpTime || supplementConfig.wakeUpTime || supplementConfig.wakeTime || '07:00')
+        : (supplementConfig.wakeUpTime || supplementConfig.wakeTime || '07:00');
+      const preferWeeklyTraining = state.usageMode !== 'single_day' || !singleDayActive;
+      const workoutStartTime = preferWeeklyTraining
+        ? (dayPlan?.startTime || supplementConfig.workoutStartTime || '18:00')
+        : (singleDayPlan?.workoutStartTime || supplementConfig.workoutStartTime || dayPlan?.startTime || '18:00');
+      const workoutDurationMinutes = preferWeeklyTraining
+        ? (parseInt(dayPlan?.duration, 10) || parseInt(supplementConfig.workoutDurationMinutes, 10) || parseInt(supplementConfig.workoutDuration, 10) || 90)
+        : (parseInt(singleDayPlan?.workoutDurationMinutes, 10) || parseInt(supplementConfig.workoutDurationMinutes, 10) || parseInt(supplementConfig.workoutDuration, 10) || parseInt(dayPlan?.duration, 10) || 90);
+      const plannedSleepTime = preferWeeklyTraining
+        ? (supplementConfig.plannedSleepTime || supplementConfig.sleepTime || dayPlan?.sleepTime || '23:00')
+        : (singleDayPlan?.plannedSleepTime || supplementConfig.plannedSleepTime || supplementConfig.sleepTime || dayPlan?.sleepTime || '23:00');
+      const percent1RM = trainingState && trainingState.percent1RM != null
+        ? trainingState.percent1RM
+        : (parseInt(supplementConfig.percent1RM, 10) || parseInt(supplementConfig.customPercent, 10) || dayPlan?.percent1RM || dayPlan?.percent || 0);
+      const postRPE = trainingState && trainingState.rpe != null
+        ? trainingState.rpe
+        : (parseFloat(supplementConfig.postRPE) || dayPlan?.rpe || 0);
+      const engine = window.SupplementRuleEngine;
+      const context = engine && typeof engine.buildSupplementContext === 'function'
+        ? engine.buildSupplementContext({
+            bodyWeightKg: bodyWeight,
+            percent1RM,
+            postRPE,
+            workoutStartTime,
+            workoutDurationMinutes,
+            plannedSleepTime,
+            wakeUpTime,
+            gender: state.profile.gender || 'male',
+            cyclePhase: state.profile.cyclePhase || 'unknown',
+            isRestDay: trainingState ? trainingState.isRestDay : type === 'rest',
+            selectedSupplements: selectedSupplements,
+            hasWorkoutTiming: !!workoutStartTime
+          })
+        : {
+            bodyWeightKg: bodyWeight,
+            percent1RM,
+            postRPE,
+            workoutStartTime,
+            workoutDurationMinutes,
+            plannedSleepTime,
+            wakeUpTime,
+            gender: state.profile.gender || 'male',
+            cyclePhase: state.profile.cyclePhase || 'unknown',
+            isRestDay: trainingState ? trainingState.isRestDay : type === 'rest',
+            selectedSupplements: selectedSupplements,
+            hasWorkoutTiming: !!workoutStartTime
+          };
+      const wakeMin = parseTime(wakeUpTime);
+      const workoutStartRaw = parseTime(workoutStartTime);
+      const workoutStartMin = toOperationalMinute(workoutStartTime, wakeMin, { kind: 'event' });
+      const workoutEndMin = workoutStartMin + workoutDurationMinutes;
+      const sleepMin = toOperationalMinute(plannedSleepTime, wakeMin, { kind: 'sleep', workoutStartMin: workoutStartRaw });
+      const timeGapHours = ((sleepMin - workoutStartMin) / 60);
+      return Object.assign(context, {
+        type,
+        trainingState,
+        dayPlan,
+        wakeMin,
+        sleepMin,
+        wakeUpTime,
+        plannedSleepTime,
+        workoutStartMin,
+        workoutStartRaw,
+        workoutEndMin,
+        timeGapHours,
+        selectedSupplements,
+        singleDayActive
+      });
+    }
+
+    function getSupplementIcon(key) {
+      return (SUPPLEMENT_LIBRARY[key] && SUPPLEMENT_LIBRARY[key].icon) || '•';
+    }
+
+    function localizeRuleSection(section) {
+      return RULE_SECTION_LABELS[section] || section || '补剂';
+    }
+
+    function localizeRuleName(item) {
+      return SUPPLEMENT_LIBRARY[item.key]?.name || item.name || item.key;
+    }
+
+    function localizeRuleNote(item) {
+      const noteSet = RULE_NOTE_MAP[item.key] || {};
+      if (item.kind === 'warning') return noteSet.warning || item.note || '';
+      if (item.kind === 'optional') return noteSet.optional || noteSet.primary || item.note || '';
+      return noteSet.primary || item.note || '';
+    }
+
+    function buildSupplementTimeline(dayIndex, type) {
+      const context = getDayContext(dayIndex, type);
+      const engine = window.SupplementRuleEngine;
+      if (!engine || typeof engine.evaluateRules !== 'function') {
+        return { owned: [], optional: [], warnings: [] };
+      }
+      const evaluation = engine.evaluateRules({
+        rulesByKey: supplementRuleCache.byKey,
+        selectedSupplements: context.selectedSupplements,
+        context,
+        includeOptional: true
+      });
+      const decorate = (item) => Object.assign({}, item, {
+        icon: getSupplementIcon(item.key),
+        name: localizeRuleName(item),
+        section: localizeRuleSection(item.section),
+        note: localizeRuleNote(item),
+        amount: item.dose,
+        timing: item.section,
+        warning: item.kind === 'warning',
+        time: toOperationalMinute(item.time, context.wakeMin, {
+          kind: item.section === 'Night recovery' ? 'sleep' : 'event',
+          workoutStartMin: context.workoutStartRaw,
+          referenceMin: context.workoutStartRaw,
+          allowNextDay: true
+        })
+      });
+      const owned = evaluation.owned.map(decorate).filter((item) => {
+        return !(item.key === 'caffeine' && context.timeGapHours < 6);
+      });
+      const warnings = evaluation.warnings.map(decorate);
+      const hasCaffeineWarning = warnings.some((item) => item.key === 'caffeine');
+      const hasLateCaffeine = (context.selectedSupplements || []).includes('caffeine') && context.timeGapHours < 6;
+      if (hasLateCaffeine && !hasCaffeineWarning) {
+        warnings.push({
+          key: 'caffeine',
+          icon: getSupplementIcon('caffeine'),
+          name: localizeRuleName({ key: 'caffeine', name: '咖啡因' }),
+          note: '距离计划入睡过近，当前不建议加入咖啡因。',
+          amount: '',
+          section: '风险提示',
+          warning: true,
+          time: context.workoutStartMin
+        });
+      }
+      return {
+        owned: owned,
+        optional: evaluation.optional.map(decorate),
+        warnings: warnings
+      };
+    }
+
+    function renderHintList(containerId, items, emptyText, warningMode) {
+      const container = document.getElementById(containerId);
+      if (!items.length) {
+        container.innerHTML = `<div class="hint-item"><div class="hint-meta">${emptyText}</div></div>`;
+        return;
+      }
+      container.innerHTML = items.map((item) => `
+        <div class="hint-item ${warningMode ? 'warning' : ''}">
+          <div class="hint-title">${item.icon || '•'} ${item.name}</div>
+          <div class="hint-meta">${item.note || ''}${item.amount ? ` · ${item.amount}` : ''}</div>
+        </div>
+      `).join('');
+    }
+
+    function pickPrimaryReminder(result) {
+      const warning = (result.warnings || [])[0];
+      if (warning) {
+        if (warning.key === 'caffeine') {
+          return {
+            main: '晚间咖啡因已阻断',
+            sub: '已阻断晚间咖啡因：距离计划入睡时间过近。',
+            isWarning: true
+          };
+        }
+        return {
+          main: warning.name || '存在高优先级提醒',
+          sub: warning.note || '详细说明可在补剂详情中查看。',
+          isWarning: true
+        };
+      }
+      return {
+        main: '无高优先级风险',
+        sub: '当前条件下没有额外阻断或红色提醒。',
+        isWarning: false
+      };
+    }
+
+    function renderSummary(dayIndex, dateStr, type, macros, result) {
+      const context = result.context;
+      const trainingState = context.trainingState;
+      const reminder = pickPrimaryReminder(result);
+      const nutritionReady = macros && (macros.carb || macros.protein || macros.fat);
+      const supplementCount = (context.selectedSupplements || []).length;
+      const isRest = context.isRestDay;
+
+      document.getElementById('summaryDate').textContent = dateStr;
+      document.getElementById('summaryMode').textContent = getModeSummaryLabel(trainingState);
+      document.getElementById('summaryTrainingMain').textContent = isRest
+        ? '恢复日 · 无主项训练'
+        : `${getLiftLabel(trainingState && trainingState.lift)} · ${type} · ${formatOperationalTime(context.workoutStartMin)}`;
+      document.getElementById('summaryTrainingSub').textContent = isRest
+        ? '以轻活动、拉伸和恢复管理为主。'
+        : `训练来源：${getTrainingSourceLabel(trainingState ? trainingState.source : 'none')}${state.usageMode === 'long_term' ? ' · 长期计划仍为草稿。' : ''}`;
+
+      document.getElementById('summaryNutritionMain').textContent = nutritionReady
+        ? `碳水 ${macros.carb}g · 蛋白 ${macros.protein}g · 脂肪 ${macros.fat}g`
+        : '尚未生成营养预算';
+      document.getElementById('summaryNutritionSub').textContent = nutritionReady
+        ? `总热量 ${macros.carb * 4 + macros.protein * 4 + macros.fat * 9} kcal`
+        : '还没有当天营养预算。';
+
+      document.getElementById('summarySupplementMain').textContent = supplementCount
+        ? `已设置 ${supplementCount} 项补剂`
+        : '尚未设置补剂清单';
+      document.getElementById('summarySupplementSub').textContent = supplementCount
+        ? `当前优先使用${context.singleDayActive ? '轻量单日计划' : '补剂设置'}中的已选补剂。`
+        : '尚未纳入补剂事件。';
+
+      document.getElementById('summaryReminderMain').textContent = reminder.main;
+      document.getElementById('summaryReminderSub').textContent = reminder.sub;
+      document.getElementById('summaryReminderCard').classList.toggle('warning', !!reminder.isWarning);
+    }
+
+    function renderTrainingDetails(result) {
+      const training = result.context.trainingState;
+      const container = document.getElementById('trainingDetailContent');
+      if (!training || !training.exists) {
+        container.innerHTML = `
+          <div class="hint-item">
+            <div class="hint-title">当前没有完整训练详情</div>
+            <div class="hint-meta">休息日会显示恢复安排；单日模式缺训练数据时，可回到轻量单日计划补充。</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="detail-grid">
+          <div class="detail-item">
+            <div class="detail-item-label">主项</div>
+            <div class="detail-item-value">${getLiftLabel(training.lift)}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">训练类型</div>
+            <div class="detail-item-value">${TYPE_NAMES[result.context.type]}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">训练量</div>
+            <div class="detail-item-value">${formatMaybeNumber(training.weight, 'kg')} × ${formatMaybeNumber(training.reps, '次')} × ${formatMaybeNumber(training.sets, '组')}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">强度</div>
+            <div class="detail-item-value">${formatMaybeNumber(training.percent1RM, '%1RM')} · ${training.rpe != null ? `RPE ${training.rpe}` : 'RPE --'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">INOL</div>
+            <div class="detail-item-value">${training.inol != null ? training.inol : '--'}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-item-label">训练来源</div>
+            <div class="detail-item-value">${getTrainingSourceLabel(training.source)}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderNutritionDetails(result, macros) {
+      const container = document.getElementById('nutritionDetailContent');
+      const action = document.getElementById('nutritionDetailAction');
+      const macroPlan = state.dashboardContext && state.dashboardContext.macroPlan ? state.dashboardContext.macroPlan : null;
+      const dailyPlan = macroPlan && macroPlan.dailyPlan ? macroPlan.dailyPlan[result.context.type] : null;
+      const totalCals = macros.carb * 4 + macros.protein * 4 + macros.fat * 9;
+      const eaStatus = macroPlan && macroPlan.eaStatus ? macroPlan.eaStatus : '未提供';
+      const redsStatus = macroPlan && macroPlan.redSRisk ? macroPlan.redSRisk : '未提供';
+      const hasBudget = !!(macroPlan && macroPlan.exists);
+      container.innerHTML = hasBudget
+        ? `当天预算 ${totalCals || '--'} kcal；EA ${eaStatus}，RED-S ${redsStatus}。${dailyPlan && Array.isArray(dailyPlan.meals) ? '餐次明细已并入时间流。' : '当前使用默认餐次分配。'}`
+        : '当前还没有保存营养预算。生成预算后，这里会显示当天热量、宏量和 EA / RED-S 状态。';
+      action.style.display = hasBudget ? 'none' : 'block';
+    }
+
+    function renderSupplementDetails(result) {
+      renderHintList('ownedSupplementContent', result.owned, '当前没有补剂被纳入时间流。', false);
+      renderHintList('optionalSuggestionContent', result.optional, '当前条件下没有额外可选补剂建议。', false);
+      renderHintList('warningSuggestionContent', result.warnings, '当前条件下没有触发额外风险提示。', true);
+    }
+
+    function buildDailyFlow(dayIndex, type, macros) {
+      const context = getDayContext(dayIndex, type);
+      const supplementOutputs = buildSupplementTimeline(dayIndex, type);
+      const dashboardContext = state.dashboardContext || (window.AppState ? window.AppState.getTodayDashboardContext({ mode: state.usageMode, dayIndex: dayIndex }) : null);
+      const flowContext = Object.assign({}, dashboardContext || {}, {
+        mode: state.usageMode,
+        dayIndex: dayIndex,
+        flowDayType: type,
+        flowMacros: macros,
+        selectedSupplements: context.selectedSupplements,
+        carbTiming: state.carbTiming,
+        mealPlansByType: state.mealPlans
+      });
+      const rawEvents = window.DailyFlowEngine
+        ? window.DailyFlowEngine.buildDailyFlowEvents(flowContext)
+        : [];
+      const groups = [];
+
+      rawEvents.filter((event) => event.type !== 'warning').forEach((event) => {
+        let group = groups.find((item) => item.time === event.absoluteMinute);
+        if (!group) {
+          group = { time: event.absoluteMinute, label: event.displayTime, items: [] };
+          groups.push(group);
+        }
+        group.items.push({
+          title: event.title,
+          meta: event.meta,
+          tags: event.tags || [],
+          details: event.detail ? String(event.detail).split('\n').filter(Boolean) : []
+        });
+      });
+
+      const warnings = rawEvents
+        .filter((event) => event.type === 'warning')
+        .map((event) => ({
+          key: event.source,
+          icon: '⚠️',
+          name: String(event.title || '').replace(/^⚠️\s*/, ''),
+          note: event.meta || event.detail || '',
+          amount: '',
+          section: '风险提示',
+          warning: true,
+          time: event.absoluteMinute
+        }));
+
+      return {
+        context: context,
+        events: rawEvents,
+        flow: groups,
+        owned: supplementOutputs.owned,
+        optional: supplementOutputs.optional,
+        warnings: warnings
+      };
+    }
+
+    function updateDailyFlow(result) {
+      const content = document.getElementById('dailyFlowContent');
+      content.innerHTML = result.flow.map((group) => `
+        <div class="flow-item">
+          <div class="flow-time">${group.label}</div>
+          <div>
+            ${group.items.map((item, idx) => `
+              ${idx > 0 ? '<div class="flow-divider"></div>' : ''}
+              <div class="flow-sub-item">
+                <div class="flow-title">${item.title}</div>
+                <div class="flow-meta">${item.meta}</div>
+                ${item.tags && item.tags.length ? `
+                  <div class="flow-tags">
+                    ${item.tags.map(tag => `<span class="flow-tag">${tag}</span>`).join('')}
+                  </div>
+                ` : ''}
+                ${item.details && item.details.length ? `
+                  <details class="flow-detail">
+                    <summary>展开详情</summary>
+                    <div class="flow-detail-body">
+                      ${item.details.map(line => `<div class="flow-detail-line">${line}</div>`).join('')}
+                    </div>
+                  </details>
+                ` : ''}
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    ensureSupplementRules().then(() => {
+      if (state.selectedDay !== null) {
+        selectDay(state.selectedDay);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app_ui.css">
+  <title>轻量单日计划</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .page-header {
+      margin-bottom: 18px;
+    }
+
+    .page-header h1 {
+      font-size: 28px;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .page-header p {
+      color: var(--text-dim);
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    .info-box {
+      margin-bottom: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      border: 1px solid rgba(68, 136, 255, 0.28);
+      background: rgba(68, 136, 255, 0.08);
+    }
+
+    .info-box strong {
+      display: block;
+      color: var(--info);
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+
+    .choice-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .choice-btn {
+      min-height: 44px;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0b0b0b;
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .choice-btn.active {
+      border-color: rgba(0, 255, 136, 0.6);
+      background: rgba(0, 255, 136, 0.1);
+      color: var(--accent);
+    }
+
+    .panel {
+      padding: 18px;
+    }
+
+    .panel + .panel {
+      margin-top: 16px;
+    }
+
+    .panel-title {
+      margin-bottom: 14px;
+      color: var(--text);
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .panel-subtitle {
+      margin: -8px 0 14px;
+      color: var(--text-dim);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    .supplement-group + .supplement-group {
+      margin-top: 14px;
+    }
+
+    .supplement-group-title {
+      margin-bottom: 10px;
+      color: var(--text-dim);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .supplement-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .supplement-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 46px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: #0b0b0b;
+      cursor: pointer;
+    }
+
+    .supplement-item.selected {
+      border-color: rgba(0, 255, 136, 0.6);
+      background: rgba(0, 255, 136, 0.08);
+    }
+
+    .supplement-item input {
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--accent);
+    }
+
+    .supplement-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .supplement-type {
+      display: block;
+      margin-top: 2px;
+      color: var(--text-dim);
+      font-size: 11px;
+    }
+
+    .readonly-summary {
+      display: grid;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 12px;
+      background: #0d0d0d;
+      border: 1px solid var(--border);
+    }
+
+    .summary-row strong {
+      font-size: 13px;
+    }
+
+    .summary-row span {
+      color: var(--text-dim);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .training-fields.is-rest {
+      opacity: 0.6;
+    }
+
+    .actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .helper {
+      margin-top: 8px;
+      color: var(--text-dim);
+      font-size: 11px;
+      line-height: 1.6;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 30px;
+      transform: translateX(-50%);
+      padding: 12px 16px;
+      background: var(--panel);
+      border: 1px solid rgba(0, 255, 136, 0.55);
+      border-radius: 10px;
+      color: var(--accent);
+      font-size: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 140;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 420px) {
+      .choice-row,
+      .supplement-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="global-nav">
+      <div class="global-nav-list">
+        <a class="global-nav-link" href="index.html">总控台</a>
+        <a class="global-nav-link active" href="单日计划_轻量模式.html">单日</a>
+        <a class="global-nav-link" href="模块一_用户档案.html">档案</a>
+        <a class="global-nav-link" href="模块三_每周训练安排.html">训练</a>
+        <a class="global-nav-link" href="模块二_碳水预算引擎.html">营养</a>
+        <a class="global-nav-link" href="补剂时序生成器.html">补剂</a>
+        <a class="global-nav-link" href="模块四_单日仪表盘.html">作战图</a>
+        <a class="global-nav-link" href="模块五_长期计划.html">长期</a>
+      </div>
+    </div>
+
+    <div class="page-header">
+      <h1>轻量单日计划</h1>
+      <p>只规划今天 · 保存后生成今日作战图</p>
+    </div>
+
+    <div class="info-box">
+      <strong>页面说明</strong>
+      适合只想快速安排今天训练、饮食和补剂时间的用户。不需要先完整录入一周计划。
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">今日训练</div>
+      <div class="choice-row">
+        <button type="button" class="choice-btn active" id="trainingYesBtn" onclick="setTrainingDay(true)">今天训练</button>
+        <button type="button" class="choice-btn" id="trainingNoBtn" onclick="setTrainingDay(false)">今天休息</button>
+      </div>
+
+      <div class="training-fields" id="trainingFields">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="dayType">训练类型</label>
+            <select id="dayType" class="form-select">
+              <option value="light">light</option>
+              <option value="medium" selected>medium</option>
+              <option value="heavy">heavy</option>
+              <option value="rest">rest</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="lift">主项</label>
+            <select id="lift" class="form-select">
+              <option value="squat">深蹲</option>
+              <option value="bench">卧推</option>
+              <option value="deadlift">硬拉</option>
+              <option value="accessory">辅助</option>
+              <option value="rest">休息</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label" for="weight">训练重量，可选</label>
+            <input id="weight" type="number" class="form-input" placeholder="kg">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="sets">组数，可选</label>
+            <input id="sets" type="number" class="form-input" placeholder="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="reps">次数，可选</label>
+            <input id="reps" type="number" class="form-input" placeholder="3">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="percent1RM">%1RM，可选</label>
+            <input id="percent1RM" type="number" class="form-input" placeholder="85">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="rpe">RPE，可选</label>
+            <input id="rpe" type="number" step="0.5" class="form-input" placeholder="8">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">今日时间</div>
+      <div class="readonly-summary">
+        <div class="summary-row">
+          <strong>计划日期</strong>
+          <span id="todayLabel">--</span>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="wakeUpTime">起床时间</label>
+          <input id="wakeUpTime" type="time" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="plannedSleepTime">计划入睡时间</label>
+          <input id="plannedSleepTime" type="time" class="form-input">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="workoutStartTime">训练开始时间</label>
+          <input id="workoutStartTime" type="time" class="form-input">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="workoutDurationMinutes">训练时长（分钟）</label>
+          <input id="workoutDurationMinutes" type="number" class="form-input" placeholder="90">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="bodyWeightKg">体重（kg）</label>
+        <input id="bodyWeightKg" type="number" class="form-input" placeholder="80">
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">补剂清单</div>
+      <div class="panel-subtitle">默认读取你已有的补剂选择。这里只保存到轻量单日计划，不会改写补剂设置页。</div>
+      <div id="supplementGrid"></div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">备注</div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label" for="notes">备注，可选</label>
+        <textarea id="notes" class="form-input" placeholder="例如：今天晚练、训练后回家较晚。"></textarea>
+      </div>
+      <div class="helper">保存后会写入 <code>singleDayPlan</code>，并把使用模式切到 <code>single_day</code>。</div>
+      <div class="actions">
+        <button class="btn btn-primary" onclick="saveAndGo()">保存并生成今日作战图</button>
+        <a class="btn btn-secondary" href="index.html">返回总控台</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="app_state.js"></script>
+  <script>
+    const SUPPLEMENT_META = {
+      d3k2: { name: '维生素 D3+K2', category: '基础' },
+      omega3: { name: 'Omega-3', category: '基础' },
+      creatine: { name: '一水肌酸', category: '基础' },
+      protein: { name: '乳清蛋白', category: '基础' },
+      vitaminC: { name: '维生素 C', category: '基础' },
+      magnesium: { name: '镁', category: '基础' },
+      zinc: { name: '锌', category: '基础' },
+      caffeine: { name: '咖啡因', category: '训练前' },
+      betaAlanine: { name: 'β-丙氨酸', category: '训练前' },
+      citrulline: { name: 'L-瓜氨酸', category: '训练前' },
+      nitrate: { name: '甜菜根/硝酸盐', category: '训练前' },
+      alphaGPC: { name: 'Alpha-GPC', category: '训练前' },
+      lTheanine: { name: 'L-茶氨酸', category: '训练前' },
+      sodiumBicarbonate: { name: '碳酸氢钠', category: '训练前' },
+      collagen: { name: '胶原蛋白肽', category: '训练后' },
+      bcaa: { name: 'BCAA', category: '训练后' },
+      glutamine: { name: '谷氨酰胺', category: '训练后' },
+      turmeric: { name: '姜黄素', category: '训练后' },
+      tartCherry: { name: '酸樱桃提取物', category: '训练后' },
+      hmb: { name: 'HMB', category: '训练后' },
+      zincMagnesium: { name: '锌镁复合 (ZMA)', category: '睡眠恢复' },
+      melatonin: { name: '褪黑素', category: '睡眠恢复' },
+      ashwagandha: { name: '南非醉茄', category: '睡眠恢复' },
+      lionsMane: { name: '狮鬃菇', category: '高级/可选' },
+      alphaLipoicAcid: { name: 'α-硫辛酸', category: '高级/可选' },
+      betaEcdysterone: { name: 'β-蜕皮甾酮', category: '高级/可选' },
+      chromium: { name: '吡啶甲酸铬', category: '高级/可选' },
+      berberine: { name: '小檗碱', category: '高级/可选' }
+    };
+
+    const SUPPLEMENT_GROUPS = [
+      { title: '基础', keys: ['d3k2', 'omega3', 'creatine', 'protein', 'vitaminC', 'magnesium', 'zinc'] },
+      { title: '训练前', keys: ['caffeine', 'betaAlanine', 'citrulline', 'nitrate', 'alphaGPC', 'lTheanine', 'sodiumBicarbonate'] },
+      { title: '训练后', keys: ['collagen', 'bcaa', 'glutamine', 'turmeric', 'tartCherry', 'hmb'] },
+      { title: '睡眠恢复', keys: ['zincMagnesium', 'melatonin', 'ashwagandha'] },
+      { title: '高级/可选', keys: ['lionsMane', 'alphaLipoicAcid', 'betaEcdysterone', 'chromium', 'berberine'] }
+    ];
+
+    let selectedSupplements = new Set();
+    let isTrainingDay = true;
+
+    function todayDateString() {
+      const now = new Date();
+      return now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0') + '-' + String(now.getDate()).padStart(2, '0');
+    }
+
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      setTimeout(function() {
+        toast.classList.remove('show');
+      }, 1800);
+    }
+
+    function parseNumber(value) {
+      if (value === '' || value === null || value === undefined) return null;
+      const number = Number(value);
+      return Number.isFinite(number) ? number : null;
+    }
+
+    function updateTodayLabel() {
+      const now = new Date();
+      const dayNames = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+      document.getElementById('todayLabel').textContent = `${todayDateString()} · ${dayNames[now.getDay()]}`;
+    }
+
+    function setTrainingDay(value) {
+      isTrainingDay = !!value;
+      document.getElementById('trainingYesBtn').classList.toggle('active', isTrainingDay);
+      document.getElementById('trainingNoBtn').classList.toggle('active', !isTrainingDay);
+      document.getElementById('trainingFields').classList.toggle('is-rest', !isTrainingDay);
+      if (!isTrainingDay) {
+        document.getElementById('dayType').value = 'rest';
+        document.getElementById('lift').value = 'rest';
+      } else {
+        if (document.getElementById('dayType').value === 'rest') document.getElementById('dayType').value = 'medium';
+        if (document.getElementById('lift').value === 'rest') document.getElementById('lift').value = 'squat';
+      }
+    }
+
+    function renderSupplementGrid() {
+      const root = document.getElementById('supplementGrid');
+      root.innerHTML = SUPPLEMENT_GROUPS.map(function(group) {
+        return [
+          '<div class="supplement-group">',
+            '<div class="supplement-group-title">' + group.title + '</div>',
+            '<div class="supplement-grid">',
+              group.keys.map(function(key) {
+                const meta = SUPPLEMENT_META[key] || { name: key, category: group.title };
+                const checked = selectedSupplements.has(key);
+                return [
+                  '<label class="supplement-item ' + (checked ? 'selected' : '') + '" data-key="' + key + '">',
+                    '<input type="checkbox" ' + (checked ? 'checked' : '') + ' onchange="toggleSupplement(\'' + key + '\', this)">',
+                    '<span>',
+                      '<span class="supplement-name">' + meta.name + '</span>',
+                      '<span class="supplement-type">' + meta.category + '</span>',
+                    '</span>',
+                  '</label>'
+                ].join('');
+              }).join(''),
+            '</div>',
+          '</div>'
+        ].join('');
+      }).join('');
+    }
+
+    function toggleSupplement(key, input) {
+      if (input.checked) selectedSupplements.add(key);
+      else selectedSupplements.delete(key);
+      renderSupplementGrid();
+    }
+
+    function applyDefaults() {
+      const profile = window.AppState ? window.AppState.getProfile() : null;
+      const supplementState = window.AppState ? window.AppState.getSupplementState() : null;
+      const singleDayPlan = window.AppState ? window.AppState.getSingleDayPlan() : null;
+      const existing = singleDayPlan && singleDayPlan.exists ? singleDayPlan : null;
+
+      const defaultWake = existing?.wakeUpTime || supplementState?.wakeUpTime || '07:00';
+      const defaultStart = existing?.workoutStartTime || supplementState?.workoutStartTime || '17:00';
+      const defaultDuration = existing?.workoutDurationMinutes || supplementState?.workoutDurationMinutes || 90;
+      const defaultSleep = existing?.plannedSleepTime || supplementState?.plannedSleepTime || '23:30';
+      const defaultWeight = existing?.bodyWeightKg || profile?.weight || supplementState?.bodyWeightKg || '';
+
+      document.getElementById('wakeUpTime').value = defaultWake;
+      document.getElementById('workoutStartTime').value = defaultStart;
+      document.getElementById('workoutDurationMinutes').value = defaultDuration;
+      document.getElementById('plannedSleepTime').value = defaultSleep;
+      document.getElementById('bodyWeightKg').value = defaultWeight;
+      document.getElementById('notes').value = existing?.notes || '';
+      document.getElementById('dayType').value = existing?.dayType || 'medium';
+      document.getElementById('lift').value = existing?.lift || 'squat';
+      document.getElementById('weight').value = existing?.weight ?? '';
+      document.getElementById('sets').value = existing?.sets ?? '';
+      document.getElementById('reps').value = existing?.reps ?? '';
+      document.getElementById('percent1RM').value = existing?.percent1RM ?? '';
+      document.getElementById('rpe').value = existing?.rpe ?? '';
+
+      selectedSupplements = new Set(
+        existing?.selectedSupplements?.length
+          ? existing.selectedSupplements
+          : (supplementState?.selectedSupplements || [])
+      );
+
+      setTrainingDay(existing ? !!existing.isTrainingDay : true);
+      renderSupplementGrid();
+      updateTodayLabel();
+    }
+
+    function buildSingleDayPlan() {
+      const now = new Date().toISOString();
+      const existing = window.AppState ? window.AppState.getSingleDayPlan() : null;
+      const training = isTrainingDay;
+      const rawDayType = document.getElementById('dayType').value;
+      const rawLift = document.getElementById('lift').value;
+
+      return {
+        version: 'v1',
+        createdAt: existing && existing.exists ? (existing.createdAt || now) : now,
+        updatedAt: now,
+        source: 'single_day',
+        date: todayDateString(),
+        isTrainingDay: training,
+        dayType: training ? rawDayType : 'rest',
+        lift: training ? rawLift : 'rest',
+        workoutStartTime: document.getElementById('workoutStartTime').value || '17:00',
+        workoutDurationMinutes: parseNumber(document.getElementById('workoutDurationMinutes').value) || 90,
+        wakeUpTime: document.getElementById('wakeUpTime').value || '07:00',
+        plannedSleepTime: document.getElementById('plannedSleepTime').value || '23:30',
+        bodyWeightKg: parseNumber(document.getElementById('bodyWeightKg').value),
+        weight: training ? parseNumber(document.getElementById('weight').value) : null,
+        sets: training ? parseNumber(document.getElementById('sets').value) : null,
+        reps: training ? parseNumber(document.getElementById('reps').value) : null,
+        percent1RM: training ? parseNumber(document.getElementById('percent1RM').value) : null,
+        rpe: training ? parseNumber(document.getElementById('rpe').value) : null,
+        selectedSupplements: Array.from(selectedSupplements),
+        notes: document.getElementById('notes').value.trim()
+      };
+    }
+
+    function saveAndGo() {
+      const payload = buildSingleDayPlan();
+      localStorage.setItem('singleDayPlan', JSON.stringify(payload));
+      localStorage.setItem('appUsageMode', 'single_day');
+      showToast('轻量单日计划已保存');
+      setTimeout(function() {
+        window.location.href = '模块四_单日仪表盘.html';
+      }, 220);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      applyDefaults();
+    });
+  </script>
+</body>
+</html>

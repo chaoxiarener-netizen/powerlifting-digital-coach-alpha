@@ -1,0 +1,1491 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app_ui.css">
+  <title>补剂清单与作息偏好</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --panel-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-dim: #666;
+      --accent: #00ff88;
+      --accent-dim: #00cc6a;
+      --warn: #ff4444;
+      --warn-bg: rgba(255,68,68,0.1);
+      --info: #4488ff;
+      --success: #00ff88;
+      --carbs: #ffaa00;
+      --protein: #ff6b6b;
+      --fat: #9b59b6;
+      --light: #5ac8fa;
+      --medium: #ffd700;
+      --heavy: #ff6b6b;
+      --rest: #666;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 2px;
+    }
+
+    .header .version {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 5px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 14px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M3 4l3 4 3-4H3z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 16px;
+    }
+
+    .btn:hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-secondary {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    /* Timeline Output */
+    .timeline {
+      display: none;
+    }
+
+    .timeline.active {
+      display: block;
+    }
+
+    .timeline-summary {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+      padding: 10px;
+      background: var(--bg);
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      line-height: 1.6;
+    }
+
+    .timeline-summary strong {
+      color: var(--accent);
+    }
+
+    .timeline-section {
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      padding-left: 8px;
+      border-left: 2px solid var(--accent);
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: var(--bg);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .timeline-time {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 50px;
+      margin-right: 12px;
+    }
+
+    .timeline-content {
+      flex: 1;
+    }
+
+    .timeline-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .timeline-dose {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .timeline-dose.extra {
+      font-size: 12px;
+      color: var(--text-dim);
+      font-weight: normal;
+    }
+
+    .timeline-note {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .timeline-calc {
+      font-size: 9px;
+      color: var(--text-dim);
+      margin-top: 4px;
+      font-family: monospace;
+    }
+
+    .timeline-item.warning {
+      border-color: var(--warn);
+      background: rgba(255, 68, 68, 0.1);
+    }
+
+    .timeline-item.warning .timeline-time,
+    .timeline-item.warning .timeline-name {
+      color: var(--warn);
+    }
+
+    /* Presets */
+    .presets {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .preset-btn {
+      font-size: 10px;
+      padding: 5px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+
+    .preset-btn:hover, .preset-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .percentage-badge {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 3px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+
+    /* RPE Slider */
+    .rpe-slider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rpe-slider input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      background: var(--border);
+      height: 4px;
+      border-radius: 2px;
+    }
+
+    .rpe-slider input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 16px;
+      height: 16px;
+      background: var(--accent);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .rpe-value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+      min-width: 30px;
+      text-align: center;
+    }
+
+    /* Supplement Selection */
+    .supplement-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .supplement-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .supplement-item:hover {
+      border-color: var(--text-dim);
+    }
+
+    .supplement-item.selected {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .supplement-item input {
+      accent-color: var(--accent);
+    }
+
+    .supplement-name {
+      flex: 1;
+    }
+
+    .supplement-type {
+      font-size: 9px;
+      color: var(--text-dim);
+      background: var(--border);
+      padding: 1px 4px;
+      border-radius: 2px;
+    }
+
+    .collapse-btn {
+      font-size: 10px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      cursor: pointer;
+    }
+
+    .collapse-btn:hover {
+      color: var(--accent);
+    }
+
+    /* Target Selector */
+    .target-options {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .target-btn {
+      flex: 1;
+      padding: 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-dim);
+      font-size: 11px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .target-btn:hover {
+      border-color: var(--text-dim);
+    }
+
+    .target-btn.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .target-btn small {
+      display: block;
+      font-size: 9px;
+      margin-top: 2px;
+      color: inherit;
+      opacity: 0.7;
+    }
+
+    .auto-fill-status {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: var(--bg);
+      border-radius: 4px;
+      border-left: 2px solid var(--accent);
+      line-height: 1.5;
+    }
+    .auto-fill-status .info { color: var(--info); }
+    .auto-fill-status .warn { color: var(--warn); }
+
+    .info-box {
+      background: rgba(68, 136, 255, 0.1);
+      border: 1px solid rgba(68, 136, 255, 0.35);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .info-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--info);
+      margin-bottom: 6px;
+    }
+
+    .info-box-content {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .global-nav {
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .global-nav-list {
+      display: flex;
+      gap: 8px;
+      min-width: max-content;
+    }
+
+    .global-nav-link {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--text-dim);
+      font-size: 12px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .global-nav-link.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .summary-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .summary-grid {
+      display: grid;
+      gap: 10px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 12px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .summary-row strong {
+      color: var(--text);
+    }
+
+    .summary-row span {
+      color: var(--text-dim);
+      text-align: right;
+    }
+
+    .category-block + .category-block {
+      margin-top: 14px;
+    }
+
+    .category-title {
+      font-size: 11px;
+      color: var(--info);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .preview-helper {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="global-nav">
+      <div class="global-nav-list">
+        <a class="global-nav-link" href="index.html">总控台</a>
+        <a class="global-nav-link" href="单日计划_轻量模式.html">单日</a>
+        <a class="global-nav-link" href="模块一_用户档案.html">档案</a>
+        <a class="global-nav-link" href="模块三_每周训练安排.html">训练</a>
+        <a class="global-nav-link" href="模块二_碳水预算引擎.html">营养</a>
+        <a class="global-nav-link active" href="补剂时序生成器.html">补剂</a>
+        <a class="global-nav-link" href="模块四_单日仪表盘.html">作战图</a>
+        <a class="global-nav-link" href="模块五_长期计划.html">长期</a>
+      </div>
+    </div>
+
+    <div class="header">
+      <h1>补剂清单与作息偏好</h1>
+      <div class="version">选择已有补剂 · 设置作息偏好 · 最终时间轴在今日作战图中展示</div>
+      <div style="margin-top:6px;font-size:10px;"><a href="index.html" style="color:var(--accent);text-decoration:none;">← 返回首页</a></div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-title">补剂清单与作息偏好页</div>
+      <div class="info-box-content">本页只负责设置你手里有哪些补剂，以及作息时间偏好。周计划模式下，今日训练强度会自动来自训练页；只有临时改单日训练时，才需要使用高级覆盖。</div>
+    </div>
+
+    <div class="summary-card">
+      <div class="panel-title">自动回填摘要</div>
+      <div class="summary-grid" id="autofillSummary"></div>
+      <div class="preview-helper">以上内容会自动读取当前档案和今日训练来源。主流程里你通常只需要确认作息时间和补剂清单。</div>
+    </div>
+
+    <!-- 基础数据 -->
+    <div class="panel" id="baseDataPanel">
+      <div class="panel-title">基础数据</div>
+      <div class="form-group">
+        <label class="form-label">体重 (kg) · 自动回填，可手动覆盖</label>
+        <input type="number" class="form-input" id="bodyWeight" data-key="bodyWeight" value="70" step="0.1" min="40" max="150">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">深蹲 (kg) · 自动回填，可手动覆盖</label>
+          <input type="number" class="form-input" data-key="squatMax" id="squatMax" value="140" min="20" max="400">
+        </div>
+        <div class="form-group">
+          <label class="form-label">卧推 (kg) · 自动回填，可手动覆盖</label>
+          <input type="number" class="form-input" data-key="benchMax" id="benchMax" value="100" min="20" max="300">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">硬拉 (kg) · 自动回填，可手动覆盖</label>
+        <input type="number" class="form-input" data-key="deadliftMax" id="deadliftMax" value="180" min="20" max="500">
+      </div>
+      <div class="auto-fill-status" id="autofillStatus"></div>
+    </div>
+
+    <!-- 训练目标 -->
+    <div class="panel" id="trainingOverridePanel">
+      <div class="panel-title">训练目标</div>
+      <div class="target-options">
+        <button class="target-btn active" data-target="muscle" onclick="setTarget('muscle', this)">
+          增肌
+          <small>高容量中强度</small>
+        </button>
+        <button class="target-btn" data-target="strength" onclick="setTarget('strength', this)">
+          力量
+          <small>低容量高强度</small>
+        </button>
+        <button class="target-btn" data-target="cut" onclick="setTarget('cut', this)">
+          减脂
+          <small>中容量中强度</small>
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">训练动作 · 自动回填，可手动覆盖</label>
+        <select class="form-select" id="workoutType" onchange="updatePresetInfo()">
+          <option value="squat">深蹲</option>
+          <option value="bench">卧推</option>
+          <option value="deadlift">硬拉</option>
+          <option value="hypertrophy">容量日（综合）</option>
+          <option value="rest">休息日</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">1RM 百分比 · 自动回填，可手动覆盖</label>
+        <input type="number" class="form-input" id="customPercent" value="85" min="50" max="100" onchange="updateFromCustomPercent()">
+        <div id="percentageDisplay" class="percentage-badge" style="display:none;">85% 1RM</div>
+      </div>
+      <div class="form-row-3">
+        <div class="form-group">
+          <label class="form-label">重量 (kg) · 自动回填，可手动覆盖</label>
+          <input type="number" class="form-input" id="weight" value="119" min="20" max="500" onchange="calculatePercentage()">
+        </div>
+        <div class="form-group">
+          <label class="form-label">组数 · 自动回填，可手动覆盖</label>
+          <input type="number" class="form-input" id="sets" value="5" min="1" max="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">次数 · 自动回填，可手动覆盖</label>
+          <input type="number" class="form-input" id="reps" value="3" min="1" max="20">
+        </div>
+      </div>
+    </div>
+
+    <!-- 时间设置 -->
+    <div class="panel">
+      <div class="panel-title">作息偏好</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">起床时间 · 自动回填，可手动覆盖</label>
+          <input type="time" class="form-input" data-key="wakeTime" id="wakeTime" value="07:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">训练开始 · 自动回填，可手动覆盖</label>
+          <input type="time" class="form-input" data-key="workoutStartTime" id="workoutStartTime" value="15:00">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">训练时长 (min) · 自动回填，可手动覆盖</label>
+          <input type="number" class="form-input" id="workoutDuration" value="90" min="30" max="180">
+        </div>
+        <div class="form-group">
+          <label class="form-label">计划入睡 · 自动回填，可手动覆盖</label>
+          <input type="time" class="form-input" data-key="sleepTime" id="sleepTime" value="23:00">
+        </div>
+      </div>
+    </div>
+
+    <!-- 训练后反馈 -->
+    <div class="panel" id="trainingFeedbackPanel">
+      <div class="panel-title">训练后反馈</div>
+        <div style="background:var(--bg);border:1px dashed var(--border);border-radius:6px;padding:12px;">
+        <div class="form-label" style="margin-bottom:10px;">自感用力程度 RPE · 自动回填，可手动覆盖</div>
+        <div class="rpe-slider">
+          <span style="font-size:10px;color:#666;">6</span>
+          <input type="range" id="postRPE" min="6" max="10" step="0.5" value="8" oninput="updateRPEValue()">
+          <span style="font-size:10px;color:#666;">10</span>
+          <span id="rpeValue" class="rpe-value">8</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 补剂选择 -->
+    <div class="panel">
+      <div class="panel-title">
+        补剂清单
+        <button class="collapse-btn" onclick="toggleSupplementPanel()">收起 △</button>
+      </div>
+      <div id="supplementPanel">
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+          <span>勾选你已有的补剂，保存后将由今日作战图生成最终时间轴</span>
+          <button class="btn-secondary" onclick="clearSupplementHistory()" style="padding:4px 8px;font-size:10px;">清除历史</button>
+        </div>
+        <div class="supplement-grid" id="supplementGrid">
+          <!-- 动态生成 -->
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-group action-stack">
+      <button class="btn" onclick="saveAndGoToDashboard()">保存补剂设置并查看今日作战图</button>
+      <button class="btn btn-secondary" onclick="previewTimeline()">预览补剂时序</button>
+    </div>
+
+    <!-- 快捷预设 -->
+    <div class="presets" id="presetPanel" style="margin-top:12px;">
+      <button class="preset-btn" onclick="applyPreset('light', this)">轻松训练</button>
+      <button class="preset-btn" onclick="applyPreset('medium', this)">中等强度</button>
+      <button class="preset-btn" onclick="applyPreset('heavy', this)">大重量日</button>
+      <button class="preset-btn" onclick="applyPreset('max', this)">极限挑战</button>
+    </div>
+
+    <div class="preview-helper" style="margin-bottom:16px;">
+      已选择补剂清单会保存在本地。默认不展开完整补剂时序预览，晚间咖啡因阻断和风险提示在预览与今日作战图中都会继续生效。
+    </div>
+
+    <div id="resetRow" style="display:flex;gap:10px;">
+      <button class="btn-secondary" onclick="resetForm()">重置</button>
+    </div>
+
+    <details class="panel" id="advancedOverridePanel">
+      <summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--text);">高级覆盖：手动覆盖今日训练强度</summary>
+      <div class="preview-helper" style="margin-top:12px;margin-bottom:12px;">
+        通常不需要填写。周计划模式下，今日训练强度会自动来自训练页。只有临时调整训练时，才需要展开本区。
+      </div>
+      <div id="advancedOverrideMount"></div>
+    </details>
+
+    <!-- 输出区域 -->
+    <div class="panel timeline" id="timelinePanel">
+      <div class="timeline-header">
+        <div class="panel-title">补剂时序预览</div>
+      </div>
+      <div id="summary" class="timeline-summary"></div>
+      <div id="timelineContainer"></div>
+    </div>
+  </div>
+
+  <script src="app_state.js"></script>
+  <script src="supplement_rule_engine.js"></script>
+  <script>
+    const SUPPLEMENT_UI = {
+      d3k2: { name: '维生素 D3+K2', category: '基础' },
+      omega3: { name: 'Omega-3', category: '抗炎' },
+      zinc: { name: '锌', category: '矿物' },
+      magnesium: { name: '镁', category: '矿物' },
+      vitaminC: { name: '维生素 C', category: '抗氧化' },
+      caffeine: { name: '咖啡因', category: '刺激' },
+      betaAlanine: { name: 'β-丙氨酸', category: '缓冲' },
+      citrulline: { name: 'L-瓜氨酸', category: '表现' },
+      nitrate: { name: '甜菜根/硝酸盐', category: '表现' },
+      sodiumBicarbonate: { name: '碳酸氢钠', category: '缓冲' },
+      alphaGPC: { name: 'Alpha-GPC', category: '认知' },
+      lTheanine: { name: 'L-茶氨酸', category: '认知' },
+      creatine: { name: '一水肌酸', category: '恢复' },
+      protein: { name: '乳清蛋白', category: '恢复' },
+      bcaa: { name: 'BCAA', category: '恢复' },
+      glutamine: { name: '谷氨酰胺', category: '恢复' },
+      tartCherry: { name: '酸樱桃提取物', category: '抗炎' },
+      turmeric: { name: '姜黄素', category: '抗炎' },
+      collagen: { name: '胶原蛋白肽', category: '结构' },
+      ashwagandha: { name: '南非醉茄', category: '适应原' },
+      zincMagnesium: { name: '锌镁复合 (ZMA)', category: '睡眠' },
+      melatonin: { name: '褪黑素', category: '睡眠' },
+      alphaLipoicAcid: { name: 'α-硫辛酸', category: '代谢' },
+      lionsMane: { name: '狮鬃菇提取物', category: '认知' },
+      hmb: { name: 'HMB', category: '恢复' },
+      betaEcdysterone: { name: 'β-蜕皮甾酮', category: '进阶' },
+      chromium: { name: '吡啶甲酸铬', category: '代谢' },
+      berberine: { name: '小檗碱', category: '代谢' }
+    };
+
+    const popularSupplements = [
+      'd3k2', 'omega3', 'creatine', 'protein', 'zincMagnesium',
+      'caffeine', 'betaAlanine', 'citrulline', 'vitaminC', 'magnesium',
+      'collagen', 'bcaa', 'glutamine', 'zinc', 'melatonin',
+      'ashwagandha', 'turmeric', 'tartCherry', 'lTheanine', 'lionsMane',
+      'nitrate', 'alphaGPC', 'sodiumBicarbonate', 'alphaLipoicAcid',
+      'hmb', 'betaEcdysterone', 'chromium', 'berberine'
+    ];
+
+    const RULE_SECTION_LABELS = {
+      'Baseline': '基础营养',
+      'Pre-workout': '训练前',
+      'Recovery': '恢复期',
+      'Night recovery': '夜间恢复',
+      'Suggestion': '建议',
+      'Supplement': '补剂'
+    };
+
+    const RULE_NOTE_MAP = {
+      d3k2: { primary: '放在第一顿含脂早餐或正餐。', optional: '基础营养支持。', warning: '' },
+      omega3: { primary: '放在第一顿正餐，减少胃部不适。', optional: '恢复支持可选。', warning: '' },
+      vitaminC: { primary: '更适合放在恢复窗口，避免贴训练结束即刻。', optional: '高恢复需求日可选。', warning: '避免把大剂量维生素 C 贴着训练结束即刻使用。' },
+      caffeine: { primary: '高强度日前使用，距入睡不足 6 小时时会阻断。', optional: '重训日可选。', warning: '距离入睡过近，当前不建议加入咖啡因。' },
+      alphaGPC: { primary: '常放在训练前，偏专注支持。', optional: '高专注训练日可选。', warning: '' },
+      lTheanine: { primary: '更适合作为咖啡因协同条目。', optional: '与咖啡因搭配时可选。', warning: '未搭配咖啡因时，先保留为建议项。' },
+      lionsMane: { primary: '更适合安排在白天较早时段。', optional: '白天认知支持可选。', warning: '' },
+      sodiumBicarbonate: { primary: '高强度日前分批摄入，降低胃肠压力。', optional: '极高强度日可选。', warning: '训练时间缺失时先保留为建议项。' },
+      betaAlanine: { primary: '偏长期连续补充，不是一次性赛前补剂。', optional: '长期缓冲支持可选。', warning: '建议分次以减少刺痒感。' },
+      citrulline: { primary: '更贴近训练开始，偏表现支持。', optional: '中高强度训练日可选。', warning: '' },
+      nitrate: { primary: '需要更长提前量，适合训练前较早安排。', optional: '中高强度训练日可选。', warning: '' },
+      creatine: { primary: '每日一致性比精确分钟更重要。', optional: '基础力量支持。', warning: '' },
+      protein: { primary: '训练后优先补足蛋白窗口。', optional: '正餐蛋白不足时可选。', warning: '若同时选择 BCAA，建议错峰安排。' },
+      collagen: { primary: '更适合训练前安排，偏结缔组织支持。', optional: '关节和肌腱支持可选。', warning: '' },
+      magnesium: { primary: '更适合夜间恢复窗口。', optional: '夜间恢复支持。', warning: '' },
+      zinc: { primary: '更适合作为晚餐或夜间正餐的一部分。', optional: '夜间恢复支持。', warning: '' },
+      zincMagnesium: { primary: '作为简单的夜间恢复组合使用。', optional: '夜间恢复可选。', warning: '' },
+      ashwagandha: { primary: '偏长期压力恢复支持，不是急性兴奋补剂。', optional: '夜间恢复可选。', warning: '' },
+      turmeric: { primary: '更适合放在恢复窗口，而不是训练结束即刻。', optional: '高疲劳日可选。', warning: '' },
+      tartCherry: { primary: '更适合训练后 2 小时左右的恢复场景。', optional: '高疲劳恢复可选。', warning: '' },
+      alphaLipoicAcid: { primary: '更适合早些随餐安排。', optional: '代谢支持可选。', warning: '' },
+      bcaa: { primary: '总蛋白充足时价值更保守。', optional: '正餐或乳清延后时可选。', warning: '若同时安排乳清，建议错峰而不是同一时间堆叠。' },
+      glutamine: { primary: '更适合训练后 30 分钟附近的恢复窗口。', optional: '高疲劳恢复可选。', warning: '' },
+      melatonin: { primary: '仅在确有睡眠支持需求时使用。', optional: '睡眠支持可选。', warning: '' },
+      hmb: { primary: '更像日常支持条目，表达保持保守。', optional: '保守展示的恢复条目。', warning: '' },
+      betaEcdysterone: { primary: '证据仍偏有限，表达保持保守。', optional: '进阶尝试条目。', warning: '' },
+      chromium: { primary: '作为保守的代谢支持条目处理。', optional: '代谢支持可选。', warning: '' },
+      berberine: { primary: '更适合放在正餐而不是训练前窗口。', optional: '代谢支持可选。', warning: '' }
+    };
+
+    let selectedSupplements = new Set();
+    let currentTarget = 'muscle';
+    let supplementRuleCache = window.SupplementRuleEngine ? window.SupplementRuleEngine.getRulesSync() : { byKey: {} };
+    let fieldDirtyFlags = {};
+    const TRACKED_FIELD_MAP = {
+      bodyWeight: 'bodyWeightKg',
+      workoutStartTime: 'workoutStartTime',
+      workoutDuration: 'workoutDurationMinutes',
+      sleepTime: 'plannedSleepTime',
+      wakeTime: 'wakeUpTime',
+      workoutType: 'trainingType',
+      weight: 'weight',
+      sets: 'sets',
+      reps: 'reps',
+      customPercent: 'customPercent',
+      postRPE: 'postRPE'
+    };
+
+    function safeJsonParse(str, fallback) {
+      try { const v = JSON.parse(str); return v !== null && v !== undefined ? v : fallback; }
+      catch (e) { return fallback; }
+    }
+
+    function getStoredProfile() {
+      return safeJsonParse(localStorage.getItem('userProfile'), null)
+        || safeJsonParse(localStorage.getItem('powerliftingProfile'), {});
+    }
+
+    function getTodayDayIndex() {
+      return window.AppState ? window.AppState.getTodayDayIndex() : (new Date().getDay() + 6) % 7;
+    }
+
+    function getWeeklyTrainingDay(dayIndex) {
+      if (window.AppState) {
+        return window.AppState.getTodayTraining(dayIndex).raw || null;
+      }
+      const plan = safeJsonParse(localStorage.getItem('weeklyTrainingPlan'), null);
+      if (!plan) return null;
+      if (Array.isArray(plan.days) && plan.days[dayIndex]) return plan.days[dayIndex];
+      if (plan.byDayIndex && plan.byDayIndex[dayIndex]) return plan.byDayIndex[dayIndex];
+      return null;
+    }
+
+    function normalizeDayType(type) {
+      if (!type) return 'rest';
+      const t = String(type).toLowerCase();
+      if (['rest', 'light', 'medium', 'heavy'].includes(t)) return t;
+      return 'rest';
+    }
+
+    function buildSupplementAutofillDefaults(loadedKeys) {
+      const saved = safeJsonParse(localStorage.getItem('supplementGenerator'), {});
+      const manualOverrides = saved.manualOverrides || {};
+      const profileState = window.AppState ? window.AppState.getProfile() : null;
+      const profile = profileState && profileState.exists ? profileState : getStoredProfile();
+      const todayIndex = getTodayDayIndex();
+      const todayTrainingState = window.AppState ? window.AppState.getTodayTraining(todayIndex) : null;
+      const dayTypesRaw = safeJsonParse(localStorage.getItem('module3_dayTypes'), []);
+      const dayTypes = Array.isArray(dayTypesRaw)
+        ? dayTypesRaw
+        : Array.from({ length: 7 }, (_, i) => (dayTypesRaw && dayTypesRaw[i]) || 'rest');
+      const todayType = todayTrainingState ? todayTrainingState.type : (dayTypes[todayIndex] || 'rest');
+      const dayPlan = todayTrainingState && todayTrainingState.raw ? todayTrainingState.raw : getWeeklyTrainingDay(todayIndex);
+      const isRestDay = todayTrainingState ? todayTrainingState.isRestDay : (todayType === 'rest' || (dayPlan && (dayPlan.type === 'rest' || dayPlan.lift === 'rest')));
+      const defaults = {};
+      let anyAutofilled = false;
+
+      function shouldFill(fieldKey, storageKeys) {
+        if (manualOverrides[fieldKey]) return false;
+        return !storageKeys.some(k => loadedKeys.has(k));
+      }
+
+      const saveKeys = (keys) => keys.filter(k => loadedKeys.has(k));
+
+      // 1. Body weight from profile
+      if (shouldFill('bodyWeightKg', ['bodyWeight', 'bodyWeightKg']) && profile) {
+        const pw = profile.weight || profile.weightKg || '';
+        if (pw) { defaults.bodyWeight = pw; anyAutofilled = true; }
+      }
+
+      // 2. 1RM maxes from profile
+      if (shouldFill('squatMax', ['squatMax']) && profile) {
+        const sq = profile.squat1RM || profile.squat || '';
+        if (sq) { defaults.squatMax = sq; anyAutofilled = true; }
+      }
+      if (shouldFill('benchMax', ['benchMax']) && profile) {
+        const bp = profile.bench1RM || profile.bench || '';
+        if (bp) { defaults.benchMax = bp; anyAutofilled = true; }
+      }
+      if (shouldFill('deadliftMax', ['deadliftMax']) && profile) {
+        const dl = profile.deadlift1RM || profile.deadlift || '';
+        if (dl) { defaults.deadliftMax = dl; anyAutofilled = true; }
+      }
+
+      // 3. Training type & parameters
+      if (shouldFill('workoutType', ['workoutType', 'trainingType'])) {
+        if (isRestDay) {
+          defaults.workoutType = 'rest';
+          anyAutofilled = true;
+        } else if (dayPlan) {
+          const lift = String(dayPlan.lift || dayPlan.mainLift || '').toLowerCase();
+          const mapped = lift === 'squat' ? 'squat' : lift === 'bench' ? 'bench' : lift === 'deadlift' ? 'deadlift' : 'hypertrophy';
+          defaults.workoutType = mapped;
+          anyAutofilled = true;
+        } else if (todayType !== 'rest') {
+          // day type as fallback — map to a generic workout
+          anyAutofilled = true;
+        }
+      }
+
+      // 4. Training weight, sets, reps
+      if (!isRestDay && dayPlan) {
+        if (shouldFill('weight', ['weight']) && dayPlan.weight) {
+          defaults.weight = dayPlan.weight; anyAutofilled = true;
+        }
+        if (shouldFill('sets', ['sets']) && dayPlan.sets) {
+          defaults.sets = dayPlan.sets; anyAutofilled = true;
+        }
+        if (shouldFill('reps', ['reps']) && dayPlan.reps) {
+          defaults.reps = dayPlan.reps; anyAutofilled = true;
+        }
+      }
+
+      // 5. percent1RM
+      if (!isRestDay && shouldFill('customPercent', ['customPercent', 'percent1RM'])) {
+        const pct = (dayPlan && (dayPlan.percent1RM || dayPlan.percent)) || '';
+        if (pct) { defaults.customPercent = pct; anyAutofilled = true; }
+      }
+
+      // 6. postRPE
+      if (!isRestDay && shouldFill('postRPE', ['postRPE'])) {
+        const rpe = (dayPlan && dayPlan.rpe) || '';
+        if (rpe) { defaults.postRPE = rpe; anyAutofilled = true; }
+      }
+
+      // 7. Training times
+      if (shouldFill('workoutStartTime', ['workoutStartTime'])) {
+        const t = (dayPlan && dayPlan.startTime) || '';
+        if (t) { defaults.workoutStartTime = t; anyAutofilled = true; }
+      }
+
+      defaults.hasAutofilled = anyAutofilled;
+      defaults.isRestDay = isRestDay;
+      return defaults;
+    }
+
+    function applyAutofillDefaults(defaults) {
+      if (!defaults || !defaults.hasAutofilled) return;
+
+      if (defaults.bodyWeight !== undefined) {
+        document.getElementById('bodyWeight').value = defaults.bodyWeight;
+      }
+      if (defaults.squatMax !== undefined) {
+        document.getElementById('squatMax').value = defaults.squatMax;
+      }
+      if (defaults.benchMax !== undefined) {
+        document.getElementById('benchMax').value = defaults.benchMax;
+      }
+      if (defaults.deadliftMax !== undefined) {
+        document.getElementById('deadliftMax').value = defaults.deadliftMax;
+      }
+      if (defaults.workoutType !== undefined) {
+        document.getElementById('workoutType').value = defaults.workoutType;
+      }
+      if (defaults.weight !== undefined) {
+        document.getElementById('weight').value = defaults.weight;
+      }
+      if (defaults.sets !== undefined) {
+        document.getElementById('sets').value = defaults.sets;
+      }
+      if (defaults.reps !== undefined) {
+        document.getElementById('reps').value = defaults.reps;
+      }
+      if (defaults.customPercent !== undefined) {
+        document.getElementById('customPercent').value = defaults.customPercent;
+        const display = document.getElementById('percentageDisplay');
+        display.textContent = `${defaults.customPercent}% 1RM`;
+        display.style.display = 'inline-block';
+      }
+      if (defaults.postRPE !== undefined) {
+        document.getElementById('postRPE').value = defaults.postRPE;
+        document.getElementById('rpeValue').textContent = defaults.postRPE;
+      }
+      if (defaults.workoutStartTime !== undefined) {
+        document.getElementById('workoutStartTime').value = defaults.workoutStartTime;
+      }
+
+      calculatePercentage();
+      updateRPEValue();
+    }
+
+    function markFieldDirty(elId) {
+      fieldDirtyFlags[elId] = true;
+    }
+
+    function updateAutofillStatus(defaults) {
+      const el = document.getElementById('autofillStatus');
+      if (defaults.isRestDay) {
+        el.innerHTML = '<span class="info">ℹ</span> 今日为休息日，仅生成基础营养与恢复时序。';
+        return;
+      }
+      const dayPlan = getWeeklyTrainingDay(getTodayDayIndex());
+      if (defaults && defaults.hasAutofilled) {
+        el.innerHTML = '已从用户档案/今日训练计划自动回填默认值，可手动修改。保留字段不会影响 manualOverrides。';
+      } else if (!dayPlan) {
+        el.innerHTML = '<span class="warn">⚠</span> 未找到今日训练计划，使用补剂页默认训练参数。';
+      } else {
+        el.textContent = '';
+      }
+    }
+
+    function attachDirtyTracking() {
+      Object.keys(TRACKED_FIELD_MAP).forEach(elId => {
+        const el = document.getElementById(elId);
+        if (el) {
+          el.addEventListener('input', () => { markFieldDirty(elId); renderAutofillSummary(); });
+          el.addEventListener('change', () => { markFieldDirty(elId); renderAutofillSummary(); });
+        }
+      });
+    }
+
+    function moveAdvancedPanels() {
+      const mount = document.getElementById('advancedOverrideMount');
+      ['baseDataPanel', 'trainingOverridePanel', 'trainingFeedbackPanel', 'presetPanel', 'resetRow'].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el && mount && el.parentElement !== mount) {
+          mount.appendChild(el);
+        }
+      });
+    }
+
+    function init() {
+      const { data, loadedKeys } = loadFromStorage();
+      moveAdvancedPanels();
+      renderSupplementGrid();
+      const defaults = buildSupplementAutofillDefaults(loadedKeys);
+      applyAutofillDefaults(defaults);
+      updateAutofillStatus(defaults);
+      renderAutofillSummary();
+      attachDirtyTracking();
+      updateRPEValue();
+      calculatePercentage();
+    }
+
+    function renderAutofillSummary() {
+      const summary = document.getElementById('autofillSummary');
+      const context = window.AppState ? window.AppState.getTodayDashboardContext() : null;
+      const profile = context && context.profile ? context.profile : null;
+      const training = context && context.todayTraining ? context.todayTraining : null;
+      const sourceMap = {
+        weeklyTrainingPlan: '本周训练计划',
+        supplementGenerator: '单日覆盖',
+        module3_dayTypes: '训练日类型',
+        none: '未提供'
+      };
+      const trainingText = training && training.exists
+        ? (training.isRestDay ? '今日休息 / 恢复日' : `${training.lift || '训练日'} · ${training.type || '--'} · ${training.percent1RM || '--'}%1RM`)
+        : '未读取到今日训练';
+      const rows = [
+        { label: '当前体重', value: (profile && profile.weight ? `${profile.weight} kg` : '未读取') },
+        { label: '今日训练', value: trainingText },
+        { label: '训练来源', value: sourceMap[(training && training.source) || 'none'] || '未提供' },
+        { label: '训练时间', value: document.getElementById('workoutStartTime').value || '未设置' },
+        { label: '睡眠时间', value: document.getElementById('sleepTime').value || '未设置' }
+      ];
+      summary.innerHTML = rows.map(row => `<div class="summary-row"><strong>${row.label}</strong><span>${row.value}</span></div>`).join('');
+    }
+
+    function saveToStorage() {
+      const manualOverrides = {};
+      Object.keys(TRACKED_FIELD_MAP).forEach(elId => {
+        const key = TRACKED_FIELD_MAP[elId];
+        manualOverrides[key] = fieldDirtyFlags[elId] === true;
+      });
+
+      const data = {
+        bodyWeight: document.getElementById('bodyWeight').value,
+        bodyWeightKg: document.getElementById('bodyWeight').value,
+        squatMax: document.getElementById('squatMax').value,
+        benchMax: document.getElementById('benchMax').value,
+        deadliftMax: document.getElementById('deadliftMax').value,
+        wakeTime: document.getElementById('wakeTime').value,
+        wakeUpTime: document.getElementById('wakeTime').value,
+        workoutStartTime: document.getElementById('workoutStartTime').value,
+        sleepTime: document.getElementById('sleepTime').value,
+        plannedSleepTime: document.getElementById('sleepTime').value,
+        workoutType: document.getElementById('workoutType').value,
+        trainingType: document.getElementById('workoutType').value,
+        weight: document.getElementById('weight').value,
+        sets: document.getElementById('sets').value,
+        reps: document.getElementById('reps').value,
+        postRPE: document.getElementById('postRPE').value,
+        workoutDuration: document.getElementById('workoutDuration').value,
+        workoutDurationMinutes: document.getElementById('workoutDuration').value,
+        customPercent: document.getElementById('customPercent').value,
+        percent1RM: document.getElementById('customPercent').value,
+        selectedSupplements: Array.from(selectedSupplements),
+        currentTarget,
+        selectedGoal: currentTarget,
+        manualOverrides
+      };
+      localStorage.setItem('supplementGenerator', JSON.stringify(data));
+    }
+
+    function loadFromStorage() {
+      const saved = localStorage.getItem('supplementGenerator');
+      if (!saved) return { data: {}, loadedKeys: new Set() };
+      const data = JSON.parse(saved);
+      const loadedKeys = new Set(Object.keys(data));
+
+      Object.keys(data).forEach((key) => {
+        const el = document.getElementById(key);
+        if (el) el.value = data[key];
+      });
+
+      // Handle alias field mappings
+      if (data.bodyWeightKg !== undefined && document.getElementById('bodyWeight') && data.bodyWeight === undefined) {
+        document.getElementById('bodyWeight').value = data.bodyWeightKg;
+      }
+      if (data.wakeUpTime !== undefined && document.getElementById('wakeTime') && data.wakeTime === undefined) {
+        document.getElementById('wakeTime').value = data.wakeUpTime;
+      }
+      if (data.plannedSleepTime !== undefined && document.getElementById('sleepTime') && data.sleepTime === undefined) {
+        document.getElementById('sleepTime').value = data.plannedSleepTime;
+      }
+      if (data.workoutDurationMinutes !== undefined && document.getElementById('workoutDuration') && data.workoutDuration === undefined) {
+        document.getElementById('workoutDuration').value = data.workoutDurationMinutes;
+      }
+      if (data.percent1RM !== undefined && document.getElementById('customPercent') && data.customPercent === undefined) {
+        document.getElementById('customPercent').value = data.percent1RM;
+      }
+      if (data.trainingType !== undefined && document.getElementById('workoutType') && data.workoutType === undefined) {
+        document.getElementById('workoutType').value = data.trainingType;
+      }
+
+      if (data.selectedSupplements) {
+        selectedSupplements = new Set(data.selectedSupplements);
+      }
+      if (data.currentTarget) {
+        currentTarget = data.currentTarget;
+      } else if (data.selectedGoal) {
+        currentTarget = data.selectedGoal;
+      }
+      document.querySelectorAll('.target-btn').forEach((btn) => {
+        btn.classList.toggle('active', btn.dataset.target === currentTarget);
+      });
+
+      // Restore dirty flags from manualOverrides
+      if (data.manualOverrides) {
+        Object.keys(TRACKED_FIELD_MAP).forEach(elId => {
+          const key = TRACKED_FIELD_MAP[elId];
+          if (data.manualOverrides[key]) fieldDirtyFlags[elId] = true;
+        });
+      }
+
+      return { data, loadedKeys };
+    }
+
+    function getRuleOrUiMeta(key) {
+      const rule = supplementRuleCache.byKey[key];
+      if (rule) {
+        return {
+          name: SUPPLEMENT_UI[key]?.name || rule.name_cn || rule.name_en || key,
+          category: rule.evidence_class ? `AIS ${rule.evidence_class}` : (SUPPLEMENT_UI[key]?.category || '补剂')
+        };
+      }
+      return SUPPLEMENT_UI[key] || { name: key, category: '补剂' };
+    }
+
+    function localizeRuleSection(section) {
+      return RULE_SECTION_LABELS[section] || section || '补剂';
+    }
+
+    function localizeRuleName(item) {
+      return SUPPLEMENT_UI[item.key]?.name || item.name || item.key;
+    }
+
+    function localizeRuleNote(item) {
+      const noteSet = RULE_NOTE_MAP[item.key] || {};
+      if (item.kind === 'warning') return noteSet.warning || item.note || '';
+      if (item.kind === 'optional') return noteSet.optional || noteSet.primary || item.note || '';
+      return noteSet.primary || item.note || '';
+    }
+
+    function renderSupplementGrid() {
+      const grid = document.getElementById('supplementGrid');
+      const groups = [
+        { title: '基础', keys: ['d3k2', 'omega3', 'creatine', 'protein', 'vitaminC', 'magnesium', 'zinc'] },
+        { title: '训练前', keys: ['caffeine', 'betaAlanine', 'citrulline', 'nitrate', 'alphaGPC', 'lTheanine', 'sodiumBicarbonate'] },
+        { title: '训练后', keys: ['collagen', 'bcaa', 'glutamine', 'turmeric', 'tartCherry', 'hmb'] },
+        { title: '睡眠恢复', keys: ['zincMagnesium', 'melatonin', 'ashwagandha'] },
+        { title: '高级/可选', keys: ['lionsMane', 'alphaLipoicAcid', 'betaEcdysterone', 'chromium', 'berberine'] }
+      ];
+      grid.innerHTML = groups.map(group => `
+        <div class="category-block" style="grid-column:1 / -1;">
+          <div class="category-title">${group.title}</div>
+          <div class="supplement-grid">
+            ${group.keys.map((key) => {
+              const meta = getRuleOrUiMeta(key);
+              const isSelected = selectedSupplements.has(key);
+              return `
+                <label class="supplement-item ${isSelected ? 'selected' : ''}" onclick="toggleSupplement('${key}', this, event)">
+                  <input type="checkbox" ${isSelected ? 'checked' : ''} onchange="toggleSupplement('${key}', this.parentElement, event)">
+                  <span class="supplement-name">${meta.name}</span>
+                  <span class="supplement-type">${meta.category}</span>
+                </label>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleSupplement(key, element, event) {
+      const targetIsCheckbox = !!(event && event.target && event.target.matches('input[type="checkbox"]'));
+      if (event && !targetIsCheckbox) event.preventDefault();
+      if (event) event.stopPropagation();
+      const checkbox = element.querySelector('input[type="checkbox"]');
+      const isChecked = targetIsCheckbox
+        ? checkbox.checked
+        : !checkbox.checked;
+      checkbox.checked = isChecked;
+      element.classList.toggle('selected', isChecked);
+      if (isChecked) selectedSupplements.add(key);
+      else selectedSupplements.delete(key);
+      saveToStorage();
+    }
+
+    function toggleSupplementPanel() {
+      const panel = document.getElementById('supplementPanel');
+      const btn = document.querySelector('.collapse-btn');
+      if (panel.style.display === 'none') {
+        panel.style.display = 'block';
+        btn.textContent = '收起 △';
+      } else {
+        panel.style.display = 'none';
+        btn.textContent = '展开 ▽';
+      }
+    }
+
+    function clearSupplementHistory() {
+      if (!confirm('确定清除补剂选择历史吗？')) return;
+      localStorage.removeItem('supplementGenerator');
+      selectedSupplements = new Set();
+      renderSupplementGrid();
+    }
+
+    function setTarget(target, btn) {
+      currentTarget = target;
+      document.querySelectorAll('.target-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      saveToStorage();
+    }
+
+    function calculatePercentage() {
+      const type = document.getElementById('workoutType').value;
+      const weight = parseFloat(document.getElementById('weight').value) || 0;
+      let max = 0;
+      if (type === 'squat') max = parseFloat(document.getElementById('squatMax').value) || 0;
+      if (type === 'bench') max = parseFloat(document.getElementById('benchMax').value) || 0;
+      if (type === 'deadlift') max = parseFloat(document.getElementById('deadliftMax').value) || 0;
+      const display = document.getElementById('percentageDisplay');
+      const customInput = document.getElementById('customPercent');
+      if (max > 0 && weight > 0) {
+        const pct = Math.round(weight / max * 100);
+        customInput.value = pct;
+        display.textContent = `${pct}% 1RM`;
+        display.style.display = 'inline-block';
+      } else {
+        display.style.display = 'none';
+      }
+      renderAutofillSummary();
+    }
+
+    function updateFromCustomPercent() {
+      const type = document.getElementById('workoutType').value;
+      const pct = parseFloat(document.getElementById('customPercent').value) || 0;
+      let max = 0;
+      if (type === 'squat') max = parseFloat(document.getElementById('squatMax').value) || 0;
+      if (type === 'bench') max = parseFloat(document.getElementById('benchMax').value) || 0;
+      if (type === 'deadlift') max = parseFloat(document.getElementById('deadliftMax').value) || 0;
+      if (max > 0) {
+        const weight = Math.round(max * pct / 100 / 2.5) * 2.5;
+        document.getElementById('weight').value = weight;
+        document.getElementById('percentageDisplay').textContent = `${pct}% 1RM`;
+        document.getElementById('percentageDisplay').style.display = 'inline-block';
+      }
+    }
+
+    function updateRPEValue() {
+      document.getElementById('rpeValue').textContent = document.getElementById('postRPE').value;
+      renderAutofillSummary();
+    }
+
+    function updatePresetInfo() {
+      calculatePercentage();
+    }
+
+    function applyPreset(preset, btn) {
+      const type = document.getElementById('workoutType').value;
+      const weights = {
+        squat: parseFloat(document.getElementById('squatMax').value) || 140,
+        bench: parseFloat(document.getElementById('benchMax').value) || 100,
+        deadlift: parseFloat(document.getElementById('deadliftMax').value) || 180
+      };
+      const mapping = {
+        light: { pct: 0.65, sets: 4, reps: 10 },
+        medium: { pct: 0.75, sets: 4, reps: 6 },
+        heavy: { pct: 0.85, sets: 5, reps: 3 },
+        max: { pct: 0.95, sets: 3, reps: 1 }
+      };
+      const next = mapping[preset];
+      if (['squat', 'bench', 'deadlift'].includes(type)) {
+        const weight = Math.round(weights[type] * next.pct / 2.5) * 2.5;
+        document.getElementById('weight').value = weight;
+        document.getElementById('sets').value = next.sets;
+        document.getElementById('reps').value = next.reps;
+        document.getElementById('customPercent').value = Math.round(next.pct * 100);
+      }
+      calculatePercentage();
+      document.querySelectorAll('.preset-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function resetForm() {
+      if (!confirm('确定重置所有设置吗？')) return;
+      localStorage.removeItem('supplementGenerator');
+      location.reload();
+    }
+
+    function getGeneratorRuleContext() {
+      const profile = JSON.parse(localStorage.getItem('userProfile') || localStorage.getItem('powerliftingProfile') || '{}');
+      const engine = window.SupplementRuleEngine;
+      const payload = {
+        bodyWeightKg: parseFloat(document.getElementById('bodyWeight').value) || 70,
+        percent1RM: parseInt(document.getElementById('customPercent').value, 10) || 85,
+        postRPE: parseFloat(document.getElementById('postRPE').value) || 6,
+        workoutStartTime: document.getElementById('workoutStartTime').value,
+        workoutDurationMinutes: parseInt(document.getElementById('workoutDuration').value, 10) || 90,
+        plannedSleepTime: document.getElementById('sleepTime').value,
+        wakeUpTime: document.getElementById('wakeTime').value,
+        gender: profile.gender || 'male',
+        cyclePhase: profile.cyclePhase || 'unknown',
+        isRestDay: document.getElementById('workoutType').value === 'rest',
+        selectedSupplements: Array.from(selectedSupplements),
+        hasWorkoutTiming: !!document.getElementById('workoutStartTime').value
+      };
+      return engine && typeof engine.buildSupplementContext === 'function' ? engine.buildSupplementContext(payload) : payload;
+    }
+
+    async function ensureSupplementRules() {
+      if (window.SupplementRuleEngine) {
+        supplementRuleCache = await window.SupplementRuleEngine.primeRules();
+      }
+      return supplementRuleCache;
+    }
+
+    async function generateTimeline() {
+      saveToStorage();
+      renderAutofillSummary();
+      await ensureSupplementRules();
+      const type = document.getElementById('workoutType').value;
+      const weight = parseFloat(document.getElementById('weight').value) || 0;
+      const sets = parseInt(document.getElementById('sets').value, 10) || 0;
+      const reps = parseInt(document.getElementById('reps').value, 10) || 0;
+      const context = getGeneratorRuleContext();
+      const engine = window.SupplementRuleEngine;
+      const evaluation = engine && typeof engine.evaluateRules === 'function' ? engine.evaluateRules({
+        rulesByKey: supplementRuleCache.byKey,
+        selectedSupplements: Array.from(selectedSupplements),
+        context,
+        includeOptional: true
+      }) : { owned: [], optional: [], warnings: [] };
+
+      const typeName = { squat: '深蹲', bench: '卧推', deadlift: '硬拉', hypertrophy: '容量日', rest: '休息日' };
+      const targetName = { muscle: '增肌', strength: '力量', cut: '减脂' };
+      const summary = document.getElementById('summary');
+      const container = document.getElementById('timelineContainer');
+      const panel = document.getElementById('timelinePanel');
+
+      summary.innerHTML = `
+        <strong>${targetName[currentTarget]}</strong> ·
+        <strong>${typeName[type] || type}</strong> ${weight}kg × ${sets}组 × ${reps}次 ·
+        <strong>${context.percent1RM}%</strong> 1RM ·
+        训练后 RPE: <strong>${context.postRPE}</strong>
+        ${evaluation.warnings.length ? '<br><span style="color:var(--warn);">⚠ 已生成风险提示</span>' : ''}
+      `;
+
+      const sections = {};
+      evaluation.owned.forEach((item) => {
+        const sectionName = localizeRuleSection(item.section);
+        if (!sections[sectionName]) sections[sectionName] = [];
+        sections[sectionName].push(Object.assign({}, item, {
+          isWarning: false,
+          displayName: localizeRuleName(item),
+          displayNote: localizeRuleNote(item)
+        }));
+      });
+      if (evaluation.warnings.length) {
+        sections['风险提示'] = evaluation.warnings.map((item) => Object.assign({}, item, {
+          isWarning: true,
+          displayName: localizeRuleName(item),
+          displayNote: localizeRuleNote(item)
+        }));
+      }
+      if (evaluation.optional.length) {
+        sections['可选建议'] = evaluation.optional.map((item) => Object.assign({}, item, {
+          isWarning: false,
+          displayName: localizeRuleName(item),
+          displayNote: localizeRuleNote(item)
+        }));
+      }
+
+      let html = '';
+      Object.entries(sections).forEach(([sectionName, items]) => {
+        html += `
+          <div class="timeline-section">
+            <div class="section-title">━━ ${sectionName} ━━</div>
+            ${items.map((item) => `
+              <div class="timeline-item ${item.isWarning ? 'warning' : ''}">
+                <div class="timeline-time">${item.label}</div>
+                <div class="timeline-content">
+                  <div class="timeline-name">${item.displayName || item.name}</div>
+                  <div class="timeline-dose">${item.dose || '--'}</div>
+                  <div class="timeline-note">${item.displayNote || item.note || ''}</div>
+                  <div class="timeline-calc">⚙️ ${item.calc || ''}</div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      });
+
+      container.innerHTML = html || '<div class="timeline-note">当前条件下没有触发补剂节点。</div>';
+      panel.classList.add('active');
+      panel.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function previewTimeline() {
+      generateTimeline();
+    }
+
+    function saveAndGoToDashboard() {
+      saveToStorage();
+      renderAutofillSummary();
+      window.location.href = '模块四_单日仪表盘.html';
+    }
+
+    if (!window.AppState.getUsageMode || !localStorage.getItem('appUsageMode')) {
+      localStorage.setItem('appUsageMode', 'single_day');
+    }
+    ensureSupplementRules().finally(init);
+</script>
+</body>
+</html>

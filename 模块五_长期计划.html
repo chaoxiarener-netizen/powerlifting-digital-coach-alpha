@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app_ui.css">
+  <title>力量举全景数字教练 - 长期计划模块</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --panel-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-dim: #666;
+      --accent: #00ff88;
+      --accent-dim: #00cc6a;
+      --warn: #ff4444;
+      --warn-bg: rgba(255,68,68,0.1);
+      --info: #4488ff;
+      --info-bg: rgba(68,136,255,0.1);
+      --success: #00ff88;
+      --light: #5ac8fa;
+      --medium: #ffd700;
+      --heavy: #ff6b6b;
+      --rest: #666;
+      --squat: #ff6b6b;
+      --bench: #4a90d9;
+      --deadlift: #9b59b6;
+      --accessory: #f39c12;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 560px;
+      margin: 0 auto;
+      padding: 20px 16px 40px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .header .subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .header .subtitle a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* Beta badge */
+    .beta-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 12px;
+      background: rgba(68,136,255,0.15);
+      border: 1px solid var(--info);
+      border-radius: 999px;
+      font-size: 10px;
+      color: var(--info);
+      letter-spacing: 1px;
+    }
+
+    /* Section Title */
+    .section-title {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      margin-top: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-title::before {
+      content: '';
+      width: 3px;
+      height: 14px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Panels */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 14px;
+    }
+
+    .panel-info {
+      background: var(--info-bg);
+      border-color: var(--info);
+    }
+
+    .panel-warn {
+      background: var(--warn-bg);
+      border-color: var(--warn);
+    }
+
+    .panel-title {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .info-text {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    /* Form elements */
+    .form-group {
+      margin-bottom: 12px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--accent);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 60px;
+      font-family: inherit;
+    }
+
+    .form-group select option {
+      background: #000;
+      color: var(--text);
+    }
+
+    /* Row for two columns */
+    .form-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .form-row .form-group {
+      flex: 1;
+    }
+
+    /* Week cards */
+    .week-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .week-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .week-card:hover {
+      border-color: var(--accent-dim);
+    }
+
+    .week-card.active {
+      border-color: var(--accent);
+      background: rgba(0,255,136,0.05);
+    }
+
+    .week-card .week-label {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .week-card .week-meta {
+      font-size: 10px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .week-card .week-meta span {
+      display: block;
+    }
+
+    /* Day table */
+    .day-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    .day-table th {
+      text-align: left;
+      padding: 6px 4px;
+      color: var(--text-dim);
+      font-weight: 500;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .day-table td {
+      padding: 4px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .day-table select,
+    .day-table input {
+      width: 100%;
+      padding: 6px 4px;
+      background: #000;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 10px;
+      outline: none;
+    }
+
+    .day-table select:focus,
+    .day-table input:focus {
+      border-color: var(--accent);
+    }
+
+    .day-table select option {
+      background: #000;
+      color: var(--text);
+    }
+
+    .day-table .day-label {
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      padding-right: 6px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-block;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text-dim);
+    }
+
+    .btn-info {
+      background: transparent;
+      border: 1px solid var(--info);
+      color: var(--info);
+    }
+
+    .btn-info:hover {
+      background: var(--info-bg);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 12px 24px;
+      font-size: 13px;
+      color: var(--accent);
+      z-index: 1000;
+      opacity: 0;
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    /* Status */
+    .status-bar {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+      .week-cards {
+        grid-template-columns: 1fr 1fr;
+      }
+      .btn-group {
+        flex-direction: column;
+      }
+      .btn-group .btn {
+        width: 100%;
+        text-align: center;
+      }
+      .day-table {
+        font-size: 10px;
+      }
+      .day-table select,
+      .day-table input {
+        font-size: 9px;
+        padding: 4px 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="global-nav">
+      <div class="global-nav-list">
+        <a class="global-nav-link" href="index.html">总控台</a>
+        <a class="global-nav-link" href="单日计划_轻量模式.html">单日</a>
+        <a class="global-nav-link" href="模块一_用户档案.html">档案</a>
+        <a class="global-nav-link" href="模块三_每周训练安排.html">训练</a>
+        <a class="global-nav-link" href="模块二_碳水预算引擎.html">营养</a>
+        <a class="global-nav-link" href="补剂时序生成器.html">补剂</a>
+        <a class="global-nav-link" href="模块四_单日仪表盘.html">作战图</a>
+        <a class="global-nav-link active" href="模块五_长期计划.html">长期</a>
+      </div>
+    </div>
+    <div class="header">
+      <h1>长期计划模块</h1>
+      <div class="subtitle">4 周 Block 草稿 · <a href="index.html">返回首页</a></div>
+      <div class="beta-badge">实验功能</div>
+    </div>
+
+    <div class="panel panel-info">
+      <div class="info-text">
+        当前模块仅用于规划 4 周训练 block 草稿，不会自动生成医学、营养或赛前降重建议。长期计划不会覆盖当前周训练计划，除非你以后手动导入。
+      </div>
+    </div>
+
+    <!-- Block basic info -->
+    <div class="section-title">Block 基础信息</div>
+    <div class="panel" id="blockInfoPanel">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Block 名称</label>
+          <input type="text" id="blockName" placeholder="例如：力量周期第一 block">
+        </div>
+        <div class="form-group">
+          <label>当前目标</label>
+          <select id="blockGoal">
+            <option value="strength">力量期</option>
+            <option value="bulk">增肌期</option>
+            <option value="cut">减脂期</option>
+            <option value="recomp">体成分重组</option>
+            <option value="meet_prep">赛前准备（高级功能未启用）</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>当前周索引</label>
+          <select id="currentWeekIndex">
+            <option value="0">第 1 周</option>
+            <option value="1">第 2 周</option>
+            <option value="2">第 3 周</option>
+            <option value="3">第 4 周</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Block 长度</label>
+          <input type="text" id="blockLength" value="4 周" disabled style="opacity:0.6;">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>总备注</label>
+        <textarea id="blockNotes" placeholder="关于这个 block 的整体说明..."></textarea>
+      </div>
+    </div>
+
+    <!-- 4 week overview -->
+    <div class="section-title">4 周总览</div>
+    <div class="week-cards" id="weekCards"></div>
+
+    <!-- Current week editor -->
+    <div class="section-title" id="editorTitle">当前周编辑器</div>
+    <div class="panel" id="weekEditor">
+      <div class="form-row">
+        <div class="form-group">
+          <label>周目标</label>
+          <select id="weekFocus">
+            <option value="accumulation">积累</option>
+            <option value="intensification">强化</option>
+            <option value="deload">减量</option>
+            <option value="test">测试</option>
+            <option value="custom">自定义</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>目标压力</label>
+          <select id="weekStress">
+            <option value="low">低</option>
+            <option value="medium" selected>中</option>
+            <option value="high">高</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>主项重点</label>
+          <select id="weekMainLift">
+            <option value="balanced">均衡</option>
+            <option value="squat">深蹲</option>
+            <option value="bench">卧推</option>
+            <option value="deadlift">硬拉</option>
+            <option value="custom">自定义</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>营养重点</label>
+          <select id="weekNutrition">
+            <option value="normal">常规</option>
+            <option value="high_carb">高碳</option>
+            <option value="recovery">恢复</option>
+            <option value="cut_control">控制缺口</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>本周备注</label>
+        <textarea id="weekNotes" placeholder="本周训练注意事项..."></textarea>
+      </div>
+    </div>
+
+    <!-- 7-day table -->
+    <div class="section-title">每日安排摘要</div>
+    <div class="panel" style="overflow-x:auto;">
+      <table class="day-table" id="dayTable">
+        <thead>
+          <tr>
+            <th style="width:32px;"> </th>
+            <th style="width:64px;">类型</th>
+            <th style="width:72px;">动作</th>
+            <th>摘要</th>
+            <th style="width:48px;">%1RM</th>
+            <th style="width:36px;">RPE</th>
+          </tr>
+        </thead>
+        <tbody id="dayTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="saveDraft()">保存长期草稿</button>
+      <button class="btn btn-info" onclick="importFromWeekPlan()">导入模块三第 1 周</button>
+      <button class="btn btn-secondary" onclick="resetDraft()">新建草稿</button>
+    </div>
+
+    <div class="status-bar" id="statusBar">就绪</div>
+
+    <div style="margin-top:24px;text-align:center;">
+      <span style="font-size:10px;color:var(--text-dim);">longTermPlanDraft · v1</span>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    var DAY_LABELS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+    var DAY_NAMES = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    var GOAL_LABELS = {
+      bulk: '增肌期',
+      strength: '力量期',
+      cut: '减脂期',
+      recomp: '体成分重组',
+      meet_prep: '赛前准备（高级功能未启用）'
+    };
+    var FOCUS_LABELS = {
+      accumulation: '积累',
+      intensification: '强化',
+      deload: '减量',
+      test: '测试',
+      custom: '自定义'
+    };
+    var STRESS_LABELS = { low: '低', medium: '中', high: '高' };
+    var LIFT_LABELS = { squat: '深蹲', bench: '卧推', deadlift: '硬拉', accessory: '辅助', rest: '休息', balanced: '均衡', custom: '自定义' };
+    var NUTRITION_LABELS = { normal: '常规', high_carb: '高碳', recovery: '恢复', cut_control: '控制缺口' };
+    var TYPE_LABELS = { rest: '休息', light: '轻', medium: '中', heavy: '重' };
+
+    function emptyDay(dayIndex) {
+      return { dayIndex: dayIndex, type: 'rest', lift: 'rest', summary: '', plannedRPE: null, plannedPercent1RM: null };
+    }
+
+    function emptyWeek(weekIndex) {
+      var days = [];
+      for (var i = 0; i < 7; i++) days.push(emptyDay(i));
+      return {
+        weekIndex: weekIndex,
+        weekLabel: '第 ' + (weekIndex + 1) + ' 周',
+        focus: 'accumulation',
+        targetStress: 'medium',
+        mainLiftFocus: 'balanced',
+        nutritionFocus: 'normal',
+        notes: '',
+        days: days
+      };
+    }
+
+    function emptyDraft() {
+      var weeks = [];
+      for (var i = 0; i < 4; i++) weeks.push(emptyWeek(i));
+      return {
+        version: 'v1',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        source: 'manual',
+        goal: 'strength',
+        blockName: '',
+        blockLengthWeeks: 4,
+        currentWeekIndex: 0,
+        notes: '',
+        weeks: weeks
+      };
+    }
+
+    // ========== State ==========
+    var draft = null;
+    var editingWeekIndex = 0;
+
+    // ========== Toast ==========
+    function showToast(msg) {
+      var el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(function() { el.classList.remove('show'); }, 2500);
+    }
+
+    // ========== Save / Load ==========
+    function saveDraft() {
+      if (!draft) return;
+      // Read block info
+      draft.blockName = document.getElementById('blockName').value.trim();
+      draft.goal = document.getElementById('blockGoal').value;
+      draft.currentWeekIndex = parseInt(document.getElementById('currentWeekIndex').value);
+      draft.notes = document.getElementById('blockNotes').value.trim();
+      draft.updatedAt = new Date().toISOString();
+
+      // Read week editor
+      saveWeekFromEditor();
+
+      localStorage.setItem('longTermPlanDraft', JSON.stringify(draft));
+      renderWeekCards();
+      updateStatus('已保存 ' + new Date().toLocaleString());
+      showToast('长期计划草稿已保存');
+    }
+
+    function saveWeekFromEditor() {
+      if (!draft || editingWeekIndex === null) return;
+      var w = draft.weeks[editingWeekIndex];
+      w.focus = document.getElementById('weekFocus').value;
+      w.targetStress = document.getElementById('weekStress').value;
+      w.mainLiftFocus = document.getElementById('weekMainLift').value;
+      w.nutritionFocus = document.getElementById('weekNutrition').value;
+      w.notes = document.getElementById('weekNotes').value.trim();
+
+      // Read day table
+      for (var i = 0; i < 7; i++) {
+        if (w.days[i]) {
+          w.days[i].type = getEl('dayType_' + i).value;
+          w.days[i].lift = getEl('dayLift_' + i).value;
+          w.days[i].summary = getEl('daySummary_' + i).value.trim();
+          var pct = getEl('dayPercent_' + i).value.trim();
+          w.days[i].plannedPercent1RM = pct !== '' ? parseFloat(pct) : null;
+          var rpe = getEl('dayRPE_' + i).value.trim();
+          w.days[i].plannedRPE = rpe !== '' ? parseFloat(rpe) : null;
+        }
+      }
+    }
+
+    function loadDraft() {
+      var saved = localStorage.getItem('longTermPlanDraft');
+      if (saved) {
+        try { draft = JSON.parse(saved); } catch(e) { draft = null; }
+      }
+      if (!draft) {
+        draft = emptyDraft();
+      }
+      // Ensure all weeks/days exist for migrated data
+      for (var wi = 0; wi < 4; wi++) {
+        if (!draft.weeks[wi]) draft.weeks[wi] = emptyWeek(wi);
+        if (!draft.weeks[wi].days) {
+          draft.weeks[wi].days = [];
+          for (var di = 0; di < 7; di++) draft.weeks[wi].days.push(emptyDay(di));
+        }
+        for (var di2 = 0; di2 < 7; di2++) {
+          if (!draft.weeks[wi].days[di2]) draft.weeks[wi].days[di2] = emptyDay(di2);
+        }
+      }
+      editingWeekIndex = draft.currentWeekIndex || 0;
+    }
+
+    function applyDraftToUI() {
+      if (!draft) return;
+      document.getElementById('blockName').value = draft.blockName || '';
+      document.getElementById('blockGoal').value = draft.goal || 'strength';
+      document.getElementById('currentWeekIndex').value = draft.currentWeekIndex || 0;
+      document.getElementById('blockNotes').value = draft.notes || '';
+
+      // Check meet_prep
+      checkMeetPrep();
+    }
+
+    function checkMeetPrep() {
+      var goal = document.getElementById('blockGoal').value;
+      var info = document.getElementById('blockInfoPanel').querySelector('.info-text');
+      if (goal === 'meet_prep') {
+        showToast('赛前准备为高级功能，当前版本仅保留字段');
+      }
+    }
+
+    // ========== Week cards ==========
+    function renderWeekCards() {
+      var container = document.getElementById('weekCards');
+      container.innerHTML = '';
+      for (var i = 0; i < 4; i++) {
+        var w = draft.weeks[i];
+        var isActive = (i === editingWeekIndex);
+        var card = document.createElement('div');
+        card.className = 'week-card' + (isActive ? ' active' : '');
+        card.innerHTML =
+          '<div class="week-label">第 ' + (i + 1) + ' 周</div>' +
+          '<div class="week-meta">' +
+            '<span>目标: ' + (FOCUS_LABELS[w.focus] || w.focus) + '</span>' +
+            '<span>压力: ' + (STRESS_LABELS[w.targetStress] || w.targetStress) + '</span>' +
+            '<span>主项: ' + (LIFT_LABELS[w.mainLiftFocus] || w.mainLiftFocus) + '</span>' +
+            '<span>营养: ' + (NUTRITION_LABELS[w.nutritionFocus] || w.nutritionFocus) + '</span>' +
+          '</div>';
+        card.addEventListener('click', function(idx) { return function() { selectWeek(idx); }; }(i));
+        container.appendChild(card);
+      }
+    }
+
+    function selectWeek(idx) {
+      // Save current editor first
+      saveWeekFromEditor();
+      editingWeekIndex = idx;
+      renderWeekCards();
+      renderWeekEditor();
+    }
+
+    // ========== Week editor ==========
+    function renderWeekEditor() {
+      if (!draft || editingWeekIndex === null) return;
+      var w = draft.weeks[editingWeekIndex];
+      document.getElementById('weekFocus').value = w.focus || 'accumulation';
+      document.getElementById('weekStress').value = w.targetStress || 'medium';
+      document.getElementById('weekMainLift').value = w.mainLiftFocus || 'balanced';
+      document.getElementById('weekNutrition').value = w.nutritionFocus || 'normal';
+      document.getElementById('weekNotes').value = w.notes || '';
+
+      renderDayTable();
+    }
+
+    function getEl(id) { return document.getElementById(id); }
+
+    function renderDayTable() {
+      if (!draft || editingWeekIndex === null) return;
+      var w = draft.weeks[editingWeekIndex];
+      var tbody = document.getElementById('dayTableBody');
+      tbody.innerHTML = '';
+      for (var i = 0; i < 7; i++) {
+        var d = w.days[i];
+        var tr = document.createElement('tr');
+
+        // Day label
+        var tdLabel = document.createElement('td');
+        tdLabel.className = 'day-label';
+        tdLabel.textContent = DAY_LABELS[i];
+        tr.appendChild(tdLabel);
+
+        // Type
+        var tdType = document.createElement('td');
+        var selType = document.createElement('select');
+        selType.id = 'dayType_' + i;
+        var typeOpts = ['rest', 'light', 'medium', 'heavy'];
+        for (var ti = 0; ti < typeOpts.length; ti++) {
+          var opt = document.createElement('option');
+          opt.value = typeOpts[ti];
+          opt.textContent = TYPE_LABELS[typeOpts[ti]];
+          if (d.type === typeOpts[ti]) opt.selected = true;
+          selType.appendChild(opt);
+        }
+        tdType.appendChild(selType);
+        tr.appendChild(tdType);
+
+        // Lift
+        var tdLift = document.createElement('td');
+        var selLift = document.createElement('select');
+        selLift.id = 'dayLift_' + i;
+        var liftOpts = ['rest', 'squat', 'bench', 'deadlift', 'accessory'];
+        for (var li = 0; li < liftOpts.length; li++) {
+          var opt2 = document.createElement('option');
+          opt2.value = liftOpts[li];
+          opt2.textContent = LIFT_LABELS[liftOpts[li]];
+          if (d.lift === liftOpts[li]) opt2.selected = true;
+          selLift.appendChild(opt2);
+        }
+        tdLift.appendChild(selLift);
+        tr.appendChild(tdLift);
+
+        // Summary
+        var tdSum = document.createElement('td');
+        var inpSum = document.createElement('input');
+        inpSum.type = 'text';
+        inpSum.id = 'daySummary_' + i;
+        inpSum.value = d.summary || '';
+        inpSum.placeholder = '简述';
+        tdSum.appendChild(inpSum);
+        tr.appendChild(tdSum);
+
+        // %1RM
+        var tdPct = document.createElement('td');
+        var inpPct = document.createElement('input');
+        inpPct.type = 'number';
+        inpPct.id = 'dayPercent_' + i;
+        inpPct.value = d.plannedPercent1RM !== null ? d.plannedPercent1RM : '';
+        inpPct.placeholder = '%';
+        inpPct.min = 0;
+        inpPct.max = 100;
+        tdPct.appendChild(inpPct);
+        tr.appendChild(tdPct);
+
+        // RPE
+        var tdRPE = document.createElement('td');
+        var inpRPE = document.createElement('input');
+        inpRPE.type = 'number';
+        inpRPE.id = 'dayRPE_' + i;
+        inpRPE.value = d.plannedRPE !== null ? d.plannedRPE : '';
+        inpRPE.placeholder = '';
+        inpRPE.min = 1;
+        inpRPE.max = 10;
+        inpRPE.step = 0.5;
+        tdRPE.appendChild(inpRPE);
+        tr.appendChild(tdRPE);
+
+        tbody.appendChild(tr);
+      }
+    }
+
+    // ========== Import from module 3 ==========
+    function importFromWeekPlan() {
+      var raw = localStorage.getItem('weeklyTrainingPlan');
+      if (!raw) {
+        showToast('未找到当前周训练计划，请先完成模块三');
+        return;
+      }
+      try {
+        var plan = JSON.parse(raw);
+      } catch(e) {
+        showToast('模块三数据格式错误');
+        return;
+      }
+      var daysData = plan.days || plan.byDayIndex || null;
+      if (!daysData) {
+        showToast('模块三数据格式错误：未找到训练日数据');
+        return;
+      }
+
+      // Convert to longTermPlanDraft week 0 days
+      var targetDays = [];
+      for (var i = 0; i < 7; i++) {
+        var src = null;
+        if (Array.isArray(daysData)) {
+          src = daysData[i];
+        } else if (typeof daysData === 'object') {
+          src = daysData[i] || daysData[String(i)] || null;
+        }
+        var day = emptyDay(i);
+        if (src) {
+          day.type = src.type || 'rest';
+          day.lift = src.lift || 'rest';
+          day.summary = '';
+          if (src.lift && src.lift !== 'rest') {
+            day.summary = (src.weight || '') + 'kg x ' + (src.sets || '') + 'x' + (src.reps || '');
+          }
+          day.plannedPercent1RM = src.percent1RM || src.percent || null;
+          day.plannedRPE = src.rpe || null;
+        }
+        targetDays.push(day);
+      }
+
+      draft.weeks[0].days = targetDays;
+      draft.weeks[0].focus = 'accumulation';
+      draft.weeks[0].targetStress = 'medium';
+      draft.weeks[0].mainLiftFocus = 'balanced';
+      draft.weeks[0].nutritionFocus = 'normal';
+      draft.weeks[0].notes = '从模块三当前周计划导入';
+
+      // Set editing to week 0
+      editingWeekIndex = 0;
+      document.getElementById('currentWeekIndex').value = '0';
+
+      renderWeekCards();
+      renderWeekEditor();
+      updateStatus('已从模块三导入第 1 周草稿');
+      showToast('已从模块三导入第 1 周草稿');
+    }
+
+    // ========== Reset ==========
+    function resetDraft() {
+      if (!confirm('新建草稿将清空当前编辑内容，是否继续？')) return;
+      draft = emptyDraft();
+      editingWeekIndex = 0;
+      applyDraftToUI();
+      renderWeekCards();
+      renderWeekEditor();
+      updateStatus('已新建空白草稿');
+      showToast('已新建空白草稿');
+    }
+
+    // ========== Status ==========
+    function updateStatus(msg) {
+      document.getElementById('statusBar').textContent = msg;
+    }
+
+    // ========== Init ==========
+    function init() {
+      loadDraft();
+      applyDraftToUI();
+      renderWeekCards();
+      renderWeekEditor();
+      if (draft.createdAt) {
+        updateStatus('上次保存: ' + new Date(draft.updatedAt || draft.createdAt).toLocaleString());
+      }
+
+      // Auto-save on goal change (for meet_prep warning)
+      document.getElementById('blockGoal').addEventListener('change', function() {
+        if (this.value === 'meet_prep') {
+          showToast('赛前准备为高级功能，当前版本仅保留字段');
+        }
+      });
+
+      // Auto-save on currentWeekIndex change
+      document.getElementById('currentWeekIndex').addEventListener('change', function() {
+        var idx = parseInt(this.value);
+        if (idx !== editingWeekIndex) {
+          saveWeekFromEditor();
+          editingWeekIndex = idx;
+          renderWeekCards();
+          renderWeekEditor();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>

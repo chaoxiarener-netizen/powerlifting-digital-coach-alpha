@@ -1,0 +1,41 @@
+# Release artifacts
+alpha-release/
+alpha-release.zip
+
+# Netlify local state
+.netlify/
+
+# Knowledge source documents
+*.docx
+docx_extracts/
+macro_docx_render/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Local env and secrets
+.env
+.env.*
+*.env
+*.token
+token
+tokens/
+secrets/
+
+# Logs
+*.log
+server.out.txt
+server.err.txt
+
+# Local audit and temp artifacts
+ui-audit/
+.tmp_*.js
+.tmp_*.json
+__codex_storage_tools.html
+macro_docx_repair_report.json
+
+# OS / editor cache
+.DS_Store
+Thumbs.db
+Desktop.ini

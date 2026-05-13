@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app_ui.css">
+  <title>力量举全景数字教练 - 临床级初始评估</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --panel-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-dim: #666;
+      --accent: #00ff88;
+      --accent-dim: #00cc6a;
+      --warn: #ff4444;
+      --warn-bg: rgba(255,68,68,0.1);
+      --info: #4488ff;
+      --success: #00ff88;
+      --carbs: #ffaa00;
+      --protein: #ff6b6b;
+      --fat: #9b59b6;
+      --light: #5ac8fa;
+      --medium: #ffd700;
+      --heavy: #ff6b6b;
+      --rest: #666;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .header .subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .header .progress-bar {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      justify-content: center;
+    }
+
+    .progress-step {
+      width: 32px;
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .progress-step.active {
+      background: var(--accent);
+    }
+
+    .progress-step.completed {
+      background: var(--accent);
+      opacity: 0.5;
+    }
+
+    /* Panel */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title .step-num {
+      width: 24px;
+      height: 24px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .form-label .optional {
+      font-size: 10px;
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 16px;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* Select */
+    .form-select {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 16px;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M3 4l3 4 3-4H3z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+    }
+
+    /* Radio / Checkbox */
+    .option-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .option-card {
+      padding: 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .option-card:hover {
+      border-color: var(--text-dim);
+    }
+
+    .option-card.selected {
+      border-color: var(--accent);
+      background: rgba(0,255,136,0.1);
+    }
+
+    .option-card .icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .option-card .label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .option-card .desc {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .goal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .goal-card {
+      padding: 14px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .goal-card:hover {
+      border-color: var(--text-dim);
+    }
+
+    .goal-card.selected {
+      border-color: var(--accent);
+      background: rgba(0,255,136,0.1);
+    }
+
+    .goal-card .icon {
+      font-size: 24px;
+      margin-bottom: 6px;
+    }
+
+    .goal-card .label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .goal-card .desc {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .exp-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .exp-card {
+      padding: 14px 10px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: center;
+    }
+
+    .exp-card:hover {
+      border-color: var(--text-dim);
+    }
+
+    .exp-card.selected {
+      border-color: var(--accent);
+      background: rgba(0,255,136,0.1);
+    }
+
+    .exp-card .label {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .exp-card .desc {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* Red Flag */
+    .red-flag-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .red-flag-item:hover {
+      border-color: var(--text-dim);
+    }
+
+    .red-flag-item.checked {
+      border-color: var(--warn);
+      background: var(--warn-bg);
+    }
+
+    .red-flag-item input {
+      accent-color: var(--warn);
+      width: 18px;
+      height: 18px;
+      margin-top: 2px;
+    }
+
+    .red-flag-item .content {
+      flex: 1;
+    }
+
+    .red-flag-item .title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .red-flag-item .desc {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    /* Micronutrient Screening */
+    .question-group {
+      margin-bottom: 16px;
+    }
+
+    .question-title {
+      font-size: 12px;
+      color: var(--accent);
+      font-weight: 600;
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    .question-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-bottom: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .question-item:hover {
+      border-color: var(--text-dim);
+    }
+
+    .question-item.checked {
+      border-color: var(--accent);
+      background: rgba(0,255,136,0.1);
+    }
+
+    .question-item input {
+      accent-color: var(--accent);
+      width: 16px;
+      height: 16px;
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    .risk-result {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .risk-level {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .risk-level.low { color: var(--success); }
+    .risk-level.medium { color: #ffaa00; }
+    .risk-level.high { color: var(--warn); }
+
+    .risk-detail {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .risk-detail ul {
+      margin: 8px 0 0 16px;
+      padding: 0;
+    }
+
+    .risk-detail li {
+      margin-bottom: 4px;
+    }
+
+    /* Blood markers */
+    .blood-marker {
+      display: grid;
+      grid-template-columns: 1fr 1fr 60px;
+      gap: 8px;
+      align-items: end;
+      margin-bottom: 12px;
+    }
+
+    .blood-marker .label-col {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .blood-marker .unit {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-align: right;
+    }
+
+    /* Buttons */
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+
+    .btn-danger {
+      background: transparent;
+      border: 1px solid var(--warn);
+      color: var(--warn);
+    }
+
+    /* Warning Banner */
+    .warning-banner {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .warning-banner .icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .warning-banner .title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--warn);
+      margin-bottom: 4px;
+    }
+
+    .warning-banner .desc {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Summary */
+    .summary-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-row .key {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .summary-row .value {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Calculated values */
+    .calc-value {
+      background: rgba(0,255,136,0.1);
+      border: 1px dashed var(--accent);
+      border-radius: 6px;
+      padding: 12px;
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    .calc-value .label {
+      font-size: 10px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .calc-value .number {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      margin-top: 4px;
+    }
+
+    .calc-value .unit {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Success */
+    .success-panel {
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: rgba(0,255,136,0.2);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin: 0 auto 20px;
+    }
+
+    .success-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    .success-desc {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* Section divider */
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--text-dim);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* Unit suffix inside input */
+    .input-with-unit {
+      position: relative;
+    }
+
+    .input-with-unit input {
+      padding-right: 40px;
+    }
+
+    .input-with-unit .unit {
+      position: absolute;
+      right: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Hidden */
+    .hidden {
+      display: none !important;
+    }
+
+    .info-box {
+      background: rgba(68, 136, 255, 0.1);
+      border: 1px solid rgba(68, 136, 255, 0.35);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .info-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--info);
+      margin-bottom: 6px;
+    }
+
+    .info-box-content {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .global-nav {
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .global-nav-list {
+      display: flex;
+      gap: 8px;
+      min-width: max-content;
+    }
+
+    .global-nav-link {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--text-dim);
+      font-size: 12px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .global-nav-link.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="global-nav">
+      <div class="global-nav-list">
+        <a class="global-nav-link" href="index.html">总控台</a>
+        <a class="global-nav-link" href="单日计划_轻量模式.html">单日</a>
+        <a class="global-nav-link active" href="模块一_用户档案.html">档案</a>
+        <a class="global-nav-link" href="模块三_每周训练安排.html">训练</a>
+        <a class="global-nav-link" href="模块二_碳水预算引擎.html">营养</a>
+        <a class="global-nav-link" href="补剂时序生成器.html">补剂</a>
+        <a class="global-nav-link" href="模块四_单日仪表盘.html">作战图</a>
+        <a class="global-nav-link" href="模块五_长期计划.html">长期</a>
+      </div>
+    </div>
+
+    <div class="header">
+      <h1>🏆 力量举全景数字教练</h1>
+      <div class="subtitle">档案页 · 建立个人档案与风险筛查 · <a href="index.html" style="color:var(--accent);text-decoration:none;">返回首页</a></div>
+      <div class="progress-bar">
+        <div class="progress-step active" data-step="1"></div>
+        <div class="progress-step" data-step="2"></div>
+        <div class="progress-step" data-step="3"></div>
+        <div class="progress-step" data-step="4"></div>
+        <div class="progress-step" data-step="5"></div>
+        <div class="progress-step" data-step="6"></div>
+      </div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-title">唯一档案来源</div>
+      <div class="info-box-content">这里是唯一的个人档案来源。体重、目标、三大项之后会自动用于营养预算、补剂时序和今日作战图。</div>
+    </div>
+
+    <!-- Warning Banner -->
+    <div id="warningBanner" class="warning-banner hidden">
+      <div class="icon">⚠️</div>
+      <div class="title">检测到红旗症状</div>
+      <div class="desc">系统暂停补剂推荐，建议寻求专业医疗帮助</div>
+    </div>
+
+    <!-- Step 1: Basic Info -->
+    <div id="step1" class="panel">
+      <div class="panel-title">
+        <span class="step-num">1</span>
+        基础数据
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">性别</label>
+        <div class="option-grid">
+          <div class="option-card" data-gender="male" onclick="selectGender('male', this)">
+            <div class="icon">♂</div>
+            <div class="label">男性</div>
+          </div>
+          <div class="option-card" data-gender="female" onclick="selectGender('female', this)">
+            <div class="icon">♀</div>
+            <div class="label">女性</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">身高 (cm)</label>
+          <input type="number" class="form-input" id="height" placeholder="175" min="140" max="220">
+        </div>
+        <div class="form-group">
+          <label class="form-label">体重 (kg)</label>
+          <input type="number" class="form-input" id="weight" placeholder="75" min="40" max="200" step="0.1">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">年龄</label>
+        <input type="number" class="form-input" id="age" placeholder="28" min="16" max="80">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">体脂率 (可选) <span class="optional">更精准的代谢计算</span></label>
+        <input type="number" class="form-input" id="bodyFat" placeholder="18" min="3" max="60" step="0.1">
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" onclick="nextStep(1)">下一步</button>
+      </div>
+    </div>
+
+    <!-- Step 2: 1RM -->
+    <div id="step2" class="panel hidden">
+      <div class="panel-title">
+        <span class="step-num">2</span>
+        三大项 1RM 记录
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">深蹲 1RM (kg)</label>
+        <input type="number" class="form-input" id="squat" placeholder="140" min="20" max="400" oninput="updateTotalLift()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">卧推 1RM (kg)</label>
+        <input type="number" class="form-input" id="bench" placeholder="100" min="20" max="300" oninput="updateTotalLift()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">硬拉 1RM (kg)</label>
+        <input type="number" class="form-input" id="deadlift" placeholder="180" min="20" max="500" oninput="updateTotalLift()">
+      </div>
+
+      <div class="calc-value" id="totalLift">
+        <div class="label">总成绩</div>
+        <div class="number" id="totalLiftValue">--</div>
+        <div class="unit">kg · Wilks/IPF Points 待计算</div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(2)">上一步</button>
+        <button class="btn btn-primary" onclick="nextStep(2)">下一步</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Blood Markers -->
+    <div id="step3" class="panel hidden">
+      <div class="panel-title">
+        <span class="step-num">3</span>
+        血液检测数据 <span class="optional" style="margin-left:8px;">可选 · 输入更精准</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">维生素 D3 (ng/mL) <span class="optional">正常 >30</span></label>
+        <div class="blood-marker">
+          <input type="number" class="form-input" id="vitaminD" placeholder="25" min="5" max="100" step="0.1">
+          <span class="unit">ng/mL</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">血清镁 (mg/dL) <span class="optional">正常 1.7-2.2</span></label>
+        <div class="blood-marker">
+          <input type="number" class="form-input" id="magnesium" placeholder="2.0" min="1" max="3" step="0.01">
+          <span class="unit">mg/dL</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">铁蛋白 (ng/mL) <span class="optional">正常 30-300</span></label>
+        <div class="blood-marker">
+          <input type="number" class="form-input" id="ferritin" placeholder="80" min="5" max="1000">
+          <span class="unit">ng/mL</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">睾酮 (ng/dL) <span class="optional">正常 300-1000</span></label>
+        <div class="blood-marker">
+          <input type="number" class="form-input" id="testosterone" placeholder="600" min="50" max="2000">
+          <span class="unit">ng/dL</span>
+        </div>
+      </div>
+
+      <div class="section-divider">其他可选指标</div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">空腹血糖 <span class="optional">正常 <100</span></label>
+          <div class="blood-marker" style="grid-template-columns: 1fr;">
+            <input type="number" class="form-input" id="glucose" placeholder="90" min="50" max="200">
+            <span class="unit" style="text-align:right;">mg/dL</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">皮质醇 <span class="optional">正常 6-23</span></label>
+          <div class="blood-marker" style="grid-template-columns: 1fr;">
+            <input type="number" class="form-input" id="cortisol" placeholder="15" min="2" max="50">
+            <span class="unit" style="text-align:right;">μg/dL</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(3)">上一步</button>
+        <button class="btn btn-primary" onclick="nextStep(3)">下一步</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Goals -->
+    <div id="step4" class="panel hidden">
+      <div class="panel-title">
+        <span class="step-num">4</span>
+        当前目标
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">选择主要目标</label>
+        <div class="goal-grid">
+          <div class="goal-card" data-goal="bulk" onclick="selectGoal('bulk', this)">
+            <div class="icon">💪</div>
+            <div class="label">增肌周期</div>
+            <div class="desc">热量盈余 200-300kcal</div>
+          </div>
+          <div class="goal-card" data-goal="strength" onclick="selectGoal('strength', this)">
+            <div class="icon">⚡</div>
+            <div class="label">力量转化</div>
+            <div class="desc">维持体重优化神经</div>
+          </div>
+          <div class="goal-card" data-goal="cut" onclick="selectGoal('cut', this)">
+            <div class="icon">🔥</div>
+            <div class="label">安全减脂</div>
+            <div class="desc">热量缺口 300-500kcal</div>
+          </div>
+          <div class="goal-card" data-goal="meet" onclick="selectGoal('meet', this)">
+            <div class="icon">🏆</div>
+            <div class="label">赛前准备</div>
+            <div class="desc">精准周期化备赛</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-divider">训练经验</div>
+
+      <div class="form-group">
+        <label class="form-label">训练水平</label>
+        <div class="exp-grid">
+          <div class="exp-card" data-exp="beginner" onclick="selectExperience('beginner', this)">
+            <div class="label">初级</div>
+            <div class="desc">< 1年</div>
+          </div>
+          <div class="exp-card" data-exp="intermediate" onclick="selectExperience('intermediate', this)">
+            <div class="label">中级</div>
+            <div class="desc">1-3年</div>
+          </div>
+          <div class="exp-card" data-exp="advanced" onclick="selectExperience('advanced', this)">
+            <div class="label">高级</div>
+            <div class="desc">> 3年</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(4)">上一步</button>
+        <button class="btn btn-primary" onclick="nextStep(4)">下一步</button>
+      </div>
+    </div>
+
+    <!-- Step 5: Red Flags -->
+    <div id="step5" class="panel hidden">
+      <div class="panel-title">
+        <span class="step-num">5</span>
+        微量元素缺乏筛查 <span class="optional" style="margin-left:8px;">基于 IOC/ACSM 临床标准</span>
+      </div>
+
+      <div class="section-divider">评估维度与临床靶点</div>
+
+      <!-- 维度1：膳食模式 -->
+      <div class="question-group">
+        <div class="question-title">① 膳食模式限制与偏差</div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="diet">
+          <span>长期严格遵循全素食或极端低脂饮食（<20% 脂肪）</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="diet">
+          <span>为控制体重有意剔除主要食物群（拒绝红肉/乳制品）</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="diet">
+          <span>每日蔬果摄入 < 3 份</span>
+        </div>
+      </div>
+
+      <!-- 维度2：运动特征 -->
+      <div class="question-group">
+        <div class="question-title">② 高危运动与排泄特征</div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="sweat">
+          <span>从事极限耐力项目（马拉松/铁三）</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="sweat">
+          <span>常规在高温高湿环境下高发汗率训练</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="sweat">
+          <span>运动后尿液呈茶色（疑似溶血）</span>
+        </div>
+      </div>
+
+      <!-- 维度3：生殖内分泌（女性） -->
+      <div id="femaleSection" class="question-group">
+        <div class="question-title">③ 生殖与内分泌 <span class="optional">(女性专用)</span></div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="hormone">
+          <span>月经初潮延迟（≥16岁）</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="hormone">
+          <span>过去12个月连续闭经 ≥ 3个月</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="hormone">
+          <span>月经周期极不规律</span>
+        </div>
+      </div>
+
+      <!-- 维度4：胃肠道 -->
+      <div class="question-group">
+        <div class="question-title">④ 胃肠道通透性与吸收</div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="gi">
+          <span>频繁发作腹部绞痛/慢性腹泻/严重便秘</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="gi">
+          <span>进食后严重胀气，影响正餐食欲</span>
+        </div>
+      </div>
+
+      <!-- 维度5：伤病与免疫 -->
+      <div class="question-group">
+        <div class="question-title">⑤ 伤病史与免疫功能</div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="immune">
+          <span>过去1年发生 ≥ 2次应力性骨折/骨应激反应</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="immune">
+          <span>极其频繁上呼吸道感染（感冒 ≥ 4次/年）</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="immune">
+          <span>伤口愈合时间显著延长</span>
+        </div>
+      </div>
+
+      <!-- 维度6：神经心理 -->
+      <div class="question-group">
+        <div class="question-title">⑥ 心理与精神神经状态</div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="neuro">
+          <span>持续冷漠感/抑郁情绪（无外界刺激）</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="neuro">
+          <span>不明原因严重失眠/入睡困难</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="neuro">
+          <span>肌肉抽搐/夜间腓肠肌痉挛（Cramp）</span>
+        </div>
+      </div>
+
+      <!-- 症状观察 -->
+      <div class="section-divider">自我体征观察</div>
+      <div class="question-group">
+        <div class="question-title">⑦ 外在表征（NFPE 自检）</div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="nfpe">
+          <span>弥漫性脱发/头发干枯易拔起</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="nfpe">
+          <span>指甲匙状甲/横向裂纹/易剥落</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="nfpe">
+          <span>眼结膜/牙龈苍白</span>
+        </div>
+        <div class="question-item" onclick="toggleQuestion(this)">
+          <input type="checkbox" data-category="nfpe">
+          <span>味觉/嗅觉显著减退</span>
+        </div>
+      </div>
+
+      <!-- 风险评估结果 -->
+      <div id="riskResult" class="risk-result hidden">
+        <div class="risk-level" id="riskLevel"></div>
+        <div class="risk-detail" id="riskDetail"></div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(5)">上一步</button>
+        <button class="btn btn-primary" onclick="nextStep(5)">下一步</button>
+      </div>
+    </div>
+
+    <!-- Step 6: Red Flags Warning -->
+    <div id="step6" class="panel hidden">
+      <div class="panel-title">
+        <span class="step-num">6</span>
+        红旗症状筛查 <span class="optional" style="margin-left:8px;">医疗免责</span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">请检查以下症状，如实勾选。如有阳性请立即就医</label>
+
+        <div class="red-flag-item" onclick="toggleRedFlag(this)">
+          <input type="checkbox" id="flag1">
+          <div class="content">
+            <div class="title">⚠️ 严重失眠伴心悸</div>
+            <div class="desc">连续失眠超过 72 小时，伴随心跳异常感</div>
+          </div>
+        </div>
+
+        <div class="red-flag-item" onclick="toggleRedFlag(this)">
+          <input type="checkbox" id="flag2">
+          <div class="content">
+            <div class="title">⚠️ 胸闷/呼吸困难</div>
+            <div class="desc">休息时胸痛、呼吸不畅或压迫感</div>
+          </div>
+        </div>
+
+        <div class="red-flag-item" onclick="toggleRedFlag(this)">
+          <input type="checkbox" id="flag3">
+          <div class="content">
+            <div class="title">⚠️ 不明原因心率异常</div>
+            <div class="desc">静息心率持续 >100 或 <50 bpm</div>
+          </div>
+        </div>
+
+        <div class="red-flag-item" onclick="toggleRedFlag(this)">
+          <input type="checkbox" id="flag4">
+          <div class="content">
+            <div class="title">⚠️ 长期极度疲劳</div>
+            <div class="desc">休息后仍无法恢复，持续 2 周以上</div>
+          </div>
+        </div>
+
+        <div class="red-flag-item" onclick="toggleRedFlag(this)">
+          <input type="checkbox" id="flag5">
+          <div class="content">
+            <div class="title">⚠️ 血压异常</div>
+            <div class="desc">收缩压 >140 或舒张压 >90 mmHg</div>
+          </div>
+        </div>
+
+        <div class="red-flag-item" onclick="toggleRedFlag(this)">
+          <input type="checkbox" id="flag6">
+          <div class="content">
+            <div class="title">⚠️ 服用心脏/血压药物</div>
+            <div class="desc">正在使用 β 受体阻滞剂或其他心脑血管药物</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="prevStep(6)">上一步</button>
+        <button class="btn btn-primary" onclick="submitProfile()">完成评估</button>
+      </div>
+    </div>
+
+    <!-- Summary & Complete -->
+    <div id="summary" class="panel hidden">
+      <div class="panel-title">
+        <span class="step-num">✓</span>
+        评估完成 · 数据总览
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-row">
+          <span class="key">基础代谢 (BMR)</span>
+          <span class="value" id="summaryBMR">-- kcal</span>
+        </div>
+        <div class="summary-row">
+          <span class="key">日常消耗 (TDEE)</span>
+          <span class="value" id="summaryTDEE">-- kcal</span>
+        </div>
+        <div class="summary-row">
+          <span class="key">三大项总和</span>
+          <span class="value" id="summaryTotal">-- kg</span>
+        </div>
+        <div class="summary-row">
+          <span class="key">目标热量</span>
+          <span class="value" id="summaryTarget">-- kcal</span>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="editProfile()">编辑资料</button>
+        <button class="btn btn-primary" onclick="goToSupplement()">进入补剂系统</button>
+      </div>
+    </div>
+
+    <!-- Success Panel -->
+    <div id="successPanel" class="panel success-panel hidden">
+      <div class="success-icon">✓</div>
+      <div class="success-title">档案创建成功</div>
+      <div class="success-desc">您的个人数据已安全保存在本地</div>
+      <div class="btn-group" style="justify-content: center; margin-top: 24px;">
+        <button class="btn btn-primary" onclick="goToSupplement()">进入补剂清单设置</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app_state.js"></script>
+  <script src="macro_rule_engine.js"></script>
+  <script>
+    // ========== 数据模型 ==========
+    function normalizeGoalKeyCompat(goal) {
+      if (window.MacroRuleEngine && typeof window.MacroRuleEngine.normalizeGoalKey === 'function') {
+        return window.MacroRuleEngine.normalizeGoalKey(goal);
+      }
+      return goal;
+    }
+
+    let profile = {
+      gender: null,
+      height: null,
+      weight: null,
+      age: null,
+      bodyFat: null,
+      squat: null,
+      bench: null,
+      deadlift: null,
+      bloodMarkers: {},
+      goal: null,
+      experience: null,
+      redFlags: []
+    };
+
+    let currentStep = 1;
+    const totalSteps = 6;
+
+    // ========== 微量元素风险筛查 ==========
+    const micronutrientRisks = {
+      diet: {
+        nutrients: ['铁', 'Vit B12', '钙', '锌', 'Vit D'],
+        foods: ['红肉', '动物肝脏', '乳制品', '深绿色蔬菜', '坚果'],
+        level: 1
+      },
+      sweat: {
+        nutrients: ['铁', '镁', '锌', '钠', '铬'],
+        foods: ['海产品', '坚果', '香蕉', '乳制品'],
+        level: 1
+      },
+      hormone: {
+        nutrients: ['钙', 'Vit D', '铁'],
+        foods: ['乳制品', '深绿色蔬菜', '强化食品'],
+        test: '血清铁蛋白、25(OH)D、激素水平',
+        level: 2
+      },
+      gi: {
+        nutrients: ['镁', '铁', '锌'],
+        foods: ['全谷物', '坚果', '种子', '发酵食品'],
+        level: 1
+      },
+      immune: {
+        nutrients: ['Vit D', '钙', '锌', '镁'],
+        foods: ['鱼类', '蛋黄', '乳制品', '蘑菇'],
+        test: '血清25(OH)D、血常规',
+        level: 1
+      },
+      neuro: {
+        nutrients: ['镁', 'Vit D', 'Vit B族'],
+        foods: ['全谷物', '叶菜', '豆类', '坚果'],
+        test: '血清镁、B族维生素',
+        level: 1
+      },
+      nfpe: {
+        nutrients: ['锌', '铁', '镁', '硒', 'Vit C'],
+        foods: ['贝类', '红肉', '柑橘', '坚果'],
+        test: '锌、铁蛋白、硒',
+        level: 2
+      }
+    };
+
+    function updateMicronutrientRisk() {
+      const checked = document.querySelectorAll('.question-item input:checked');
+      const riskResult = document.getElementById('riskResult');
+      const riskLevel = document.getElementById('riskLevel');
+      const riskDetail = document.getElementById('riskDetail');
+
+      // 统计各类别
+      const categoryCount = {};
+      const nutrientSet = new Set();
+      const foodSuggestions = new Set();
+      const testSuggestions = new Set();
+
+      checked.forEach(cb => {
+        const category = cb.dataset.category;
+        categoryCount[category] = (categoryCount[category] || 0) + 1;
+
+        if (micronutrientRisks[category]) {
+          micronutrientRisks[category].nutrients.forEach(n => nutrientSet.add(n));
+          micronutrientRisks[category].foods?.forEach(f => foodSuggestions.add(f));
+          if (micronutrientRisks[category].test) {
+            testSuggestions.add(micronutrientRisks[category].test);
+          }
+        }
+      });
+
+      // 计算风险等级
+      const totalCount = checked.length;
+      const uniqueCategories = Object.keys(categoryCount).length;
+
+      let level, levelText, levelAdvice;
+      if (totalCount === 0) {
+        level = 'low';
+        levelText = '✅ 低风险';
+        levelAdvice = '维持均衡饮食即可';
+      } else if (totalCount <= 3 && uniqueCategories <= 1) {
+        level = 'low';
+        levelText = '✅ 低风险';
+        levelAdvice = '维持均衡饮食即可';
+      } else if (totalCount <= 6 && uniqueCategories <= 2) {
+        level = 'medium';
+        levelText = '⚠️ 中风险';
+        levelAdvice = '建议优先通过饮食改善';
+      } else {
+        level = 'high';
+        levelText = '🔴 高风险';
+        levelAdvice = '建议进行血液检测或咨询医生/营养师';
+      }
+
+      riskResult.classList.remove('hidden');
+      riskLevel.className = `risk-level ${level}`;
+      riskLevel.textContent = levelText;
+
+      if (totalCount > 0) {
+        const nutrients = Array.from(nutrientSet);
+        const foods = Array.from(foodSuggestions);
+        const tests = Array.from(testSuggestions);
+
+        let html = `<strong>${levelAdvice}</strong><br><br>`;
+        html += `阳性条目: ${totalCount} 项 · 涉及 ${uniqueCategories} 个维度<br>`;
+        html += `可能受影响: ${nutrients.slice(0, 5).join(' / ')}<br>`;
+
+        if (foods.length > 0 && level !== 'low') {
+          html += `<br><strong>建议增加食物来源:</strong><br>`;
+          html += foods.slice(0, 8).join(' · ');
+        }
+
+        if (tests.length > 0 && level === 'high') {
+          html += `<br><br><strong>建议检测项目:</strong><br>`;
+          html += tests.join(' / ');
+        }
+
+        riskDetail.innerHTML = html;
+      } else {
+        riskDetail.innerHTML = '无明显缺乏风险迹象，保持均衡饮食即可';
+      }
+    }
+
+    // ========== 步骤导航 ==========
+    function updateProgressBar(step) {
+      document.querySelectorAll('.progress-step').forEach((el, i) => {
+        el.classList.remove('active', 'completed');
+        if (i + 1 < step) el.classList.add('completed');
+        if (i + 1 === step) el.classList.add('active');
+      });
+    }
+
+    function showStep(step) {
+      document.querySelectorAll('.panel').forEach(el => el.classList.add('hidden'));
+      const targetPanel = document.getElementById(`step${step}`) || document.getElementById('summary');
+      if (targetPanel) targetPanel.classList.remove('hidden');
+      updateProgressBar(step);
+      currentStep = step;
+    }
+
+    function nextStep(from) {
+      if (!validateStep(from)) return;
+      showStep(from + 1);
+    }
+
+    function prevStep(from) {
+      showStep(from - 1);
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        profile.gender = document.querySelector('[data-gender].selected')?.dataset.gender;
+        if (!profile.gender) { alert('请选择性别'); return false; }
+        profile.height = parseFloat(document.getElementById('height').value);
+        profile.weight = parseFloat(document.getElementById('weight').value);
+        profile.age = parseInt(document.getElementById('age').value);
+        profile.bodyFat = parseFloat(document.getElementById('bodyFat').value) || null;
+
+        if (!profile.height || !profile.weight || !profile.age) {
+          alert('请填写完整的基础数据');
+          return false;
+        }
+      }
+
+      if (step === 2) {
+        profile.squat = parseFloat(document.getElementById('squat').value);
+        profile.bench = parseFloat(document.getElementById('bench').value);
+        profile.deadlift = parseFloat(document.getElementById('deadlift').value);
+
+        if (!profile.squat || !profile.bench || !profile.deadlift) {
+          alert('请填写三大项 1RM');
+          return false;
+        }
+      }
+
+      if (step === 3) {
+        // 血液检测可选
+        profile.bloodMarkers = {
+          vitaminD: parseFloat(document.getElementById('vitaminD').value) || null,
+          magnesium: parseFloat(document.getElementById('magnesium').value) || null,
+          ferritin: parseFloat(document.getElementById('ferritin').value) || null,
+          testosterone: parseFloat(document.getElementById('testosterone').value) || null,
+          glucose: parseFloat(document.getElementById('glucose').value) || null,
+          cortisol: parseFloat(document.getElementById('cortisol').value) || null
+        };
+      }
+
+      if (step === 4) {
+        if (!profile.goal) { alert('请选择目标'); return false; }
+        if (!profile.experience) { alert('请选择训练经验'); return false; }
+      }
+
+      return true;
+    }
+
+    // ========== 选择交互 ==========
+    function updateTotalLift() {
+      const squat = parseFloat(document.getElementById('squat').value) || 0;
+      const bench = parseFloat(document.getElementById('bench').value) || 0;
+      const deadlift = parseFloat(document.getElementById('deadlift').value) || 0;
+      const total = squat + bench + deadlift;
+      document.getElementById('totalLiftValue').textContent = total > 0 ? total + ' kg' : '--';
+    }
+
+    function selectGender(gender, el) {
+      document.querySelectorAll('[data-gender]').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      el.dataset.gender = gender;
+
+      // 显示/隐藏女性专用问题
+      const femaleSection = document.getElementById('femaleSection');
+      if (femaleSection) {
+        femaleSection.style.display = gender === 'female' ? 'block' : 'none';
+      }
+    }
+
+    function selectGoal(goal, el) {
+      document.querySelectorAll('.goal-card').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      profile.goal = normalizeGoalKeyCompat(goal);
+    }
+
+    function selectExperience(exp, el) {
+      document.querySelectorAll('.exp-card').forEach(e => e.classList.remove('selected'));
+      el.classList.add('selected');
+      profile.experience = exp;
+      el.dataset.exp = exp;
+    }
+
+    function toggleQuestion(el) {
+      const checkbox = el.querySelector('input[type="checkbox"]');
+      checkbox.checked = !checkbox.checked;
+      el.classList.toggle('checked', checkbox.checked);
+      updateMicronutrientRisk();
+    }
+
+    function toggleRedFlag(el) {
+      const checkbox = el.querySelector('input[type="checkbox"]');
+      checkbox.checked = !checkbox.checked;
+      el.classList.toggle('checked', checkbox.checked);
+
+      // 检查红旗数量
+      const checkedCount = document.querySelectorAll('.red-flag-item input:checked').length;
+      const warningBanner = document.getElementById('warningBanner');
+
+      if (checkedCount > 0) {
+        warningBanner.classList.remove('hidden');
+      } else {
+        warningBanner.classList.add('hidden');
+      }
+    }
+
+    // ========== 提交 ==========
+    function submitProfile() {
+      // 收集微量元素筛查结果
+      profile.micronutrientScreening = {
+        checked: [],
+        riskLevel: document.getElementById('riskLevel')?.textContent || '低风险',
+        nutrientConcerns: []
+      };
+      document.querySelectorAll('.question-item input:checked').forEach(cb => {
+        profile.micronutrientScreening.checked.push({
+          category: cb.dataset.category,
+          text: cb.parentElement.textContent.trim()
+        });
+      });
+
+      // 收集红旗症状
+      profile.redFlags = [];
+      document.querySelectorAll('.red-flag-item input:checked').forEach(cb => {
+        profile.redFlags.push(cb.id);
+      });
+
+      // 计算 BMR (Mifflin-St Jeor)
+      let bmr;
+      if (profile.gender === 'male') {
+        bmr = (10 * profile.weight) + (6.25 * profile.height) - (5 * profile.age) + 5;
+      } else {
+        bmr = (10 * profile.weight) + (6.25 * profile.height) - (5 * profile.age) - 161;
+      }
+
+      // 估算 TDEE (假设中等训练强度)
+      const activityMultipliers = { beginner: 1.4, intermediate: 1.55, advanced: 1.7 };
+      const tdee = Math.round(bmr * activityMultipliers[profile.experience]);
+
+      // 目标热量
+      let targetCalories;
+      const normalizedGoal = normalizeGoalKeyCompat(profile.goal);
+      profile.goal = normalizedGoal;
+
+      switch (normalizedGoal) {
+        case 'bulk': targetCalories = tdee + 300; break;
+        case 'strength': targetCalories = tdee; break;
+        case 'cut': targetCalories = tdee - 400; break;
+        case 'meet_prep': targetCalories = tdee + 100; break;
+        default: targetCalories = tdee;
+      }
+
+      // 保存到 localStorage (兼容多种key)
+      const profileData = {
+        ...profile,
+        goal: normalizedGoal,
+        squat1RM: profile.squat,
+        bench1RM: profile.bench,
+        deadlift1RM: profile.deadlift,
+        micronutrientRisk: profile.micronutrientScreening?.riskLevel || 'unknown',
+        bmr: Math.round(bmr),
+        tdee: tdee,
+        targetCalories: targetCalories,
+        createdAt: new Date().toISOString()
+      };
+      localStorage.setItem('userProfile', JSON.stringify(profileData));
+      localStorage.setItem('powerliftingProfile', JSON.stringify(profileData));
+
+      // 显示摘要
+      document.getElementById('summaryBMR').textContent = Math.round(bmr) + ' kcal';
+      document.getElementById('summaryTDEE').textContent = tdee + ' kcal';
+      document.getElementById('summaryTotal').textContent =
+        (profile.squat + profile.bench + profile.deadlift) + ' kg';
+      document.getElementById('summaryTarget').textContent = targetCalories + ' kcal';
+
+      showStep('summary');
+    }
+
+    function editProfile() {
+      showStep(1);
+    }
+
+    function goToSupplement() {
+      // 跳转到补剂清单设置页
+      window.location.href = '补剂时序生成器.html';
+    }
+
+    // ========== 自动计算 ==========
+    document.getElementById('weight')?.addEventListener('input', function() {
+      const weight = parseFloat(this.value);
+      const height = parseFloat(document.getElementById('height')?.value);
+      const age = parseInt(document.getElementById('age')?.value);
+      const gender = document.querySelector('.option-card.selected')?.dataset.gender;
+
+      if (weight && height && age && gender) {
+        let bmr;
+        if (gender === 'male') {
+          bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
+        } else {
+          bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+        }
+        // 可以显示实时 BMR
+      }
+    });
+
+    // ========== 初始化 ==========
+    document.addEventListener('DOMContentLoaded', function() {
+      showStep(1);
+      document.getElementById('femaleSection').style.display = 'none';
+      loadProfileFromStorage();
+    });
+
+    // 从 localStorage 恢复数据
+    function loadProfileFromStorage() {
+      const saved = localStorage.getItem('userProfile') || localStorage.getItem('powerliftingProfile');
+      if (!saved) return;
+
+      const data = JSON.parse(saved);
+      if (!data.squat && data.squat1RM) data.squat = data.squat1RM;
+      if (!data.bench && data.bench1RM) data.bench = data.bench1RM;
+      if (!data.deadlift && data.deadlift1RM) data.deadlift = data.deadlift1RM;
+      if (data.goal) data.goal = normalizeGoalKeyCompat(data.goal);
+      localStorage.setItem('userProfile', JSON.stringify(data));
+      localStorage.setItem('powerliftingProfile', JSON.stringify(data));
+
+      // 恢复 Step 1: 基础数据
+      if (data.gender) {
+        const genderEl = document.querySelector(`[data-gender="${data.gender}"]`);
+        if (genderEl) selectGender(data.gender, genderEl);
+      }
+      if (data.height) document.getElementById('height').value = data.height;
+      if (data.weight) document.getElementById('weight').value = data.weight;
+      if (data.age) document.getElementById('age').value = data.age;
+      if (data.bodyFat) document.getElementById('bodyFat').value = data.bodyFat;
+
+      // 恢复 Step 2: 三大项
+      if (data.squat) document.getElementById('squat').value = data.squat;
+      if (data.bench) document.getElementById('bench').value = data.bench;
+      if (data.deadlift) document.getElementById('deadlift').value = data.deadlift;
+      updateTotalLift(); // 恢复后立即更新总成绩显示
+
+      // 恢复 Step 3: 血液检测
+      if (data.bloodMarkers) {
+        if (data.bloodMarkers.vitaminD) document.getElementById('vitaminD').value = data.bloodMarkers.vitaminD;
+        if (data.bloodMarkers.magnesium) document.getElementById('magnesium').value = data.bloodMarkers.magnesium;
+        if (data.bloodMarkers.ferritin) document.getElementById('ferritin').value = data.bloodMarkers.ferritin;
+        if (data.bloodMarkers.testosterone) document.getElementById('testosterone').value = data.bloodMarkers.testosterone;
+        if (data.bloodMarkers.glucose) document.getElementById('glucose').value = data.bloodMarkers.glucose;
+        if (data.bloodMarkers.cortisol) document.getElementById('cortisol').value = data.bloodMarkers.cortisol;
+      }
+
+      // 恢复 Step 4: 目标与经验
+      if (data.goal) {
+        const uiGoal = data.goal === 'meet_prep' ? 'meet' : data.goal;
+        const goalEl = document.querySelector(`.goal-card[data-goal="${uiGoal}"]`);
+        if (goalEl) selectGoal(data.goal, goalEl);
+      }
+      if (data.experience) {
+        const expEl = document.querySelector(`.exp-card[data-exp="${data.experience}"]`);
+        if (expEl) selectExperience(data.experience, expEl);
+      }
+
+      // 恢复 Step 5: 微量元素筛查状态
+      if (data.micronutrientScreening?.checked) {
+        data.micronutrientScreening.checked.forEach(item => {
+          const cb = document.querySelector(`[data-category="${item.category}"]`);
+          if (cb && cb.closest('.question-item')) {
+            cb.checked = true;
+            cb.closest('.question-item').classList.add('checked');
+          }
+        });
+        updateMicronutrientRisk();
+      }
+
+      // 恢复 Step 6: 红旗症状
+      if (data.redFlags?.length > 0) {
+        data.redFlags.forEach(flagId => {
+          const cb = document.getElementById(flagId);
+          if (cb && cb.closest('.red-flag-item')) {
+            cb.checked = true;
+            cb.closest('.red-flag-item').classList.add('checked');
+          }
+        });
+        document.getElementById('warningBanner').classList.remove('hidden');
+      }
+    }
+  </script>
+</body>
+</html>

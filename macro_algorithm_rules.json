@@ -1,0 +1,576 @@
+{
+  "version": "v1",
+  "rule_set_name": "力量举宏量算法数据库",
+  "source_document": {
+    "primary_docx": "力量举营养宏量算法数据库_修复版.docx",
+    "workspace_copy": "macro_algorithm_database_source.docx",
+    "scope_note": "V1 仅激活增肌、力量、减脂三类目标；冲击减量、赛前减重、女性周期和水切仅保留字段，不自动进入模块二主流程。"
+  },
+  "energy_availability": {
+    "formula": "EA = (EI - EEE) / FFM",
+    "base_metric": "LBM",
+    "units": "kcal/kg LBM/day",
+    "thresholds": {
+      "clinical_danger": {
+        "male_lt": 25,
+        "female_lt": 30,
+        "note": "低于该阈值时存在明显的相对能量缺乏风险，应提示优先提高能量可用性。"
+      },
+      "subclinical_caution": {
+        "male_range": [
+          25,
+          30
+        ],
+        "female_range": [
+          30,
+          45
+        ],
+        "note": "该区间可作为减脂期警戒带，不用于直接诊断。"
+      },
+      "optimal_adaptation": {
+        "male_range": [
+          40,
+          45
+        ],
+        "female_gte": 45,
+        "note": "增肌、力量和冲击减量等非减脂阶段，优先以该区间作为操作基线。"
+      }
+    },
+    "operational_defaults": {
+      "bulk_target_ea_floor": 45,
+      "strength_target_ea_floor": 45,
+      "cut_target_ea_floor_male": 25,
+      "cut_target_ea_floor_female": 30
+    }
+  },
+  "goal_profiles": {
+    "bulk": {
+      "label": "增肌期",
+      "cycle_name": "增肌期 (Hypertrophy/Mass)",
+      "energy_management": {
+        "target_surplus_deficit_kcal_per_lbm": 4.5,
+        "red_s_ea_threshold": 45,
+        "recommended_daily_surplus_kcal": [
+          200,
+          300
+        ]
+      },
+      "macronutrient_distribution": {
+        "protein_range_g_per_kg_lbm": [
+          1.9,
+          2.6
+        ],
+        "fat_range_g_per_kg_tbw": [
+          1.0,
+          1.5
+        ],
+        "carb_range_g_per_kg_tbw": [
+          4.0,
+          7.0
+        ],
+        "notes": "仅采用微小盈余，优先保证功能性肥大；高容量训练日碳水需要逼近上限。"
+      },
+      "day_type_overrides": {
+        "rest": {
+          "carb_range_g_per_kg_tbw": [
+            3.0,
+            4.0
+          ],
+          "fat_ceiling_g_per_kg_tbw": 1.5
+        },
+        "heavy": {
+          "carb_multiplier": 1.2
+        }
+      },
+      "gender_specific_tweaks": {
+        "female_luteal_phase_adjustment": "黄体期将蛋白质推向区间上沿，并将外源性碳水补偿系数上调约 1.2 倍。",
+        "male_testosterone_support_fat_floor": 1.0
+      }
+    },
+    "strength": {
+      "label": "力量期",
+      "cycle_name": "增力期 (Strength/Power)",
+      "energy_management": {
+        "target_surplus_deficit_kcal_per_lbm": 0.0,
+        "red_s_ea_threshold": 45,
+        "recommended_daily_surplus_kcal": [
+          -100,
+          100
+        ]
+      },
+      "macronutrient_distribution": {
+        "protein_range_g_per_kg_lbm": [
+          2.0,
+          2.5
+        ],
+        "fat_range_g_per_kg_tbw": [
+          1.0,
+          1.3
+        ],
+        "carb_range_g_per_kg_tbw": [
+          3.0,
+          5.0
+        ],
+        "notes": "总热量维持接近等热量，重点放在练前、练中、练后碳水时序，以对抗中枢疲劳。"
+      },
+      "day_type_overrides": {
+        "rest": {
+          "carb_range_g_per_kg_tbw": [
+            2.0,
+            3.0
+          ],
+          "fat_energy_share_percent": 30
+        },
+        "heavy": {
+          "carb_multiplier": 1.5
+        }
+      },
+      "gender_specific_tweaks": {
+        "female_luteal_phase_adjustment": "黄体期高强度日练中应强制预留 30-40g 快速碳水。",
+        "male_testosterone_support_fat_floor": 1.0
+      }
+    },
+    "cut": {
+      "label": "减脂期",
+      "cycle_name": "减脂期 (Fat Loss/Cut)",
+      "energy_management": {
+        "target_surplus_deficit_kcal_per_lbm": -8.0,
+        "red_s_ea_threshold": 30,
+        "recommended_daily_deficit_kcal": [
+          -500,
+          -200
+        ],
+        "male_ea_floor": 25,
+        "female_ea_floor": 30
+      },
+      "macronutrient_distribution": {
+        "protein_range_g_per_kg_lbm": [
+          2.5,
+          4.2
+        ],
+        "fat_range_g_per_kg_tbw": [
+          0.8,
+          1.0
+        ],
+        "carb_range_g_per_kg_tbw": [
+          2.0,
+          4.0
+        ],
+        "notes": "优先通过高蛋白守住瘦体重，碳水绝不归零，并尽量把训练日前后窗口保住。"
+      },
+      "day_type_overrides": {
+        "rest": {
+          "carb_range_g_per_kg_tbw": [
+            1.5,
+            2.0
+          ]
+        },
+        "heavy": {
+          "carb_multiplier": 1.2
+        }
+      },
+      "gender_specific_tweaks": {
+        "female_luteal_phase_adjustment": "黄体期可允许轻微扩大热量缺口，但 EA 不得跌破 30 kcal/kg FFM。",
+        "male_testosterone_support_fat_floor": 0.8
+      }
+    }
+  },
+  "day_type_multipliers": {
+    "rest": {
+      "label": "休息日",
+      "energy_multiplier": 0.92,
+      "carb_multiplier": 0.70,
+      "protein_multiplier": 1.00,
+      "fat_multiplier": 1.05,
+      "carb_timing_enabled": false
+    },
+    "light": {
+      "label": "轻训日",
+      "energy_multiplier": 0.97,
+      "carb_multiplier": 0.85,
+      "protein_multiplier": 1.00,
+      "fat_multiplier": 1.00,
+      "carb_timing_enabled": true
+    },
+    "medium": {
+      "label": "常规日",
+      "energy_multiplier": 1.00,
+      "carb_multiplier": 1.00,
+      "protein_multiplier": 1.00,
+      "fat_multiplier": 1.00,
+      "carb_timing_enabled": true
+    },
+    "heavy": {
+      "label": "重训日",
+      "energy_multiplier": 1.05,
+      "carb_multiplier": 1.15,
+      "protein_multiplier": 1.00,
+      "fat_multiplier": 0.98,
+      "carb_timing_enabled": true
+    }
+  },
+  "macro_formulas": {
+    "energy": {
+      "base_metric": "LBM",
+      "use_profile_surplus_deficit_kcal_per_lbm": true,
+      "fallback_when_bodyfat_missing": {
+        "lbm_estimation_method": "TBW * (1 - default_bodyfat_percent/100)",
+        "default_bodyfat_percent": 15
+      }
+    },
+    "protein": {
+      "base_metric": "LBM",
+      "preferred_strategy": "range_by_goal_profile",
+      "fallback_min_g_per_kg_tbw": 1.6,
+      "high_defense_cut_trigger": {
+        "goal": "cut",
+        "apply_upper_range_when": [
+          "energy_deficit_gte_500kcal",
+          "high_frequency_training",
+          "female_luteal_phase"
+        ]
+      }
+    },
+    "fat": {
+      "base_metric": "TBW",
+      "preferred_strategy": "range_by_goal_profile",
+      "male_testosterone_floor_g_per_kg_tbw": 0.8,
+      "general_floor_g_per_kg_tbw": 0.8
+    },
+    "carbohydrate": {
+      "base_metric": "TBW",
+      "preferred_strategy": "range_by_goal_profile",
+      "cut_hard_floor_g_per_kg_tbw": 2.0,
+      "strength_session_min_pre_training_net_carb_g": [
+        15,
+        30
+      ],
+      "intra_workout_fast_carb_g_per_hour": [
+        30,
+        60
+      ],
+      "high_volume_day_prompt": "若正式工作组超过 10 组，优先把碳水推向区间上沿。"
+    },
+    "training_day_carb_timing": {
+      "pre": {
+        "window": "-2h to -3h",
+        "tbw_range_g_per_kg": [
+          1.0,
+          1.5
+        ],
+        "protein_g_per_kg_tbw": 0.3
+      },
+      "intra": {
+        "trigger": "RPE > 9 or workout_duration_minutes > 60",
+        "fast_carb_g_per_hour": [
+          30,
+          60
+        ],
+        "matrix": "glucose:fructose = 2:1"
+      },
+      "post": {
+        "window": "+30min to +2h",
+        "carb_g_per_kg_tbw": [
+          1.0,
+          1.2
+        ],
+        "protein_g_per_kg_tbw": [
+          0.3,
+          0.4
+        ],
+        "carb_to_protein_ratio": [
+          3,
+          1
+        ]
+      }
+    }
+  },
+  "meal_distribution_templates": {
+    "rest": [
+      {
+        "slot": "breakfast",
+        "label": "早餐",
+        "time_hint": "07:00",
+        "carb_pct": 0.22,
+        "protein_pct": 0.25,
+        "fat_pct": 0.24
+      },
+      {
+        "slot": "snack_am",
+        "label": "上午加餐",
+        "time_hint": "10:00",
+        "carb_pct": 0.08,
+        "protein_pct": 0.10,
+        "fat_pct": 0.10
+      },
+      {
+        "slot": "lunch",
+        "label": "午餐",
+        "time_hint": "13:00",
+        "carb_pct": 0.28,
+        "protein_pct": 0.30,
+        "fat_pct": 0.28
+      },
+      {
+        "slot": "snack_pm",
+        "label": "下午加餐",
+        "time_hint": "16:00",
+        "carb_pct": 0.10,
+        "protein_pct": 0.10,
+        "fat_pct": 0.10
+      },
+      {
+        "slot": "dinner",
+        "label": "晚餐",
+        "time_hint": "19:00",
+        "carb_pct": 0.22,
+        "protein_pct": 0.20,
+        "fat_pct": 0.20
+      },
+      {
+        "slot": "pre_sleep",
+        "label": "睡前恢复",
+        "time_hint": "22:00",
+        "carb_pct": 0.10,
+        "protein_pct": 0.05,
+        "fat_pct": 0.08
+      }
+    ],
+    "light": [
+      {
+        "slot": "breakfast",
+        "label": "早餐",
+        "time_hint": "07:00",
+        "carb_pct": 0.24,
+        "protein_pct": 0.23,
+        "fat_pct": 0.22
+      },
+      {
+        "slot": "snack_am",
+        "label": "上午加餐",
+        "time_hint": "10:00",
+        "carb_pct": 0.08,
+        "protein_pct": 0.08,
+        "fat_pct": 0.08
+      },
+      {
+        "slot": "lunch",
+        "label": "午餐",
+        "time_hint": "13:00",
+        "carb_pct": 0.24,
+        "protein_pct": 0.24,
+        "fat_pct": 0.24
+      },
+      {
+        "slot": "pre_training",
+        "label": "训练前餐",
+        "time_hint": "16:00",
+        "carb_pct": 0.16,
+        "protein_pct": 0.12,
+        "fat_pct": 0.12
+      },
+      {
+        "slot": "intra",
+        "label": "训练中",
+        "time_hint": "训练期间",
+        "carb_pct": 0.04,
+        "protein_pct": 0.00,
+        "fat_pct": 0.00
+      },
+      {
+        "slot": "post_training",
+        "label": "训练后餐",
+        "time_hint": "训练后 30-60 分钟",
+        "carb_pct": 0.16,
+        "protein_pct": 0.24,
+        "fat_pct": 0.24
+      },
+      {
+        "slot": "late_snack",
+        "label": "晚加餐",
+        "time_hint": "21:30",
+        "carb_pct": 0.08,
+        "protein_pct": 0.09,
+        "fat_pct": 0.10
+      }
+    ],
+    "medium": [
+      {
+        "slot": "breakfast",
+        "label": "早餐",
+        "time_hint": "07:00",
+        "carb_pct": 0.25,
+        "protein_pct": 0.25,
+        "fat_pct": 0.25
+      },
+      {
+        "slot": "snack_am",
+        "label": "上午加餐",
+        "time_hint": "10:00",
+        "carb_pct": 0.08,
+        "protein_pct": 0.08,
+        "fat_pct": 0.08
+      },
+      {
+        "slot": "lunch",
+        "label": "午餐",
+        "time_hint": "13:00",
+        "carb_pct": 0.25,
+        "protein_pct": 0.25,
+        "fat_pct": 0.25
+      },
+      {
+        "slot": "pre_training",
+        "label": "训练前餐",
+        "time_hint": "训练前 2-3 小时",
+        "carb_pct": 0.17,
+        "protein_pct": 0.12,
+        "fat_pct": 0.12
+      },
+      {
+        "slot": "intra",
+        "label": "训练中",
+        "time_hint": "训练期间",
+        "carb_pct": 0.05,
+        "protein_pct": 0.00,
+        "fat_pct": 0.00
+      },
+      {
+        "slot": "post_training",
+        "label": "训练后餐",
+        "time_hint": "训练后 30 分钟内",
+        "carb_pct": 0.15,
+        "protein_pct": 0.25,
+        "fat_pct": 0.25
+      },
+      {
+        "slot": "late_snack",
+        "label": "晚加餐",
+        "time_hint": "21:30",
+        "carb_pct": 0.05,
+        "protein_pct": 0.05,
+        "fat_pct": 0.05
+      }
+    ],
+    "heavy": [
+      {
+        "slot": "breakfast",
+        "label": "早餐",
+        "time_hint": "07:00",
+        "carb_pct": 0.20,
+        "protein_pct": 0.20,
+        "fat_pct": 0.20
+      },
+      {
+        "slot": "snack_am",
+        "label": "上午加餐",
+        "time_hint": "10:00",
+        "carb_pct": 0.08,
+        "protein_pct": 0.08,
+        "fat_pct": 0.08
+      },
+      {
+        "slot": "lunch",
+        "label": "午餐",
+        "time_hint": "13:00",
+        "carb_pct": 0.20,
+        "protein_pct": 0.20,
+        "fat_pct": 0.20
+      },
+      {
+        "slot": "pre_training",
+        "label": "训练前餐",
+        "time_hint": "训练前 2-3 小时",
+        "carb_pct": 0.25,
+        "protein_pct": 0.10,
+        "fat_pct": 0.12
+      },
+      {
+        "slot": "intra",
+        "label": "训练中",
+        "time_hint": "训练期间",
+        "carb_pct": 0.10,
+        "protein_pct": 0.02,
+        "fat_pct": 0.00
+      },
+      {
+        "slot": "post_training",
+        "label": "训练后餐",
+        "time_hint": "训练后 30 分钟内",
+        "carb_pct": 0.12,
+        "protein_pct": 0.30,
+        "fat_pct": 0.30
+      },
+      {
+        "slot": "late_snack",
+        "label": "晚加餐",
+        "time_hint": "21:30",
+        "carb_pct": 0.05,
+        "protein_pct": 0.10,
+        "fat_pct": 0.10
+      }
+    ]
+  },
+  "constraints": {
+    "low_energy_availability": {
+      "severity": "warning",
+      "trigger": "EA below sex-specific floor",
+      "user_message": "当前能量可用性可能偏低，建议优先检查总热量、训练消耗和恢复状态。"
+    },
+    "large_deficit": {
+      "severity": "warning",
+      "trigger": "daily deficit below -500 kcal or below profile lower bound",
+      "user_message": "热量缺口过大时，训练质量和恢复稳定性更容易下滑。"
+    },
+    "low_carbohydrate": {
+      "severity": "warning",
+      "trigger": "training day carbohydrate below 3 g/kg TBW in strength cycle or below 2 g/kg TBW in cut cycle",
+      "user_message": "碳水过低时，训练表现和神经恢复可能受影响。"
+    },
+    "low_protein": {
+      "severity": "warning",
+      "trigger": "protein below 1.6 g/kg TBW or below profile lower bound",
+      "user_message": "蛋白质摄入偏低，建议优先补足基础蛋白。"
+    },
+    "manual_only_future_modes": {
+      "peaking": {
+        "status": "reserved",
+        "note": "冲击/减量期策略已保留研究结论，但 V1 不自动进入模块二计算。"
+      },
+      "weight_cut": {
+        "status": "reserved",
+        "note": "赛前减重/称重期涉及高风险操作，V1 仅保留研究字段，不自动启用。"
+      },
+      "female_cycle": {
+        "status": "reserved",
+        "note": "女性周期调整仅保留说明字段，待后续有明确输入入口后再接入。"
+      }
+    }
+  },
+  "ui_notes": {
+    "positioning": "本规则库用于训练营养规划与风险提示，不替代医疗诊断。",
+    "user_facing_guidance": [
+      "优先保证总热量、蛋白质底线和训练日前后碳水窗口。",
+      "减脂期重点是守住能量可用性底线，而不是一味压低碳水。",
+      "力量期更看重碳水时序与中枢恢复，不是简单全天低碳。",
+      "若存在持续疲劳、明显失眠、月经紊乱或恢复异常，应考虑进一步评估。"
+    ],
+    "module2_mapping": {
+      "goal_profiles": "映射到 state.goal",
+      "day_type_multipliers": "映射到 macros.byType 的 rest/light/medium/heavy",
+      "meal_distribution_templates": "映射到 mealPlans.byType",
+      "training_day_carb_timing": "映射到 carbTiming",
+      "constraints": "驱动 RED-S / 低碳水 / 低蛋白警告区"
+    }
+  },
+  "citations": [
+    "Relative Energy Deficiency in Sport (RED-S): Scientific, Clinical, and Practical Implications",
+    "Low energy availability: history, definition and evidence of its endocrine, metabolic and physiological effects in prospective studies in females and males",
+    "Is an Energy Surplus Required to Maximize Skeletal Muscle Hypertrophy Associated With Resistance Training",
+    "A systematic review, meta-analysis and meta-regression of the effect of protein supplementation on resistance training-induced gains in muscle mass and strength in healthy adults",
+    "How to Fuel Strength Training: Carbs, Protein & Hydration",
+    "The Effect of Carbohydrate Intake on Strength and Resistance Training Performance: A Systematic Review",
+    "Recommendations and Nutritional Considerations for Female Athletes: Health and Performance",
+    "A Short-Term Low-Fiber Diet Reduces Body Mass in Healthy Young Men: Implications for Weight-Sensitive Sports"
+  ]
+}

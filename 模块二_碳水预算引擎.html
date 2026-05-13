@@ -1,0 +1,2132 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app_ui.css">
+  <title>力量举全景数字教练 - 每周碳水预算引擎</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --panel-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-dim: #666;
+      --accent: #00ff88;
+      --accent-dim: #00cc6a;
+      --warn: #ff4444;
+      --warn-bg: rgba(255,68,68,0.1);
+      --info: #4488ff;
+      --success: #00ff88;
+      --carbs: #ffaa00;
+      --protein: #ff6b6b;
+      --fat: #9b59b6;
+      --light: #5ac8fa;
+      --medium: #ffd700;
+      --heavy: #ff6b6b;
+      --rest: #666;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .header .subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Panel */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title::before {
+      content: '';
+      width: 3px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    /* Week Calendar Grid */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .day-selector {
+      aspect-ratio: 1;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg);
+    }
+
+    .day-selector:hover {
+      border-color: var(--text-dim);
+      background: var(--panel-hover);
+    }
+
+    .day-selector.active {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .day-selector .day-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+.day-selector .day-num {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .day-selector .training-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      margin-top: 4px;
+      opacity: 0;
+    }
+
+    .day-selector.type-light { border-color: #5ac8fa; background: rgba(90, 200, 250, 0.15); }
+    .day-selector.type-light .training-dot { background: #5ac8fa; opacity: 1; }
+    .day-selector.type-light .day-num { color: #5ac8fa; }
+
+    .day-selector.type-medium { border-color: #ffd700; background: rgba(255, 215, 0, 0.15); }
+    .day-selector.type-medium .training-dot { background: #ffd700; opacity: 1; }
+    .day-selector.type-medium .day-num { color: #ffd700; }
+
+    .day-selector.type-heavy { border-color: #ff6b6b; background: rgba(255, 107, 107, 0.15); }
+    .day-selector.type-heavy .training-dot { background: #ff6b6b; opacity: 1; }
+    .day-selector.type-heavy .day-num { color: #ff6b6b; }
+
+    .day-selector.active { border-color: var(--accent); background: rgba(0, 255, 136, 0.1); }
+    .day-selector.active .training-dot { background: var(--accent); opacity: 1; }
+    .day-selector.active .day-num { color: var(--accent); }
+
+    /* Macro Display */
+    .macro-display {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .macro-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+    }
+
+    .macro-card.carbs { border-color: rgba(255, 170, 0, 0.3); }
+    .macro-card.protein { border-color: rgba(255, 107, 107, 0.3); }
+    .macro-card.fat { border-color: rgba(155, 89, 182, 0.3); }
+
+    .macro-value {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .macro-card.carbs .macro-value { color: var(--carbs); }
+    .macro-card.protein .macro-value { color: var(--protein); }
+    .macro-card.fat .macro-value { color: var(--fat); }
+
+    .macro-unit {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .macro-name {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Goal Selection */
+    .goal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .goal-card {
+      padding: 16px 12px;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .goal-card:hover {
+      border-color: var(--text-dim);
+    }
+
+    .goal-card.active {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.05);
+    }
+
+    .goal-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .goal-name {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .goal-desc {
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    /* Training Day Settings */
+    .training-settings {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .training-type-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .type-card {
+      padding: 10px 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 11px;
+    }
+
+    .type-card:hover {
+      border-color: var(--text-dim);
+    }
+
+    .type-card.active {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .type-card .intensity {
+      font-size: 18px;
+      margin-bottom: 4px;
+    }
+
+    /* Weekly Summary */
+    .weekly-summary {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .summary-value {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Total KPI */
+    .total-kpi {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .kpi-card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .kpi-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .kpi-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Action Button */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 16px;
+    }
+
+    .btn:hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-secondary {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    /* Nav Bar */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 10px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    /* Spacer for nav bar */
+    .spacer {
+      height: 80px;
+    }
+
+    /* Info Box */
+    .info-box {
+      background: rgba(68, 136, 255, 0.1);
+      border: 1px solid rgba(68, 136, 255, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .info-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--info);
+      margin-bottom: 6px;
+    }
+
+    .info-box-content {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    /* Warning Box */
+    .warning-box {
+      background: var(--warn-bg);
+      border: 1px solid rgba(255, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 12px;
+    }
+
+    .warning-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--warn);
+      margin-bottom: 6px;
+    }
+
+    /* TDEE Calculator */
+    .tdee-section {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .tdee-result {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .tdee-item {
+      text-align: center;
+      padding: 12px;
+      background: var(--panel);
+      border-radius: 8px;
+    }
+
+    .tdee-item.main {
+      border: 1px solid var(--accent);
+    }
+
+    .tdee-item.main .tdee-value {
+      color: var(--accent);
+    }
+
+    .tdee-value {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .tdee-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Carb Distribution Chart */
+    .carb-chart {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .carb-bar {
+      display: flex;
+      height: 24px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+
+    .carb-segment {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 600;
+      transition: all 0.3s;
+    }
+
+    .carb-segment.pre {
+      background: #4a90d9;
+    }
+
+    .carb-segment.intra {
+      background: #5ac8fa;
+    }
+
+    .carb-segment.post {
+      background: #00d4aa;
+    }
+
+    .carb-legend {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 10px;
+      color: var(--text-dim);
+    }
+
+    .legend-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+    }
+
+    /* Toggle Switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .toggle-row:last-child {
+      border-bottom: none;
+    }
+
+    .toggle-label {
+      font-size: 13px;
+    }
+
+    .toggle-switch {
+      width: 48px;
+      height: 26px;
+      background: var(--border);
+      border-radius: 13px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-switch.active {
+      background: var(--accent);
+    }
+
+    .toggle-switch::after {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      background: white;
+      border-radius: 50%;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.2s;
+    }
+
+    .toggle-switch.active::after {
+      transform: translateX(22px);
+    }
+
+    /* Carb Timing Recommendation */
+    .timing-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+
+    .timing-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .timing-card.pre {
+      border-color: rgba(74, 144, 217, 0.5);
+    }
+
+    .timing-card.intra {
+      border-color: rgba(90, 200, 250, 0.5);
+    }
+
+    .timing-card.post {
+      border-color: rgba(0, 212, 170, 0.5);
+    }
+
+    .timing-phase {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    .timing-amount {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .timing-card.pre .timing-amount { color: #4a90d9; }
+    .timing-card.intra .timing-amount { color: #5ac8fa; }
+    .timing-card.post .timing-amount { color: #00d4aa; }
+
+    .timing-desc {
+      font-size: 9px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Adaptive TDEE Toggle */
+    .adaptive-section {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .adaptive-info {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+
+    /* Meal Structure */
+    .meal-structure {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+    }
+
+    .meal-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 6px;
+      text-align: center;
+    }
+
+    .meal-time {
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .meal-macro {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: 4px;
+    }
+
+    .meal-carb {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--carbs);
+    }
+
+    .meal-pro {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--protein);
+    }
+
+    .meal-fat {
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--fat);
+    }
+
+    .meal-name {
+      font-size: 10px;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    /* Explanation Panel */
+    .explanation-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 0;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 13px;
+      transition: color 0.2s;
+      user-select: none;
+    }
+    .explanation-toggle:hover { color: var(--text); }
+    .explanation-toggle .arrow { transition: transform 0.3s; font-size: 12px; }
+    .explanation-toggle.open .arrow { transform: rotate(90deg); }
+    .explanation-content {
+      display: none;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+    .explanation-content.open { display: block; }
+    .explanation-section { margin-bottom: 16px; }
+    .explanation-section:last-child { margin-bottom: 0; }
+    .explanation-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .explanation-line {
+      font-size: 12px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      padding: 4px 0;
+      padding-left: 12px;
+      border-left: 2px solid var(--border);
+      margin-bottom: 4px;
+    }
+    .explanation-line.warn { border-left-color: var(--warn); }
+    .explanation-line.info { border-left-color: var(--info); }
+
+    .info-box {
+      background: rgba(68, 136, 255, 0.1);
+      border: 1px solid rgba(68, 136, 255, 0.35);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .info-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--info);
+      margin-bottom: 6px;
+    }
+
+    .info-box-content {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .global-nav {
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .global-nav-list {
+      display: flex;
+      gap: 8px;
+      min-width: max-content;
+    }
+
+    .global-nav-link {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--text-dim);
+      font-size: 12px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .global-nav-link.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="global-nav">
+      <div class="global-nav-list">
+        <a class="global-nav-link" href="index.html">总控台</a>
+        <a class="global-nav-link" href="单日计划_轻量模式.html">单日</a>
+        <a class="global-nav-link" href="模块一_用户档案.html">档案</a>
+        <a class="global-nav-link" href="模块三_每周训练安排.html">训练</a>
+        <a class="global-nav-link active" href="模块二_碳水预算引擎.html">营养</a>
+        <a class="global-nav-link" href="补剂时序生成器.html">补剂</a>
+        <a class="global-nav-link" href="模块四_单日仪表盘.html">作战图</a>
+        <a class="global-nav-link" href="模块五_长期计划.html">长期</a>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>⚡ 碳水预算引擎</h1>
+      <div class="subtitle">营养预算页 · 根据档案和训练自动生成预算 · <a href="index.html" style="color:var(--accent);text-decoration:none;">返回首页</a></div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-title">自动读取说明</div>
+      <div class="info-box-content">本页会自动读取用户档案和训练计划生成预算，不需要重复填写体重和训练强度。</div>
+    </div>
+
+    <!-- User Data from Module 1 -->
+    <div class="panel">
+      <div class="panel-title">用户数据</div>
+      <div id="userDataInfo" style="font-size: 12px; color: var(--text-dim);">
+        <p>暂无用户档案数据</p>
+        <p style="margin-top: 8px; font-size: 11px;">请先完成模块1的基础数据录入</p>
+      </div>
+    </div>
+
+    <!-- Goal Selection -->
+    <div class="panel">
+      <div class="panel-title">训练目标</div>
+      <div class="info-box" style="margin-bottom:12px;">
+        <div class="info-box-content">默认读取模块一目标，可在此临时切换查看不同预算。</div>
+      </div>
+      <div class="goal-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="goal-card active" data-goal="bulk" onclick="selectGoal(this)">
+          <div class="goal-icon">📈</div>
+          <div class="goal-name">增肌期</div>
+          <div class="goal-desc">热量盈余 +400kcal</div>
+        </div>
+        <div class="goal-card" data-goal="strength" onclick="selectGoal(this)">
+          <div class="goal-icon">💪</div>
+          <div class="goal-name">力量期</div>
+          <div class="goal-desc">维持TDEE</div>
+        </div>
+        <div class="goal-card" data-goal="cut" onclick="selectGoal(this)">
+          <div class="goal-icon">🔥</div>
+          <div class="goal-name">减脂期</div>
+          <div class="goal-desc">热量缺口 -400kcal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TDEE Calculator -->
+    <div class="panel">
+      <div class="panel-title">TDEE 计算</div>
+
+      <div class="form-group">
+        <label class="form-label">体重 (kg)</label>
+        <input type="number" id="bodyWeight" class="form-input" placeholder="70" oninput="calculateTDEE()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">体脂率 (%)</label>
+        <input type="number" id="bodyFat" class="form-input" placeholder="15" oninput="calculateTDEE()">
+      </div>
+
+      <div class="tdee-result">
+        <div class="tdee-item">
+          <div class="tdee-value" id="bmrValue">--</div>
+          <div class="tdee-label">BMR (基础代谢)</div>
+        </div>
+        <div class="tdee-item main">
+          <div class="tdee-value" id="tdeeValue">--</div>
+          <div class="tdee-label">TDEE (总消耗)</div>
+        </div>
+        <div class="tdee-item">
+          <div class="tdee-value" id="trainingDaysPerWeek">0</div>
+          <div class="tdee-label">训练频率(天/周)</div>
+        </div>
+      </div>
+
+      <div class="adaptive-section">
+        <div class="toggle-row">
+          <span class="toggle-label">开启自适应调整</span>
+          <div class="toggle-switch active" id="adaptiveToggle" onclick="toggleAdaptive()"></div>
+        </div>
+        <div class="adaptive-info">
+          根据训练强度和疲劳程度动态调整碳水预算，避免过度训练导致的代谢适应。
+        </div>
+      </div>
+    </div>
+
+    <!-- Training Days Setup -->
+    <div class="panel">
+      <div class="panel-title">本周训练日安排</div>
+      <div class="week-grid" id="weekGrid">
+        <!-- 天数由 JS 动态生成 -->
+      </div>
+      <div class="info-box" style="margin-top: 12px;">
+        <div class="info-box-content">
+          <span style="color: var(--text-dim);">点击日期切换：</span>
+          <span style="color: var(--text-dim);">休息</span>
+          <span style="color: #5ac8fa;">→ 轻训</span>
+          <span style="color: #ffd700;">→ 常规</span>
+          <span style="color: #ff6b6b;">→ 重训</span>
+        </div>
+      </div>
+      <div class="summary-row" style="margin-top: 12px;">
+        <span class="summary-label">本周训练日</span>
+        <span class="summary-value" id="trainingDaysDisplay">2天（周三、周五常规）</span>
+      </div>
+    </div>
+
+    <!-- Daily Macro Budget -->
+    <div class="panel">
+      <div class="panel-title">每日营养预算</div>
+
+      <div class="form-label">选择查看类型</div>
+      <div class="training-type-grid" style="margin-bottom: 16px;">
+        <div class="type-card" data-view="rest" onclick="switchMacroView('rest')">
+          <div class="intensity">○</div>
+          <div>休息日</div>
+        </div>
+        <div class="type-card" data-view="light" onclick="switchMacroView('light')">
+          <div class="intensity">🔵</div>
+          <div>轻训日</div>
+        </div>
+        <div class="type-card active" data-view="medium" onclick="switchMacroView('medium')">
+          <div class="intensity">🟡</div>
+          <div>常规日</div>
+        </div>
+        <div class="type-card" data-view="heavy" onclick="switchMacroView('heavy')">
+          <div class="intensity">🔴</div>
+          <div>重训日</div>
+        </div>
+      </div>
+
+      <div class="macro-display">
+        <div class="macro-card carbs">
+          <div class="macro-value" id="carbBudget">--</div>
+          <div class="macro-unit">g</div>
+          <div class="macro-name">碳水</div>
+        </div>
+        <div class="macro-card protein">
+          <div class="macro-value" id="proteinBudget">--</div>
+          <div class="macro-unit">g</div>
+          <div class="macro-name">蛋白质</div>
+        </div>
+        <div class="macro-card fat">
+          <div class="macro-value" id="fatBudget">--</div>
+          <div class="macro-unit">g</div>
+          <div class="macro-name">脂肪</div>
+        </div>
+      </div>
+      <div id="macroTypeNote" style="text-align: center; font-size: 11px; color: var(--text-dim); margin-bottom: 12px;">
+        常规日基准值
+      </div>
+
+      <div class="carb-chart">
+        <div class="carb-bar" id="carbBar"></div>
+        <div class="carb-legend">
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #4a90d9;"></div>
+            <span>训练前 40%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #5ac8fa;"></div>
+            <span>训练中 20%</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-dot" style="background: #00d4aa;"></div>
+            <span>训练后 40%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="timing-cards">
+        <div class="timing-card pre">
+          <div class="timing-phase">PRE</div>
+          <div class="timing-amount" id="preCarb">--g</div>
+          <div class="timing-desc">训练前2-3h</div>
+        </div>
+        <div class="timing-card intra">
+          <div class="timing-phase">INTRA</div>
+          <div class="timing-amount" id="intraCarb">--g</div>
+          <div class="timing-desc">训练期间</div>
+        </div>
+        <div class="timing-card post">
+          <div class="timing-phase">POST</div>
+          <div class="timing-amount" id="postCarb">--g</div>
+          <div class="timing-desc">训练后30min内</div>
+        </div>
+      </div>
+
+      <div class="info-box">
+        <div class="info-box-title">💡 碳水时序原理</div>
+        <div class="info-box-content">
+          训练前：建立肌肉糖原储备 | 训练中：维持能量稳定 | 训练后：快速补充 + 促进合成代谢
+        </div>
+      </div>
+    </div>
+
+    <!-- Meal Structure -->
+    <div class="panel">
+      <div class="panel-title">训练日膳食结构</div>
+      <div class="meal-structure" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="meal-item">
+          <div class="meal-time">07:00</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="meal1C">--g</span>
+            <span class="meal-pro" id="meal1P">--g</span>
+            <span class="meal-fat" id="meal1F">--g</span>
+          </div>
+          <div class="meal-name">早餐</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-time">10:30</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="meal2C">--g</span>
+            <span class="meal-pro" id="meal2P">--g</span>
+            <span class="meal-fat" id="meal2F">--g</span>
+          </div>
+          <div class="meal-name">上午加餐</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-time">13:00</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="meal3C">--g</span>
+            <span class="meal-pro" id="meal3P">--g</span>
+            <span class="meal-fat" id="meal3F">--g</span>
+          </div>
+          <div class="meal-name">午餐</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-time">17:00</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="meal4C">--g</span>
+            <span class="meal-pro" id="meal4P">--g</span>
+            <span class="meal-fat" id="meal4F">--g</span>
+          </div>
+          <div class="meal-name">训练前餐</div>
+        </div>
+      </div>
+      <div class="meal-structure" style="grid-template-columns: repeat(4, 1fr); margin-top: 8px;">
+        <div class="meal-item">
+          <div class="meal-time">训练中</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="meal5C">--g</span>
+            <span class="meal-pro" id="meal5P">--g</span>
+            <span class="meal-fat" id="meal5F">--g</span>
+          </div>
+          <div class="meal-name">Intra</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-time">19:00</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="meal6C">--g</span>
+            <span class="meal-pro" id="meal6P">--g</span>
+            <span class="meal-fat" id="meal6F">--g</span>
+          </div>
+          <div class="meal-name">训练后餐</div>
+        </div>
+        <div class="meal-item">
+          <div class="meal-time">21:00</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="meal7C">--g</span>
+            <span class="meal-pro" id="meal7P">--g</span>
+            <span class="meal-fat" id="meal7F">--g</span>
+          </div>
+          <div class="meal-name">晚加餐</div>
+        </div>
+        <div class="meal-item" style="border-color: var(--accent);">
+          <div class="meal-time">合计</div>
+          <div class="meal-macro">
+            <span class="meal-carb" id="mealTotalC" style="color: var(--accent);">--g</span>
+            <span class="meal-pro" id="mealTotalP" style="color: var(--protein);">--g</span>
+            <span class="meal-fat" id="mealTotalF" style="color: var(--fat);">--g</span>
+          </div>
+          <div class="meal-name">日总量</div>
+        </div>
+      </div>
+      <div class="info-box" style="margin-top: 12px;">
+        <div class="info-box-content" style="text-align: center;">
+          <span style="color: var(--carbs);">● 碳水</span>
+          <span style="margin-left: 16px; color: var(--protein);">● 蛋白质</span>
+          <span style="margin-left: 16px; color: var(--fat);">● 脂肪</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Summary -->
+    <div class="panel">
+      <div class="panel-title">本周营养总结</div>
+      <div class="weekly-summary">
+        <div class="summary-row">
+          <span class="summary-label">训练日天数</span>
+          <span class="summary-value" id="trainingDaysCount">2天</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">休息日天数</span>
+          <span class="summary-value" id="restDaysCount">5天</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">训练日碳水</span>
+          <span class="summary-value" style="color: var(--carbs);" id="trainingDayCarb">--g</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">训练日蛋白质</span>
+          <span class="summary-value" style="color: var(--protein);" id="trainingDayPro">--g</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">训练日脂肪</span>
+          <span class="summary-value" style="color: var(--fat);" id="trainingDayFat">--g</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">休息日碳水</span>
+          <span class="summary-value" id="restDayCarb">--g</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">周总热量</span>
+          <span class="summary-value" id="weeklyCals">--kcal</span>
+        </div>
+      </div>
+
+      <div class="total-kpi">
+        <div class="kpi-card">
+          <div class="kpi-value" id="totalCalories">--</div>
+          <div class="kpi-label">日总热量 (kcal)</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value" id="proteinPercent">--%</div>
+          <div class="kpi-label">蛋白质供能比</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Algorithm Explanation -->
+    <div class="panel">
+      <div class="explanation-toggle" onclick="toggleExplanation()">
+        <span>🧠 算法解释 / 为什么这样分配</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="explanation-content" id="explanationContent">
+        <div class="explanation-section">
+          <div class="explanation-section-title">🎯 目标阶段依据</div>
+          <div class="explanation-line info" id="expGoal"></div>
+        </div>
+        <div class="explanation-section">
+          <div class="explanation-section-title">🥩 宏量营养依据</div>
+          <div id="expMacros"></div>
+        </div>
+        <div class="explanation-section">
+          <div class="explanation-section-title">📅 周预算分配逻辑</div>
+          <div id="expWeekly"></div>
+        </div>
+        <div class="explanation-section">
+          <div class="explanation-section-title">⚠️ EA / RED-S 风险评估</div>
+          <div id="expRisk"></div>
+        </div>
+        <div style="margin-top: 12px; font-size: 10px; color: var(--text-dim); text-align: right;" id="expTimestamp"></div>
+      </div>
+    </div>
+
+    <!-- RED-S Warning -->
+    <div class="panel" id="redisWarning" style="display: none;">
+      <div class="warning-box">
+        <div class="warning-box-title">⚠️ RED-S 风险提示</div>
+        <div class="info-box-content" id="redisContent">
+          检测到潜在的能量可用度不足风险...
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <button class="btn" onclick="saveAndExport()">💾 保存周计划</button>
+    <button class="btn btn-secondary" onclick="resetDefaults()">🔄 重置默认</button>
+
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <div class="nav-bar">
+    <div class="nav-item" onclick="navigateTo('module1')">
+      <span class="nav-icon">📋</span>
+      <span>档案</span>
+    </div>
+    <div class="nav-item active">
+      <span class="nav-icon">🍚</span>
+      <span>营养</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('module3')">
+      <span class="nav-icon">📊</span>
+      <span>训练</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('module4')">
+      <span class="nav-icon">📅</span>
+      <span>作战图</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('supplement')">
+      <span class="nav-icon">💊</span>
+      <span>补剂</span>
+    </div>
+  </div>
+
+  <script src="app_state.js"></script>
+  <script src="macro_rule_engine.js"></script>
+  <script>
+    // ============ State ============
+    let state = {
+      goal: 'bulk',
+      bodyWeight: null,
+      bodyFat: null,
+      trainingDaysPerWeek: 4,
+      adaptiveEnabled: true,
+      BMR: 0,
+      TDEE: 0,
+      trainingBurn: 0,
+      dayTypes: ['rest', 'rest', 'medium', 'rest', 'medium', 'rest', 'rest'],
+      currentMacroView: 'medium',
+      baseMacros: { carb: 0, protein: 0, fat: 0 },
+      mealPlans: { rest: [], light: [], medium: [], heavy: [] }
+    };
+
+    let macroRuleCache = window.MacroRuleEngine ? window.MacroRuleEngine.getRulesSync() : { data: null, source: 'fallback' };
+
+    // ============ Initialization ============
+    document.addEventListener('DOMContentLoaded', async () => {
+      await ensureMacroRules();
+      loadUserData();
+      initWeekGrid();
+      calculateTDEE();
+    });
+
+    function clamp(value, min, max) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function normalizeGoalKeyCompat(goal) {
+      if (window.MacroRuleEngine && typeof window.MacroRuleEngine.normalizeGoalKey === 'function') {
+        return window.MacroRuleEngine.normalizeGoalKey(goal);
+      }
+      return goal || 'strength';
+    }
+
+    function toMondayIndex(date) {
+      return (date.getDay() + 6) % 7;
+    }
+
+    function midpoint(range, fallback) {
+      if (Array.isArray(range) && range.length >= 2) {
+        return (Number(range[0]) + Number(range[1])) / 2;
+      }
+      return fallback;
+    }
+
+    async function ensureMacroRules() {
+      if (window.MacroRuleEngine) {
+        macroRuleCache = await window.MacroRuleEngine.primeRules();
+      }
+      return macroRuleCache;
+    }
+
+    function getMacroRules() {
+      if (macroRuleCache && macroRuleCache.data) return macroRuleCache.data;
+      return window.MacroRuleEngine ? window.MacroRuleEngine.getRulesSync().data : null;
+    }
+
+    function normalizeDayTypes(value) {
+      if (Array.isArray(value)) {
+        return value.slice(0, 7).concat(Array(Math.max(0, 7 - value.length)).fill('rest'));
+      }
+      return Array.from({ length: 7 }, (_, index) => (value && value[index]) || 'rest');
+    }
+
+    function getDayTypeMultiplier(type) {
+      const rules = getMacroRules();
+      const fallback = {
+        rest: { carb_multiplier: 0.7, protein_multiplier: 1.0, fat_multiplier: 1.05, carb_timing_enabled: false },
+        light: { carb_multiplier: 0.85, protein_multiplier: 1.0, fat_multiplier: 1.0, carb_timing_enabled: true },
+        medium: { carb_multiplier: 1.0, protein_multiplier: 1.0, fat_multiplier: 1.0, carb_timing_enabled: true },
+        heavy: { carb_multiplier: 1.15, protein_multiplier: 1.0, fat_multiplier: 0.98, carb_timing_enabled: true }
+      };
+      return rules?.day_type_multipliers?.[type] || fallback[type] || fallback.medium;
+    }
+
+    function updateCarbTimingFromRules(carb, type) {
+      const typeConfig = getDayTypeMultiplier(type);
+      if (!typeConfig.carb_timing_enabled) {
+        document.getElementById('preCarb').textContent = '--';
+        document.getElementById('intraCarb').textContent = '--';
+        document.getElementById('postCarb').textContent = '--';
+        return;
+      }
+
+      const rules = getMacroRules();
+      const weight = parseFloat(document.getElementById('bodyWeight').value) || state.bodyWeight || 0;
+      const timing = rules?.macro_formulas?.training_day_carb_timing || {};
+      const preTarget = Math.round(weight * midpoint(timing.pre?.tbw_range_g_per_kg, 1.25));
+      const intraTarget = Math.round(midpoint(timing.intra?.fast_carb_g_per_hour, 45));
+      const postTarget = Math.round(weight * midpoint(timing.post?.carb_g_per_kg_tbw, 1.1));
+
+      let preCarb = Math.min(carb, preTarget);
+      let intraCarb = Math.min(Math.max(0, carb - preCarb), intraTarget);
+      let postCarb = Math.min(Math.max(0, carb - preCarb - intraCarb), postTarget);
+      const remainder = Math.max(0, carb - preCarb - intraCarb - postCarb);
+      postCarb += remainder;
+
+      document.getElementById('preCarb').textContent = `${preCarb}g`;
+      document.getElementById('intraCarb').textContent = `${intraCarb}g`;
+      document.getElementById('postCarb').textContent = `${postCarb}g`;
+    }
+
+    // ============ User Data Loading ============
+    function isMeaningfulProfile(obj) {
+      return obj && typeof obj === 'object' && Object.keys(obj).length > 0 && (obj.weight || obj.bodyWeight || obj.squat1RM);
+    }
+
+    function loadUserData() {
+      const infoEl = document.getElementById('userDataInfo');
+      const profile = window.AppState ? window.AppState.getProfile() : null;
+
+      if (profile && profile.exists) {
+        const normalizedGoal = normalizeGoalKeyCompat(profile.goal);
+
+        // 直接从模块1读取数据（结构匹配）
+        if (profile.weight) {
+          state.bodyWeight = profile.weight;
+          document.getElementById('bodyWeight').value = profile.weight;
+        }
+        if (profile.bodyFat) {
+          state.bodyFat = profile.bodyFat;
+          document.getElementById('bodyFat').value = profile.bodyFat;
+        }
+
+        const genderText = profile.gender === 'female' ? '女' : '男';
+        const weight = profile.weight || '--';
+        const bodyFat = profile.bodyFat || '--';
+        const goal = translateGoal(normalizedGoal);
+
+        infoEl.innerHTML = `
+          <div style="color: var(--text); font-weight: 600;">${genderText} | ${weight}kg | 体脂${bodyFat}%</div>
+          <div style="margin-top: 6px; font-size: 11px;">目标: ${goal}</div>
+        `;
+
+        // 自动选择目标
+        if (normalizedGoal) {
+          const uiGoal = normalizedGoal === 'recomp' || normalizedGoal === 'meet_prep' ? 'strength' : normalizedGoal;
+          const goalCard = document.querySelector(`.goal-card[data-goal="${uiGoal}"]`);
+          if (goalCard) {
+            selectGoal(goalCard);
+          }
+        }
+
+        // 保存性别用于计算
+        state.gender = profile.gender;
+        state.height = profile.height;
+        state.age = profile.age;
+      } else {
+        infoEl.innerHTML = `
+          <p>暂无用户档案数据</p>
+          <p style="margin-top: 8px; font-size: 11px;">请先完成模块1的基础数据录入</p>
+        `;
+      }
+    }
+
+    function translateGoal(goal) {
+      const map = { bulk: '增肌', strength: '力量', cut: '减脂', recomp: '重组', meet_prep: '赛前准备' };
+      return map[goal] || goal;
+    }
+
+    // ============ Goal Selection ============
+    function selectGoal(el) {
+      document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('active'));
+      el.classList.add('active');
+      state.goal = normalizeGoalKeyCompat(el.dataset.goal);
+      calculateTDEE();
+    }
+
+    // ============ Training Days ============
+    const DAY_TYPES = ['rest', 'light', 'medium', 'heavy'];
+    const DAY_TYPE_NAMES = { rest: '休息', light: '轻训', medium: '常规', heavy: '重训' };
+    const DAY_LABELS = ['一', '二', '三', '四', '五', '六', '日'];
+
+    function getMonday(date = new Date()) {
+      const base = new Date(date);
+      const offset = -toMondayIndex(base);
+      base.setDate(base.getDate() + offset);
+      return base;
+    }
+
+    function initWeekGrid() {
+      const grid = document.getElementById('weekGrid');
+      const monday = getMonday();
+      const dayNames = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
+
+      // 优先从模块三同步的数据
+      const todayContext = window.AppState ? window.AppState.getTodayDashboardContext() : null;
+      if (todayContext && todayContext.todayTraining && todayContext.todayTraining.exists) {
+        const weekly = window.AppState.getWeeklyTrainingPlan();
+        const rawDayTypes = window.AppState.safeJsonParse(localStorage.getItem('module3_dayTypes'), []);
+        state.dayTypes = normalizeDayTypes(rawDayTypes);
+      } else {
+        const module3DayTypes = localStorage.getItem('module3_dayTypes');
+        state.dayTypes = module3DayTypes
+          ? normalizeDayTypes(JSON.parse(module3DayTypes))
+          : ['rest', 'rest', 'medium', 'rest', 'medium', 'rest', 'rest'];
+      }
+
+      grid.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        const dayNum = date.getDate();
+        const type = state.dayTypes[i] || 'rest';
+
+        const div = document.createElement('div');
+        div.className = `day-selector type-${type}`;
+        div.dataset.day = i;
+        div.onclick = () => cycleDayType(i);
+
+        const typeLabel = document.createElement('span');
+        typeLabel.className = 'type-badge';
+        typeLabel.textContent = type === 'rest' ? '' : type === 'light' ? '轻' : type === 'medium' ? '常' : '重';
+        typeLabel.style.cssText = `font-size:8px; position:absolute; top:2px; right:2px; color: inherit;`;
+
+        div.style.cssText = 'position: relative;';
+        div.innerHTML = `
+          <span class="day-label">${dayNames[i].slice(1)}</span>
+          <span class="day-num">${dayNum}</span>
+          <div class="training-dot"></div>
+        `;
+        div.appendChild(typeLabel);
+        grid.appendChild(div);
+      }
+      updateTrainingDaysDisplay();
+    }
+
+    function cycleDayType(dayIndex) {
+      const currentType = state.dayTypes[dayIndex] || 'rest';
+      const currentIdx = DAY_TYPES.indexOf(currentType);
+      const nextIdx = (currentIdx + 1) % DAY_TYPES.length;
+      const nextType = DAY_TYPES[nextIdx];
+      state.dayTypes[dayIndex] = nextType;
+
+      const dayEl = document.querySelector(`.day-selector[data-day="${dayIndex}"]`);
+      dayEl.className = `day-selector type-${nextType}`;
+      const badge = dayEl.querySelector('.type-badge');
+      const badgeLabels = { rest: '', light: '轻', medium: '常', heavy: '重' };
+      badge.textContent = badgeLabels[nextType] || '';
+
+      updateTrainingDaysDisplay();
+      calculateTDEE();
+    }
+
+    function updateTrainingDaysDisplay() {
+      // 统计训练日
+      const trainingDays = [];
+      const typeNames = { light: '轻训', medium: '常规', heavy: '重训' };
+
+      for (let i = 0; i < 7; i++) {
+        if (state.dayTypes[i] && state.dayTypes[i] !== 'rest') {
+          trainingDays.push({ day: i, type: state.dayTypes[i] });
+        }
+      }
+
+      document.getElementById('trainingDaysCount').textContent = `${trainingDays.length}天`;
+      document.getElementById('restDaysCount').textContent = `${7 - trainingDays.length}天`;
+
+      // 更新训练日汇总显示
+      if (trainingDays.length > 0) {
+        const summary = trainingDays.map(d => `周${DAY_LABELS[d.day]}${typeNames[d.type]}`).join('、');
+        document.getElementById('trainingDaysDisplay').textContent = `${trainingDays.length}天（${summary}）`;
+      } else {
+        document.getElementById('trainingDaysDisplay').textContent = '无训练日';
+      }
+    }
+
+    // ============ Macro View Switch ============
+    function switchMacroView(type) {
+      // 更新 UI
+      document.querySelectorAll('.type-card[data-view]').forEach(c => c.classList.remove('active'));
+      document.querySelector(`.type-card[data-view="${type}"]`).classList.add('active');
+      state.currentMacroView = type;
+
+      // 计算该类型的宏量
+      const multiplier = getDayTypeMultiplier(type);
+      const carb = Math.round(state.baseMacros.carb * (multiplier.carb_multiplier || 1.0));
+      const protein = Math.round(state.baseMacros.protein * (multiplier.protein_multiplier || 1.0));
+      const fat = Math.round(state.baseMacros.fat * (multiplier.fat_multiplier || 1.0));
+
+      document.getElementById('carbBudget').textContent = carb;
+      document.getElementById('proteinBudget').textContent = protein;
+      document.getElementById('fatBudget').textContent = fat;
+
+      // 更新注释
+      const carbPct = Math.round(((multiplier.carb_multiplier || 1) - 1) * 100);
+      const typeNotes = {
+        rest: `休息日（碳水${carbPct}%）`,
+        light: `轻训日（碳水${carbPct > 0 ? '+' : ''}${carbPct}%）`,
+        medium: '常规日基准值',
+        heavy: `重训日（碳水+${Math.max(carbPct, 0)}%）`
+      };
+      document.getElementById('macroTypeNote').textContent = typeNotes[type];
+
+      // 更新碳水时序
+      updateCarbTimingFromRules(carb, type);
+
+      // 更新碳水条
+      updateCarbBar(carb);
+
+      // 更新膳食结构
+      updateMealStructure(carb, protein, fat);
+    }
+
+    // ============ Adaptive Toggle ============
+    function toggleAdaptive() {
+      const toggle = document.getElementById('adaptiveToggle');
+      toggle.classList.toggle('active');
+      state.adaptiveEnabled = toggle.classList.contains('active');
+      calculateTDEE();
+    }
+
+    // ============ TDEE Calculation (Mifflin-St Jeor) ============
+    function calculateTDEE() {
+      const weight = parseFloat(document.getElementById('bodyWeight').value) || state.bodyWeight;
+      const height = state.height || 175;
+      const age = state.age || 30;
+      const isMale = state.gender !== 'female';
+
+      if (!weight) {
+        document.getElementById('bmrValue').textContent = '--';
+        document.getElementById('tdeeValue').textContent = '--';
+        document.getElementById('trainingDaysPerWeek').textContent = '--';
+        return;
+      }
+
+      // Mifflin-St Jeor Formula
+      let BMR = 10 * weight + 6.25 * height - 5 * age + (isMale ? 5 : -161);
+      state.BMR = BMR;
+
+      // 从日历统计训练日数量
+      const trainingDaysCount = Object.values(state.dayTypes).filter(t => t !== 'rest').length;
+      state.trainingDaysPerWeek = trainingDaysCount;
+
+      // Activity multiplier based on training frequency from calendar
+      let activityMultiplier;
+      if (trainingDaysCount <= 2) activityMultiplier = 1.40;
+      else if (trainingDaysCount === 3) activityMultiplier = 1.55;
+      else if (trainingDaysCount === 4) activityMultiplier = 1.65;
+      else if (trainingDaysCount === 5) activityMultiplier = 1.80;
+      else activityMultiplier = 1.90;
+
+      state.TDEE = Math.round(BMR * activityMultiplier);
+
+      // 计算本周平均训练强度
+      let totalIntensity = 0;
+      for (const type of Object.values(state.dayTypes)) {
+        if (type === 'light') totalIntensity += 1;
+        else if (type === 'medium') totalIntensity += 1.5;
+        else if (type === 'heavy') totalIntensity += 2;
+      }
+      const avgIntensity = trainingDaysCount > 0 ? (totalIntensity / trainingDaysCount).toFixed(1) : 0;
+
+      document.getElementById('bmrValue').textContent = Math.round(BMR);
+      document.getElementById('tdeeValue').textContent = state.TDEE;
+      document.getElementById('trainingDaysPerWeek').textContent = trainingDaysCount;
+
+      calculateMacros(avgIntensity);
+    }
+
+    // ============ Macro Calculation ============
+    function calculateMacros(avgIntensity = 1.5) {
+      const weight = parseFloat(document.getElementById('bodyWeight').value) || state.bodyWeight;
+      if (!weight || !state.TDEE) return;
+
+      const rules = getMacroRules();
+      const goalProfile = rules?.goal_profiles?.[state.goal];
+
+      // Protein: prefer goal profile range from macro rules
+      const bodyFatValue = parseFloat(document.getElementById('bodyFat').value) || 15;
+      const leanMass = weight * (1 - bodyFatValue / 100);
+      const proteinPerKgLbm = midpoint(goalProfile?.macronutrient_distribution?.protein_range_g_per_kg_lbm, 2.0);
+      const protein = Math.round(leanMass * proteinPerKgLbm);
+
+      // Fat: prefer goal profile range and respect floor
+      const fatFloor = state.gender === 'female'
+        ? (rules?.macro_formulas?.fat?.general_floor_g_per_kg_tbw || 0.8)
+        : (rules?.macro_formulas?.fat?.male_testosterone_floor_g_per_kg_tbw || 0.8);
+      const fatPerKgTbw = Math.max(midpoint(goalProfile?.macronutrient_distribution?.fat_range_g_per_kg_tbw, 1.0), fatFloor);
+      const fat = Math.round(weight * fatPerKgTbw);
+
+      // Goal-based energy adjustment from macro rules
+      const energyManagement = goalProfile?.energy_management || {};
+      const surplusRange = energyManagement.recommended_daily_surplus_kcal;
+      const deficitRange = energyManagement.recommended_daily_deficit_kcal;
+      const goalAdjustment = Array.isArray(surplusRange)
+        ? Math.round(midpoint(surplusRange, 0))
+        : Array.isArray(deficitRange)
+          ? Math.round(midpoint(deficitRange, -300))
+          : 0;
+
+      // Adjust TDEE for goal
+      let adjustedTDEE = state.TDEE + goalAdjustment;
+
+      // Blend rule-range carb target with energy target
+      const proteinCals = protein * 4;
+      const fatCals = fat * 9;
+      const carbCals = adjustedTDEE - proteinCals - fatCals;
+      const ruleCarbRange = goalProfile?.macronutrient_distribution?.carb_range_g_per_kg_tbw || [3.0, 5.0];
+      const carbFloor = state.goal === 'cut'
+        ? Math.max(Number(ruleCarbRange[0]) || 2.0, rules?.macro_formulas?.carbohydrate?.cut_hard_floor_g_per_kg_tbw || 2.0)
+        : (Number(ruleCarbRange[0]) || 3.0);
+      const carbCeiling = Number(ruleCarbRange[1]) || 5.0;
+      const intensityRatio = clamp(Number(avgIntensity) / 1.5, 0.8, 1.2);
+      const ruleCarbPerKg = clamp(midpoint(ruleCarbRange, 4.0) * intensityRatio, carbFloor, carbCeiling);
+      const carbFromRules = Math.round(weight * ruleCarbPerKg);
+      const carbFromEnergy = Math.max(50, Math.round(carbCals / 4));
+      let carb = Math.round((carbFromRules + carbFromEnergy) / 2);
+      carb = clamp(carb, Math.round(weight * carbFloor), Math.round(weight * carbCeiling));
+
+      // 保存基准宏量（常规日）
+      state.baseMacros = { carb, protein, fat };
+
+      // 根据当前查看类型显示
+      switchMacroView(state.currentMacroView);
+      document.getElementById('carbBudget').textContent = carb;
+      document.getElementById('proteinBudget').textContent = protein;
+      document.getElementById('fatBudget').textContent = fat;
+
+      // Carb timing split (training day)
+      updateCarbTimingFromRules(carb, state.currentMacroView);
+
+      // Update carb bar
+      updateCarbBar(carb);
+
+      // Meal structure
+      updateMealStructure(carb, protein, fat);
+
+      // Weekly summary
+      updateWeeklySummary(carb, protein, fat);
+
+      // RED-S check
+      checkREDSCriteria(adjustedTDEE, protein, weight);
+    }
+
+    function updateCarbBar(carb) {
+      const bar = document.getElementById('carbBar');
+      const pre = Math.round(carb * 0.4);
+      const intra = Math.round(carb * 0.2);
+      const post = carb - pre - intra;
+
+      bar.innerHTML = `
+        <div class="carb-segment pre" style="width: ${pre/carb*100}%;">${pre}g</div>
+        <div class="carb-segment intra" style="width: ${intra/carb*100}%;">${intra}g</div>
+        <div class="carb-segment post" style="width: ${post/carb*100}%;">${post}g</div>
+      `;
+    }
+
+    function updateMealStructure(carb, protein, fat) {
+      const mealLabels = [
+        { name: '早餐', time: '07:00' },
+        { name: '上午加餐', time: '10:30' },
+        { name: '午餐', time: '13:00' },
+        { name: '训练前餐', time: '17:00' },
+        { name: '训练中', time: '训练中' },
+        { name: '训练后餐', time: '19:00' },
+        { name: '晚加餐', time: '21:00' }
+      ];
+
+      // 根据训练强度调整分配比例
+      const intensityMultipliers = {
+        light: 0.7,
+        medium: 1.0,
+        heavy: 1.3
+      };
+      const activeType = state.currentMacroView || 'medium';
+      const mult = intensityMultipliers[activeType] || 1.0;
+
+      // 调整后的营养素
+      const adjCarb = Math.round(carb * mult);
+      const adjPro = Math.round(protein * mult);
+      const adjFat = Math.round(fat * mult);
+
+      // 不同强度下的分配策略
+      // 轻训：减少训练前后碳水
+      // 常规：均衡分配
+      // 重训：训练前碳水增加，蛋白质集中到训练后
+      let meals;
+      if (activeType === 'light') {
+        meals = [
+          { carbPct: 0.30, proPct: 0.25, fatPct: 0.25 },
+          { carbPct: 0.10, proPct: 0.10, fatPct: 0.10 },
+          { carbPct: 0.30, proPct: 0.30, fatPct: 0.30 },
+          { carbPct: 0.15, proPct: 0.15, fatPct: 0.15 },
+          { carbPct: 0.00, proPct: 0.00, fatPct: 0.00 },
+          { carbPct: 0.10, proPct: 0.15, fatPct: 0.15 },
+          { carbPct: 0.05, proPct: 0.05, fatPct: 0.05 },
+        ];
+      } else if (activeType === 'heavy') {
+        meals = [
+          { carbPct: 0.20, proPct: 0.20, fatPct: 0.20 },
+          { carbPct: 0.08, proPct: 0.08, fatPct: 0.08 },
+          { carbPct: 0.20, proPct: 0.20, fatPct: 0.20 },
+          { carbPct: 0.25, proPct: 0.10, fatPct: 0.12 },
+          { carbPct: 0.10, proPct: 0.02, fatPct: 0.00 },
+          { carbPct: 0.12, proPct: 0.30, fatPct: 0.30 },
+          { carbPct: 0.05, proPct: 0.10, fatPct: 0.10 },
+        ];
+      } else {
+        meals = [
+          { carbPct: 0.25, proPct: 0.25, fatPct: 0.25 },
+          { carbPct: 0.08, proPct: 0.08, fatPct: 0.08 },
+          { carbPct: 0.25, proPct: 0.25, fatPct: 0.25 },
+          { carbPct: 0.17, proPct: 0.12, fatPct: 0.12 },
+          { carbPct: 0.05, proPct: 0.00, fatPct: 0.00 },
+          { carbPct: 0.15, proPct: 0.25, fatPct: 0.25 },
+          { carbPct: 0.05, proPct: 0.05, fatPct: 0.05 },
+        ];
+      }
+
+      let totalCarb = 0, totalPro = 0, totalFat = 0;
+
+      const renderedMeals = [];
+
+      meals.forEach((m, i) => {
+        const carbVal = Math.round(adjCarb * m.carbPct);
+        const proVal = Math.round(adjPro * m.proPct);
+        const fatVal = Math.round(adjFat * m.fatPct);
+        document.getElementById(`meal${i+1}C`).textContent = `${carbVal}g`;
+        document.getElementById(`meal${i+1}P`).textContent = `${proVal}g`;
+        document.getElementById(`meal${i+1}F`).textContent = `${fatVal}g`;
+        totalCarb += carbVal;
+        totalPro += proVal;
+        totalFat += fatVal;
+
+        renderedMeals.push({
+          slot: i + 1,
+          name: mealLabels[i].name,
+          time: mealLabels[i].time,
+          carb: carbVal,
+          protein: proVal,
+          fat: fatVal
+        });
+      });
+
+      document.getElementById('mealTotalC').textContent = `${totalCarb}g`;
+      document.getElementById('mealTotalP').textContent = `${totalPro}g`;
+      document.getElementById('mealTotalF').textContent = `${totalFat}g`;
+
+      state.mealPlans[activeType] = renderedMeals;
+    }
+
+    function updateWeeklySummary(carb, protein, fat) {
+      // 从日历统计训练日数
+      const dayTypeList = Object.values(state.dayTypes);
+      const trainingDays = dayTypeList.filter(t => t !== 'rest').length;
+      const restDays = 7 - trainingDays;
+
+      // 计算日总热量
+      const totalCals = carb * 4 + protein * 4 + fat * 9;
+      document.getElementById('totalCalories').textContent = totalCals;
+
+      // 蛋白质供能比
+      const proteinCals = protein * 4;
+      const proteinPercent = totalCals > 0 ? Math.round((proteinCals / totalCals) * 100) : 0;
+      document.getElementById('proteinPercent').textContent = `${proteinPercent}%`;
+
+      // 训练日宏量
+      document.getElementById('trainingDayCarb').textContent = `${carb}g`;
+      document.getElementById('trainingDayPro').textContent = `${protein}g`;
+      document.getElementById('trainingDayFat').textContent = `${fat}g`;
+
+      // 休息日碳水（降低40%）
+      const restDayCarb = Math.round(carb * 0.6);
+      document.getElementById('restDayCarb').textContent = `${restDayCarb}g`;
+
+      // 周总热量估算
+      const restCals = restDayCarb * 4 + protein * 4 + fat * 9;
+      const weeklyCals = (totalCals * trainingDays) + (restCals * restDays);
+      document.getElementById('weeklyCals').textContent = `${Math.round(weeklyCals)}kcal`;
+    }
+
+    // ============ RED-S Check ============
+    function checkREDSCriteria(tdee, protein, weight) {
+      const warnings = [];
+
+      // Check 1: Low energy availability (carb < 3g/kg)
+      const carbPerKg = weight > 0 ? parseFloat(document.getElementById('carbBudget').textContent) / weight : 0;
+      if (carbPerKg < 3 && state.goal === 'cut') {
+        warnings.push('碳水摄入过低 (<3g/kg)，可能影响训练表现');
+      }
+
+      // Check 2: Low protein intake
+      const proteinPerKg = protein / weight;
+      if (proteinPerKg < 1.6) {
+        warnings.push(`蛋白质摄入偏低 (${proteinPerKg.toFixed(1)}g/kg)，建议≥1.6g/kg`);
+      }
+
+      // Check 3: Extreme deficit (>500kcal)
+      if (tdee < state.TDEE - 500) {
+        warnings.push('热量缺口过大 (>500kcal)，长期可能影响代谢');
+      }
+
+      // Check 4: Low body fat males
+      const bodyFat = parseFloat(document.getElementById('bodyFat').value) || 15;
+      const isMale = state.gender !== 'female';
+      if (isMale && bodyFat < 8) {
+        warnings.push('体脂过低 (<8%)，存在RED-S风险');
+      }
+
+      const warningPanel = document.getElementById('redisWarning');
+      const contentEl = document.getElementById('redisContent');
+      if (warnings.length > 0) {
+        warningPanel.style.display = 'block';
+        contentEl.innerHTML = warnings.map(w => `• ${w}`).join('<br>');
+      } else {
+        warningPanel.style.display = 'none';
+      }
+
+      return {
+        warnings,
+        redSRisk: warnings.length > 0 ? 'caution' : 'ok',
+        eaStatus: state.goal === 'cut' && carbPerKg < 3 ? 'low' : 'ok'
+      };
+    }
+
+    // ============ Explanation Layer ============
+    function buildExplanationText() {
+      var weight = parseFloat(document.getElementById('bodyWeight').value) || state.bodyWeight || 0;
+      var bodyFat = parseFloat(document.getElementById('bodyFat').value) || state.bodyFat || 15;
+      var leanMass = weight * (1 - bodyFat / 100);
+      var goalKey = normalizeGoalKeyCompat(state.goal);
+      var isMale = state.gender !== 'female';
+      var tdee = state.TDEE || 0;
+      var bmr = state.BMR || 0;
+      var rules = getMacroRules();
+      var goalProfile = rules?.goal_profiles?.[goalKey];
+
+      var explanation = { goal: '', macro: [], weeklyDistribution: [], risk: [], generatedAt: new Date().toISOString() };
+
+      // 1. Goal explanation
+      if (state.goal === 'recomp') {
+        explanation.goal = '身体重组目标：在维持体重的过程中同步增肌减脂。当前映射为力量期逻辑（维持 TDEE），因重组所需的热量窗口极窄、个体差异大，建议密切监测体成分变化并按需微调。';
+      } else if (state.goal === 'meet_prep') {
+        explanation.goal = '赛前准备目标：聚焦比赛表现最大化。当前映射为力量期逻辑（维持 TDEE），因赛前需要维持训练强度与恢复能力，不建议在此阶段制造大幅热量波动。';
+      } else {
+        var goalTexts = {};
+        goalTexts['bulk'] = '增肌期目标：热量盈余，为肌肉合成提供额外能量。BMR (' + bmr + 'kcal) × 活动系数(' + state.trainingDaysPerWeek + '天训练) = TDEE ' + tdee + 'kcal，在 TDEE 基础上增加盈余 ~+400kcal/日。';
+        goalTexts['strength'] = '力量期目标：维持当前体重与体成分。BMR (' + bmr + 'kcal) × 活动系数(' + state.trainingDaysPerWeek + '天训练) = TDEE ' + tdee + 'kcal，热量目标 ≈ TDEE，优先保证训练恢复与神经适应。';
+        goalTexts['cut'] = '减脂期目标：在保留肌肉的前提下减少脂肪。BMR (' + bmr + 'kcal) × 活动系数(' + state.trainingDaysPerWeek + '天训练) = TDEE ' + tdee + 'kcal，在 TDEE 基础上制造缺口 ~-400kcal/日，同时设碳水下限保护训练表现。';
+        explanation.goal = goalTexts[goalKey] || '当前目标：' + goalKey + '，热量策略基于 TDEE ' + tdee + 'kcal 调整。';
+      }
+
+      // 2. Macro nutrient explanation
+      var protein = state.baseMacros.protein || 0;
+      var fat = state.baseMacros.fat || 0;
+      var carb = state.baseMacros.carb || 0;
+      var proRange = goalProfile?.macronutrient_distribution?.protein_range_g_per_kg_lbm;
+      var proteinTarget = proRange ? ((Number(proRange[0]) + Number(proRange[1])) / 2).toFixed(1) : '2.0';
+      var proteinActual = protein > 0 && leanMass > 0 ? (protein / leanMass).toFixed(1) : '--';
+      explanation.macro.push('蛋白质 ' + protein + 'g/日（' + proteinActual + 'g/kg LBM）。基于去脂体重 ' + Math.round(leanMass) + 'kg × ' + proteinTarget + 'g/kg，确保肌肉蛋白合成与训练恢复。');
+      var fatFloor = isMale
+        ? (rules?.macro_formulas?.fat?.male_testosterone_floor_g_per_kg_tbw || 0.8)
+        : (rules?.macro_formulas?.fat?.general_floor_g_per_kg_tbw || 0.8);
+      var fatActual = fat > 0 && weight > 0 ? (fat / weight).toFixed(1) : '--';
+      explanation.macro.push('脂肪 ' + fat + 'g/日（' + fatActual + 'g/kg TBW）。采用 ' + (isMale ? '男性睾酮' : '女性生理') + '功能底线 ' + fatFloor + 'g/kg 作为下限，保障激素分泌与脂溶性维生素吸收。');
+      var carbRange = goalProfile?.macronutrient_distribution?.carb_range_g_per_kg_tbw;
+      var carbRangeStr = carbRange ? carbRange[0] + '~' + carbRange[1] : '3~5';
+      var carbActual = carb > 0 && weight > 0 ? (carb / weight).toFixed(1) : '--';
+      explanation.macro.push('碳水 ' + carb + 'g/日（' + carbActual + 'g/kg TBW）。蛋白质与脂肪热量锁定后，剩余热量由碳水补充，并结合规则库 ' + goalKey + ' 目标范围（' + carbRangeStr + 'g/kg）进行双向约束。');
+
+      // 3. Weekly distribution
+      var trainingDays = state.dayTypes.filter(function(t) { return t !== 'rest'; }).length;
+      var restDays = 7 - trainingDays;
+      var typeLabels = { rest: '休息日', light: '轻训日', medium: '常规日', heavy: '重训日' };
+      var typeReasons = {
+        rest: '训练压力低，碳水需求减少',
+        light: '低强度训练日，碳水需求略降',
+        medium: '基准训练日，碳水按需分配',
+        heavy: '高强度训练日，碳水需求增加以补充肌糖原'
+      };
+      var typeCounts = {};
+      state.dayTypes.forEach(function(t) { typeCounts[t] = (typeCounts[t] || 0) + 1; });
+
+      explanation.weeklyDistribution.push('本周共 ' + trainingDays + ' 天训练、' + restDays + ' 天休息，按日类型分配如下：');
+      Object.keys(typeLabels).forEach(function(type) {
+        if (typeCounts[type]) {
+          var mult = getDayTypeMultiplier(type);
+          var carbPct = Math.round(((mult.carb_multiplier || 1) - 1) * 100);
+          var carbStr = carbPct === 0 ? '基准' : (carbPct > 0 ? '+' + carbPct + '%' : carbPct + '%');
+          explanation.weeklyDistribution.push(
+            typeLabels[type] + ' ×' + typeCounts[type] + '天：碳水 ' + carbStr + '（' + typeReasons[type] + '）'
+          );
+        }
+      });
+      if (state.dayTypes.some(function(t) { return t !== 'rest'; })) {
+        explanation.weeklyDistribution.push('碳水时序：训练日按 40%（训练前）/ 20%（训练中）/ 40%（训练后）分配，分别服务肌糖原储备、运动表现维持、训练后合成代谢窗口。');
+      }
+
+      // 4. Risk assessment
+      var redS = checkREDSCriteria(tdee, protein, weight);
+      if (redS.warnings.length > 0) {
+        redS.warnings.forEach(function(w) { explanation.risk.push(w); });
+      } else {
+        explanation.risk.push('当前未检测到明显的 RED-S 风险，能量可用度正常。');
+      }
+      explanation.risk.push('EA 状态：' + (redS.eaStatus === 'low' ? '⚠️ 偏低，建议增加碳水摄入' : '✅ 正常'));
+      if (state.goal === 'cut') {
+        explanation.risk.push('减脂期建议每周监测体重与训练表现，若连续 2 周力量下降 >5%，应增加碳水摄入或缩小缺口。');
+      }
+
+      return explanation;
+    }
+
+    function toggleExplanation() {
+      var toggle = document.querySelector('.explanation-toggle');
+      var content = document.getElementById('explanationContent');
+      var opened = content.classList.toggle('open');
+      toggle.classList.toggle('open');
+
+      if (opened) {
+        var exp = buildExplanationText();
+        document.getElementById('expGoal').textContent = exp.goal;
+        var macroEl = document.getElementById('expMacros');
+        macroEl.innerHTML = exp.macro.map(function(m) { return '<div class="explanation-line info">' + m + '</div>'; }).join('');
+        var weeklyEl = document.getElementById('expWeekly');
+        weeklyEl.innerHTML = exp.weeklyDistribution.map(function(w) { return '<div class="explanation-line info">' + w + '</div>'; }).join('');
+        var riskEl = document.getElementById('expRisk');
+        riskEl.innerHTML = exp.risk.map(function(r) {
+          var isWarn = r.indexOf('⚠️') !== -1 || r.indexOf('偏低') !== -1 || r.indexOf('过大') !== -1 || r.indexOf('过低') !== -1 || r.indexOf('减少') !== -1 || r.indexOf('建议增加') !== -1;
+          return '<div class="explanation-line ' + (isWarn ? 'warn' : 'info') + '">' + r + '</div>';
+        }).join('');
+        document.getElementById('expTimestamp').textContent = '生成时间：' + new Date(exp.generatedAt).toLocaleString('zh-CN');
+      }
+    }
+
+    // ============ Save & Export ============
+    function saveAndExport() {
+      const weight = parseFloat(document.getElementById('bodyWeight').value) || state.bodyWeight;
+      const baseCarb = state.baseMacros.carb || 0;
+      const rules = getMacroRules();
+      const macroEval = window.MacroRuleEngine
+        ? window.MacroRuleEngine.evaluateMacroPlan({
+            rules,
+            context: {
+              goal: state.goal,
+              weightKg: weight,
+              bodyFatPercent: parseFloat(document.getElementById('bodyFat').value) || state.bodyFat || 15,
+              gender: state.gender || 'male',
+              tdee: state.TDEE,
+              avgIntensity: 1.5,
+              dayTypes: state.dayTypes
+            }
+          })
+        : null;
+      const redSStatus = checkREDSCriteria(state.TDEE + 0, state.baseMacros.protein || 0, weight);
+      const macroByType = {
+        rest: {
+          carb: Math.round(state.baseMacros.carb * (getDayTypeMultiplier('rest').carb_multiplier || 1)),
+          protein: Math.round(state.baseMacros.protein * (getDayTypeMultiplier('rest').protein_multiplier || 1)),
+          fat: Math.round(state.baseMacros.fat * (getDayTypeMultiplier('rest').fat_multiplier || 1))
+        },
+        light: {
+          carb: Math.round(state.baseMacros.carb * (getDayTypeMultiplier('light').carb_multiplier || 1)),
+          protein: Math.round(state.baseMacros.protein * (getDayTypeMultiplier('light').protein_multiplier || 1)),
+          fat: Math.round(state.baseMacros.fat * (getDayTypeMultiplier('light').fat_multiplier || 1))
+        },
+        medium: {
+          carb: Math.round(state.baseMacros.carb * (getDayTypeMultiplier('medium').carb_multiplier || 1)),
+          protein: Math.round(state.baseMacros.protein * (getDayTypeMultiplier('medium').protein_multiplier || 1)),
+          fat: Math.round(state.baseMacros.fat * (getDayTypeMultiplier('medium').fat_multiplier || 1))
+        },
+        heavy: {
+          carb: Math.round(state.baseMacros.carb * (getDayTypeMultiplier('heavy').carb_multiplier || 1)),
+          protein: Math.round(state.baseMacros.protein * (getDayTypeMultiplier('heavy').protein_multiplier || 1)),
+          fat: Math.round(state.baseMacros.fat * (getDayTypeMultiplier('heavy').fat_multiplier || 1))
+        }
+      };
+      const dailyPlan = state.dayTypes.map((type, dayIndex) => ({
+        dayIndex,
+        type,
+        macros: macroByType[type] || macroByType.medium,
+        carbTiming: type === 'rest' ? null : {
+          pre: Math.round((macroByType[type] || macroByType.medium).carb * 0.4),
+          intra: Math.round((macroByType[type] || macroByType.medium).carb * 0.2),
+          post: Math.round((macroByType[type] || macroByType.medium).carb * 0.4)
+        },
+        meals: state.mealPlans[type] || []
+      }));
+      const weeklyTotals = dailyPlan.reduce((acc, day) => {
+        acc.weeklyCarbs += day.macros.carb || 0;
+        acc.weeklyProtein += day.macros.protein || 0;
+        acc.weeklyFat += day.macros.fat || 0;
+        return acc;
+      }, { weeklyCarbs: 0, weeklyProtein: 0, weeklyFat: 0 });
+      const weeklyCalories = (weeklyTotals.weeklyCarbs * 4) + (weeklyTotals.weeklyProtein * 4) + (weeklyTotals.weeklyFat * 9);
+
+      const weekPlan = {
+        goal: normalizeGoalKeyCompat(state.goal),
+        generatedAt: new Date().toISOString(),
+        bodyWeight: weight,
+        weeklyCalories: weeklyCalories,
+        weeklyCarbs: weeklyTotals.weeklyCarbs,
+        weeklyProtein: weeklyTotals.weeklyProtein,
+        weeklyFat: weeklyTotals.weeklyFat,
+        dailyPlan: dailyPlan,
+        eaStatus: redSStatus.eaStatus,
+        redSRisk: redSStatus.redSRisk,
+        rulesVersion: macroRuleCache?.version || 'fallback',
+        ruleSource: macroRuleCache?.source || 'fallback',
+        mappedGoalKey: macroEval?.mappedGoalKey || normalizeGoalKeyCompat(state.goal),
+        dayTypes: state.dayTypes,
+        macros: {
+          base: state.baseMacros,
+          byType: macroByType
+        },
+        carbTiming: {
+          pre: Math.round(baseCarb * 0.4),
+          intra: Math.round(baseCarb * 0.2),
+          post: Math.round(baseCarb * 0.4)
+        },
+        mealPlans: {
+          byType: state.mealPlans
+        },
+        tdee: state.TDEE,
+        warnings: redSStatus.warnings
+      };
+
+      // Attach explanations
+      weekPlan.explanations = buildExplanationText();
+
+      // Save to localStorage
+      localStorage.setItem('carbBudgetPlan', JSON.stringify(weekPlan));
+      localStorage.removeItem('currentWeekPlan');
+
+      // Show confirmation
+      alert('✅ 周碳水计划已保存！\n\n该计划将与模块4的日训练表同步。');
+    }
+
+    function resetDefaults() {
+      state = {
+        goal: 'bulk',
+        bodyWeight: null,
+        bodyFat: null,
+        trainingDaysPerWeek: 2,
+        adaptiveEnabled: true,
+        BMR: 0,
+        TDEE: 0,
+        trainingBurn: 0,
+        dayTypes: ['rest', 'rest', 'medium', 'rest', 'medium', 'rest', 'rest'],
+        currentMacroView: 'medium',
+        baseMacros: { carb: 0, protein: 0, fat: 0 },
+        mealPlans: { rest: [], light: [], medium: [], heavy: [] }
+      };
+
+      document.getElementById('bodyWeight').value = '';
+      document.getElementById('bodyFat').value = '';
+
+      // 重新初始化日历
+      initWeekGrid();
+
+      // Reset UI
+      document.querySelectorAll('.goal-card').forEach(c => c.classList.remove('active'));
+      document.querySelector('.goal-card[data-goal="bulk"]').classList.add('active');
+
+      updateTrainingDaysDisplay();
+      calculateTDEE();
+    }
+
+    // ============ Navigation ============
+    function navigateTo(module) {
+      const routes = {
+        module1: '模块一_用户档案.html',
+        module3: '模块三_每周训练安排.html',
+        module4: '模块四_单日仪表盘.html',
+        supplement: '补剂时序生成器.html'
+      };
+      const target = routes[module];
+      if (target) {
+        window.location.href = target;
+      }
+    }
+  </script>
+</body>
+</html>
+
+
+

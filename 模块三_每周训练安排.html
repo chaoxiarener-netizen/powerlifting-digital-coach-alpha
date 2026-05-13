@@ -1,0 +1,1756 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="app_ui.css">
+  <title>力量举全景数字教练 - 每周训练安排</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a0a;
+      --panel: #141414;
+      --panel-hover: #1a1a1a;
+      --border: #2a2a2a;
+      --text: #e5e5e5;
+      --text-dim: #666;
+      --accent: #00ff88;
+      --accent-dim: #00cc6a;
+      --warn: #ff4444;
+      --warn-bg: rgba(255,68,68,0.1);
+      --info: #4488ff;
+      --success: #00ff88;
+      --carbs: #ffaa00;
+      --protein: #ff6b6b;
+      --fat: #9b59b6;
+      --light: #5ac8fa;
+      --medium: #ffd700;
+      --heavy: #ff6b6b;
+      --rest: #666;
+      --squat: #ff6b6b;
+      --bench: #4a90d9;
+      --deadlift: #9b59b6;
+      --accessory: #f39c12;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header h1 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--accent);
+      letter-spacing: 1px;
+    }
+
+    .header .subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Panel */
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+
+    .panel-title {
+      font-size: 12px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-title::before {
+      content: '';
+      width: 3px;
+      height: 12px;
+      background: var(--accent);
+      border-radius: 2px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      transition: border-color 0.2s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-dim);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* User Info Summary */
+    .user-summary {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .summary-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 8px;
+      text-align: center;
+    }
+
+    .summary-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .summary-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Week Grid */
+    .week-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .day-card {
+      aspect-ratio: 1;
+      background: var(--bg);
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 11px;
+    }
+
+    .day-card:hover {
+      border-color: var(--text-dim);
+    }
+
+    .day-card.active {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    .day-card .day-name {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .day-card .day-date {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .day-card .lift-badge {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      margin-top: 4px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+    }
+
+    .day-card.active .lift-badge {
+      display: flex;
+    }
+
+    /* Training Day Editor */
+    .training-editor {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .editor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .editor-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .editor-date {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Lift Type Selector */
+    .lift-selector {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .lift-btn {
+      padding: 12px 8px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 11px;
+    }
+
+    .lift-btn:hover {
+      border-color: var(--text-dim);
+    }
+
+    .lift-btn.active {
+      border-width: 2px;
+    }
+
+    .lift-btn[data-lift="squat"].active {
+      border-color: var(--squat);
+      background: rgba(255, 107, 107, 0.1);
+    }
+
+    .lift-btn[data-lift="bench"].active {
+      border-color: var(--bench);
+      background: rgba(74, 144, 217, 0.1);
+    }
+
+    .lift-btn[data-lift="deadlift"].active {
+      border-color: var(--deadlift);
+      background: rgba(155, 89, 182, 0.1);
+    }
+
+    .lift-btn[data-lift="accessory"].active {
+      border-color: var(--accessory);
+      background: rgba(243, 156, 18, 0.1);
+    }
+
+    .lift-btn .lift-icon {
+      font-size: 20px;
+      margin-bottom: 4px;
+    }
+
+    .lift-btn .lift-name {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    /* Set/Rep Input */
+    .setrep-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .setrep-item {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .setrep-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .setrep-label {
+      font-size: 10px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    .setrep-input {
+      width: 60px;
+      padding: 6px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text);
+      font-size: 16px;
+      text-align: center;
+    }
+
+    /* Percentage Display */
+    .percentage-display {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .percentage-value {
+      font-size: 36px;
+      font-weight: 700;
+    }
+
+    .percentage-display.low .percentage-value { color: var(--success); }
+    .percentage-display.medium .percentage-value { color: #ffaa00; }
+    .percentage-display.high .percentage-value { color: var(--warn); }
+
+    .percentage-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 4px;
+    }
+
+    /* Intensity Tags */
+    .intensity-tag {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    .intensity-tag.low {
+      background: rgba(0, 255, 136, 0.2);
+      color: var(--success);
+    }
+
+    .intensity-tag.medium {
+      background: rgba(255, 170, 0, 0.2);
+      color: #ffaa00;
+    }
+
+    .intensity-tag.high {
+      background: rgba(255, 68, 68, 0.2);
+      color: var(--warn);
+    }
+
+    /* RPE Selector */
+    .rpe-selector {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+    }
+
+    .rpe-btn {
+      flex: 1;
+      min-width: 36px;
+      padding: 8px 4px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .rpe-btn:hover {
+      border-color: var(--text-dim);
+    }
+
+    .rpe-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+    }
+
+    .rpe-btn.low { color: var(--success); }
+    .rpe-btn.medium { color: #ffaa00; }
+    .rpe-btn.high { color: var(--warn); }
+
+    /* Time Input */
+    .time-input-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+    }
+
+    .time-input-item {
+      text-align: center;
+    }
+
+    .time-input-item label {
+      font-size: 10px;
+      color: var(--text-dim);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .time-input-item input {
+      width: 100%;
+      padding: 10px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 14px;
+      text-align: center;
+    }
+
+    /* Weekly Summary */
+    .weekly-summary {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .summary-row:last-child {
+      border-bottom: none;
+    }
+
+    .summary-label {
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    .summary-value {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    /* Training Day List */
+    .training-list {
+      margin-top: 16px;
+    }
+
+    .training-list-item {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .training-list-item .day-badge {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      color: #000;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .training-list-item .info {
+      flex: 1;
+    }
+
+    .training-list-item .lift-type {
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .training-list-item .details {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .training-list-item .intensity-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      color: var(--bg);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 16px;
+    }
+
+    .btn:hover {
+      background: var(--accent-dim);
+    }
+
+    .btn-secondary {
+      background: var(--panel);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+    /* Nav Bar */
+    .nav-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-around;
+      padding: 12px 0;
+      z-index: 100;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      color: var(--text-dim);
+      text-decoration: none;
+      font-size: 10px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .nav-item.active {
+      color: var(--accent);
+    }
+
+    .nav-icon {
+      font-size: 20px;
+    }
+
+    /* Spacer */
+    .spacer {
+      height: 80px;
+    }
+
+    /* No Profile Alert */
+    .no-profile-alert {
+      background: var(--warn-bg);
+      border: 1px solid var(--warn);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+
+    .no-profile-alert .icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .no-profile-alert .text {
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Rest Day Message */
+    .rest-day-message {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--text-dim);
+    }
+
+    .rest-day-message .icon {
+      font-size: 48px;
+      margin-bottom: 12px;
+    }
+
+    .rest-day-message .text {
+      font-size: 14px;
+    }
+
+    /* Week Overview */
+    .week-overview { margin-top: 12px; }
+    .overview-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .overview-card:hover { border-color: var(--text-dim); }
+    .overview-card.active { border-color: var(--accent); background: rgba(0,255,136,0.05); }
+    .overview-card.rest { opacity: 0.5; }
+    .overview-card .overview-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .overview-card .overview-day {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .overview-card .overview-type-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .overview-card .overview-mid {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+    .overview-card .overview-lift {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .overview-card .overview-weight {
+      font-size: 11px;
+      color: var(--text-dim);
+    }
+    .overview-card .overview-bottom {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .overview-card .overview-stat {
+      text-align: center;
+    }
+    .overview-card .overview-stat-value {
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .overview-card .overview-stat-label {
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+    .overview-card .overview-pressure-tag {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 600;
+      margin-left: auto;
+      align-self: center;
+    }
+    .overview-pressure-tag.low { background: rgba(0,255,136,0.15); color: var(--success); }
+    .overview-pressure-tag.medium { background: rgba(255,170,0,0.15); color: #ffaa00; }
+    .overview-pressure-tag.high { background: rgba(255,68,68,0.15); color: var(--warn); }
+    .overview-pressure-tag.extreme { background: rgba(255,0,0,0.2); color: var(--warn); }
+
+    /* Edit Summary */
+    .edit-summary {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 16px;
+    }
+    .edit-summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+    .edit-summary-item { text-align: center; }
+    .edit-summary-label { font-size: 9px; color: var(--text-dim); margin-bottom: 2px; }
+    .edit-summary-value { font-size: 13px; font-weight: 600; }
+    .edit-summary-hint {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .edit-summary-hint.info { background: rgba(68,136,255,0.1); border: 1px solid rgba(68,136,255,0.3); color: var(--info); }
+    .edit-summary-hint.warn { background: rgba(255,68,68,0.1); border: 1px solid rgba(255,68,68,0.3); color: var(--warn); }
+    .edit-summary-hint.success { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--success); }
+
+    /* INOL/RPE Explanation */
+    .inol-explanation-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      user-select: none;
+      color: var(--text-dim);
+      font-size: 12px;
+      padding: 8px 0;
+    }
+    .inol-explanation-toggle:hover { color: var(--text); }
+    .inol-explanation-toggle .arrow { transition: transform 0.3s; font-size: 10px; }
+    .inol-explanation-toggle.open .arrow { transform: rotate(90deg); }
+    .inol-explanation-content {
+      display: none;
+      padding: 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .inol-explanation-content.open { display: block; }
+    .inol-exp-section { margin-bottom: 10px; }
+    .inol-exp-section:last-child { margin-bottom: 0; }
+    .inol-exp-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+    .inol-exp-text {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.5;
+    }
+
+    .info-box {
+      background: rgba(68, 136, 255, 0.1);
+      border: 1px solid rgba(68, 136, 255, 0.35);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+    }
+
+    .info-box-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--info);
+      margin-bottom: 6px;
+    }
+
+    .info-box-content {
+      font-size: 11px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+
+    .global-nav {
+      margin-bottom: 16px;
+      overflow-x: auto;
+    }
+
+    .global-nav-list {
+      display: flex;
+      gap: 8px;
+      min-width: max-content;
+    }
+
+    .global-nav-link {
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--panel);
+      color: var(--text-dim);
+      font-size: 12px;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .global-nav-link.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+    }
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="global-nav">
+      <div class="global-nav-list">
+        <a class="global-nav-link" href="index.html">总控台</a>
+        <a class="global-nav-link" href="单日计划_轻量模式.html">单日</a>
+        <a class="global-nav-link" href="模块一_用户档案.html">档案</a>
+        <a class="global-nav-link active" href="模块三_每周训练安排.html">训练</a>
+        <a class="global-nav-link" href="模块二_碳水预算引擎.html">营养</a>
+        <a class="global-nav-link" href="补剂时序生成器.html">补剂</a>
+        <a class="global-nav-link" href="模块四_单日仪表盘.html">作战图</a>
+        <a class="global-nav-link" href="模块五_长期计划.html">长期</a>
+      </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+      <h1>📅 每周训练安排</h1>
+      <div class="subtitle">训练设置页 · 每周训练计划唯一来源 · <a href="index.html" style="color:var(--accent);text-decoration:none;">返回首页</a></div>
+    </div>
+
+    <div class="info-box">
+      <div class="info-box-title">唯一训练来源</div>
+      <div class="info-box-content">这里是唯一的训练计划来源。今日训练强度会自动用于碳水分配和补剂时序。</div>
+    </div>
+
+    <!-- No Profile Alert -->
+    <div id="noProfileAlert" class="no-profile-alert" style="display: none;">
+      <div class="icon">⚠️</div>
+      <div class="text">请先完成用户档案录入</div>
+      <button class="btn btn-secondary" onclick="goToModule1()" style="margin-top: 12px;">去录入档案</button>
+    </div>
+
+    <!-- User 1RM Summary -->
+    <div class="panel" id="userSummaryPanel">
+      <div class="panel-title">你的力量数据</div>
+      <div class="user-summary">
+        <div class="summary-item">
+          <div class="summary-value" id="squatMax">--</div>
+          <div class="summary-label">深蹲 1RM</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" id="benchMax">--</div>
+          <div class="summary-label">卧推 1RM</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-value" id="deadliftMax">--</div>
+          <div class="summary-label">硬拉 1RM</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Week Calendar -->
+    <div class="panel">
+      <div class="panel-title">本周安排</div>
+      <div class="week-grid" id="weekGrid">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- Day Editor -->
+    <div class="panel" id="dayEditor" style="display: none;">
+      <div class="panel-title">
+        <span id="editorTitle">训练日详情</span>
+      </div>
+
+      <!-- Day Selector -->
+      <div class="editor-header">
+        <div>
+          <div class="editor-title" id="currentDayTitle">周三训练</div>
+          <div class="editor-date" id="currentDayDate">4月26日</div>
+        </div>
+        <button class="btn-secondary" onclick="clearDay()" style="padding: 6px 12px; font-size: 11px;">休息日</button>
+      </div>
+
+      <!-- Current Edit Summary -->
+      <div id="editSummary" class="edit-summary" style="display: none;">
+        <div class="edit-summary-grid">
+          <div class="edit-summary-item">
+            <div class="edit-summary-label">训练类型</div>
+            <div class="edit-summary-value" id="editType">--</div>
+          </div>
+          <div class="edit-summary-item">
+            <div class="edit-summary-label">%1RM</div>
+            <div class="edit-summary-value" id="editPercent">--%</div>
+          </div>
+          <div class="edit-summary-item">
+            <div class="edit-summary-label">INOL</div>
+            <div class="edit-summary-value" id="editINOL">--</div>
+          </div>
+          <div class="edit-summary-item">
+            <div class="edit-summary-label">RPE</div>
+            <div class="edit-summary-value" id="editRPE">--</div>
+          </div>
+          <div class="edit-summary-item">
+            <div class="edit-summary-label">压力标签</div>
+            <div class="edit-summary-value" id="editPressure">--</div>
+          </div>
+          <div class="edit-summary-item">
+            <div class="edit-summary-label">RPE 解释</div>
+            <div class="edit-summary-value" id="editRPElabel" style="font-size: 10px;">--</div>
+          </div>
+        </div>
+        <div id="editSummaryHint" class="edit-summary-hint info">实时计算中...</div>
+      </div>
+      </div>
+
+      <!-- Lift Type -->
+      <div class="form-group">
+        <label class="form-label">主项</label>
+        <div class="lift-selector">
+          <div class="lift-btn" data-lift="squat" onclick="selectLift('squat', this)">
+            <div class="lift-icon">🦵</div>
+            <div class="lift-name">深蹲</div>
+          </div>
+          <div class="lift-btn" data-lift="bench" onclick="selectLift('bench', this)">
+            <div class="lift-icon">🏋️</div>
+            <div class="lift-name">卧推</div>
+          </div>
+          <div class="lift-btn" data-lift="deadlift" onclick="selectLift('deadlift', this)">
+            <div class="lift-icon">💪</div>
+            <div class="lift-name">硬拉</div>
+          </div>
+          <div class="lift-btn" data-lift="accessory" onclick="selectLift('accessory', this)">
+            <div class="lift-icon">🔧</div>
+            <div class="lift-name">辅助</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Working Weight -->
+      <div class="form-group">
+        <label class="form-label">训练重量 (kg)</label>
+        <input type="number" class="form-input" id="workingWeight" placeholder="170" oninput="calculatePercent()">
+      </div>
+
+      <!-- Set x Reps -->
+      <div class="form-group">
+        <label class="form-label">组数 × 次数</label>
+        <div class="setrep-grid">
+          <div class="setrep-item">
+            <input type="number" class="setrep-input" id="sets" placeholder="5" value="5" oninput="calculatePercent()">
+            <div class="setrep-label">组数</div>
+          </div>
+          <div class="setrep-item">
+            <input type="number" class="setrep-input" id="reps" placeholder="5" value="5" oninput="calculatePercent()">
+            <div class="setrep-label">次数</div>
+          </div>
+          <div class="setrep-item">
+            <input type="number" class="setrep-input" id="duration" placeholder="90" value="90" oninput="calculatePercent()">
+            <div class="setrep-label">时长(分钟)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Percentage Display -->
+      <div class="percentage-display" id="percentageDisplay">
+        <div class="percentage-value" id="percentValue">--%</div>
+        <div class="percentage-label">占 1RM 比例</div>
+        <div class="intensity-tag low" id="intensityTag">轻度</div>
+      </div>
+
+      <!-- Time Settings -->
+      <div class="form-group">
+        <label class="form-label">时间安排</label>
+        <div class="time-input-group">
+          <div class="time-input-item">
+            <label>开始时间</label>
+            <input type="time" id="startTime" value="18:00">
+          </div>
+          <div class="time-input-item">
+            <label>时长</label>
+            <input type="number" id="durationMins" value="90" style="width: 60px;">
+          </div>
+          <div class="time-input-item">
+            <label>睡眠时间</label>
+            <input type="time" id="sleepTime" value="23:00">
+          </div>
+        </div>
+      </div>
+
+      <!-- Post RPE -->
+      <div class="form-group">
+        <label class="form-label">训练后 RPE <span style="font-size:10px;color:var(--text-dim);">(可选)</span></label>
+        <div class="rpe-selector" id="rpeSelector">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <!-- INOL/RPE Combo Hint -->
+      <div id="comboHint" class="combo-hint" style="display: none;"></div>
+
+      <button class="btn" onclick="saveDay()">保存训练日</button>
+    </div>
+
+    <button class="btn" onclick="saveWeekPlan()">💾 保存周计划</button>
+    <button class="btn btn-secondary" onclick="goToSupplement()">补剂清单设置</button>
+
+    <!-- Rest Day Message -->
+    <div class="panel" id="restDayMessage" style="display: none;">
+      <div class="rest-day-message">
+        <div class="icon">😴</div>
+        <div class="text">休息日 · 恢复为主</div>
+      </div>
+    </div>
+
+    <!-- INOL/RPE Explanation -->
+    <div class="panel">
+      <div class="inol-explanation-toggle" onclick="toggleINOLExplanation()">
+        <span>📊 INOL / RPE 是什么？</span>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="inol-explanation-content" id="inolExplanationContent">
+        <div class="inol-exp-section">
+          <div class="inol-exp-section-title">INOL（客观训练压力）</div>
+          <div class="inol-exp-text">
+            INOL 用于估算某个主项当天的客观训练压力，由组数、次数和 %1RM 共同决定。
+            数值越高，说明该动作对恢复的压力越大。<br><br>
+            参考范围：<br>
+            · &lt; 0.4：低压力<br>
+            · 0.4 ~ 0.8：中等压力<br>
+            · 0.8 ~ 1.2：较高压力，注意恢复<br>
+            · ≥ 1.2：单日压力偏高，谨慎叠加高 RPE
+          </div>
+        </div>
+        <div class="inol-exp-section">
+          <div class="inol-exp-section-title">RPE（主观用力程度）</div>
+          <div class="inol-exp-text">
+            RPE 是训练后的主观用力程度。相同重量下，如果 RPE 明显升高，可能代表疲劳、睡眠不足或恢复不足。<br><br>
+            · ≤ 6：轻松<br>
+            · 7：可控<br>
+            · 8：较吃力，约保留 2 次<br>
+            · 9：接近极限，约保留 1 次<br>
+            · 10：极限，无保留
+          </div>
+        </div>
+        <div class="inol-exp-section">
+          <div class="inol-exp-section-title">组合解读</div>
+          <div class="inol-exp-text">
+            INOL 更像客观工作量，RPE 更像身体反馈。<br><br>
+            · 高 INOL + 高 RPE → 训练压力和疲劳都高，需要关注恢复<br>
+            · 高 INOL + 低 RPE → 客观量较大但体感可控，说明状态较好<br>
+            · 低 INOL + 高 RPE → 客观量不大但体感吃力，可能存在疲劳累积<br>
+            · 低 INOL + 低 RPE → 训练压力低，适合作为恢复日
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">本周总览</div>
+      <div id="weekOverview" class="week-overview">
+        <!-- Week overview rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Weekly Summary -->
+    <div class="panel">
+      <div class="panel-title">本周训练总结</div>
+      <div class="weekly-summary">
+        <div class="summary-row">
+          <span class="summary-label">训练日天数</span>
+          <span class="summary-value" id="summaryTrainingDays">0天</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">休息日天数</span>
+          <span class="summary-value" id="summaryRestDays">7天</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">平均训练强度</span>
+          <span class="summary-value" id="summaryAvgIntensity">--</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">预计训练量</span>
+          <span class="summary-value" id="summaryVolume">-- 组</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <div class="nav-bar">
+    <div class="nav-item" onclick="navigateTo('module1')">
+      <span class="nav-icon">📋</span>
+      <span>档案</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('module2')">
+      <span class="nav-icon">🍚</span>
+      <span>营养</span>
+    </div>
+    <div class="nav-item active">
+      <span class="nav-icon">📅</span>
+      <span>训练</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('module4')">
+      <span class="nav-icon">📊</span>
+      <span>作战图</span>
+    </div>
+    <div class="nav-item" onclick="navigateTo('module5')">
+      <span class="nav-icon">🧠</span>
+      <span>补剂</span>
+    </div>
+  </div>
+
+  <script src="app_state.js"></script>
+  <script>
+    // ========== 数据模型 ==========
+    function toMondayIndex(date) {
+      return (date.getDay() + 6) % 7;
+    }
+
+    const state = {
+      userProfile: null,
+      currentEditingDay: null, // 0-6 (周一到周日)
+      weekPlan: {
+        0: null, 1: null, 2: null, 3: null, 4: null, 5: null, 6: null
+      }
+    };
+
+    const dayNames = ['一', '二', '三', '四', '五', '六', '日'];
+    const liftColors = {
+      squat: 'var(--squat)',
+      bench: 'var(--bench)',
+      deadlift: 'var(--deadlift)',
+      accessory: 'var(--accessory)'
+    };
+    const liftNames = {
+      squat: '深蹲',
+      bench: '卧推',
+      deadlift: '硬拉',
+      accessory: '辅助'
+    };
+
+    // ========== INOL / RPE Helpers ==========
+    function calculateINOL(sets, reps, percent1RM) {
+      if (!sets || !reps || percent1RM === null || percent1RM === undefined || percent1RM >= 100) return 0;
+      return Number(((sets * reps) / Math.max(1, 100 - percent1RM)).toFixed(2));
+    }
+
+    function getINOLPressureLabel(inol) {
+      if (inol === null || inol === undefined || inol === 0) return '无';
+      if (inol < 0.4) return '低';
+      if (inol < 0.8) return '中';
+      if (inol < 1.2) return '高';
+      return '透支风险';
+    }
+
+    function getRPEInterpretation(rpe) {
+      if (!rpe) return '未设置';
+      if (rpe <= 6) return '轻松';
+      if (rpe <= 7) return '可控';
+      if (rpe <= 8) return '较吃力';
+      if (rpe <= 9) return '接近极限';
+      return '极限';
+    }
+
+    function getINOLRPEHint(inol, rpe) {
+      if (inol === null || inol === undefined) return null;
+      var highINOL = inol >= 0.8;
+      var highRPE = rpe >= 8;
+      if (highINOL && !highRPE) return { text: '客观训练量较高，但主观压力可控，说明状态较好。', type: 'info' };
+      if (highINOL && highRPE) return { text: '训练压力和主观疲劳都偏高，建议关注睡眠、碳水和恢复。', type: 'warn' };
+      if (!highINOL && highRPE) return { text: '客观训练量不高但体感吃力，可能存在疲劳累积或恢复不足。', type: 'warn' };
+      return { text: '当前训练压力较低，适合作为轻训或恢复日。', type: 'success' };
+    }
+
+    // ========== 初始化 ==========
+    document.addEventListener('DOMContentLoaded', function() {
+      loadUserProfile();
+      generateWeekCalendar();
+      generateRPESelector();
+      loadFromStorage();
+      selectDay(toMondayIndex(new Date()));
+      updateSummary();
+      // Input listeners for real-time edit summary
+      document.getElementById('workingWeight').addEventListener('input', updateEditSummary);
+      document.getElementById('sets').addEventListener('input', updateEditSummary);
+      document.getElementById('reps').addEventListener('input', updateEditSummary);
+    });
+
+    function loadUserProfile() {
+      // 尝试多个 key
+      const data = JSON.parse(localStorage.getItem('userProfile') || localStorage.getItem('powerliftingProfile') || '{}');
+
+      if (!data.squat && data.squat1RM) data.squat = data.squat1RM;
+      if (!data.bench && data.bench1RM) data.bench = data.bench1RM;
+      if (!data.deadlift && data.deadlift1RM) data.deadlift = data.deadlift1RM;
+
+      if (!data.squat || !data.bench || !data.deadlift) {
+        document.getElementById('noProfileAlert').style.display = 'block';
+        document.getElementById('userSummaryPanel').style.display = 'none';
+        return;
+      }
+
+      state.userProfile = data;
+
+      // 显示 1RM 数据
+      document.getElementById('squatMax').textContent = data.squat + 'kg';
+      document.getElementById('benchMax').textContent = data.bench + 'kg';
+      document.getElementById('deadliftMax').textContent = data.deadlift + 'kg';
+    }
+
+    function goToModule1() {
+      window.location.href = '模块一_用户档案.html';
+    }
+
+    // ========== 周日历生成 ==========
+    function generateWeekCalendar() {
+      const grid = document.getElementById('weekGrid');
+      const today = new Date();
+      const currentDay = toMondayIndex(today);
+      const monday = new Date(today);
+      monday.setDate(today.getDate() - currentDay);
+
+      let html = '';
+      for (let i = 0; i < 7; i++) {
+        const date = new Date(monday);
+        date.setDate(monday.getDate() + i);
+        const dayNum = date.getDate();
+        const isToday = i === currentDay;
+        const plan = state.weekPlan[i];
+
+        html += `
+          <div class="day-card ${plan ? 'active' : ''} ${isToday ? 'today' : ''}"
+               data-day="${i}"
+               onclick="selectDay(${i})">
+            <span class="day-name">${dayNames[i]}</span>
+            <span class="day-date">${dayNum}</span>
+            <div class="lift-badge" id="badge${i}"
+                 style="background: ${plan ? liftColors[plan.lift] : 'transparent'}">
+              ${plan ? liftNames[plan.lift]?.[0] || '🏋' : ''}
+            </div>
+          </div>
+        `;
+      }
+      grid.innerHTML = html;
+    }
+
+    // ========== Edit Summary ==========
+    function updateEditSummary() {
+      var summary = document.getElementById('editSummary');
+      var liftBtn = document.querySelector('.lift-btn.active');
+      var weight = parseFloat(document.getElementById('workingWeight').value);
+      var sets = parseInt(document.getElementById('sets').value) || 0;
+      var reps = parseInt(document.getElementById('reps').value) || 0;
+      var rpeBtn = document.querySelector('.rpe-btn.active');
+      var rpe = rpeBtn ? parseFloat(rpeBtn.dataset.rpe) : null;
+
+      if (!liftBtn || !weight || !state.userProfile) {
+        summary.style.display = 'none';
+        return;
+      }
+
+      var lift = liftBtn.dataset.lift;
+      var max = lift === 'squat' ? state.userProfile.squat : lift === 'bench' ? state.userProfile.bench : lift === 'deadlift' ? state.userProfile.deadlift : 100;
+      var percent = Math.round((weight / max) * 100);
+      var inol = calculateINOL(sets, reps, percent);
+      var pressure = getINOLPressureLabel(inol);
+
+      // Determine type
+      var type = 'medium';
+      if (lift === 'accessory') type = 'light';
+      else if (rpe) type = rpe <= 6 ? 'light' : rpe <= 8 ? 'medium' : 'heavy';
+      var typeLabels = { rest: '休息', light: '轻训', medium: '常规', heavy: '重训' };
+
+      summary.style.display = 'block';
+      document.getElementById('editType').textContent = typeLabels[type] || type;
+      document.getElementById('editPercent').textContent = percent + '%';
+      document.getElementById('editINOL').textContent = inol;
+      document.getElementById('editRPE').textContent = rpe || '--';
+      document.getElementById('editPressure').textContent = pressure;
+      document.getElementById('editRPElabel').textContent = getRPEInterpretation(rpe);
+
+      // Combo hint
+      var hint = getINOLRPEHint(inol, rpe);
+      var hintEl = document.getElementById('comboHint');
+      if (hint && lift !== 'accessory') {
+        hintEl.style.display = 'block';
+        hintEl.className = 'combo-hint ' + hint.type;
+        hintEl.textContent = hint.text;
+      } else {
+        hintEl.style.display = 'none';
+      }
+
+      // Summary hint box
+      var hintBox = document.getElementById('editSummaryHint');
+      if (inol === 0 && lift !== 'accessory') {
+        hintBox.textContent = '当前训练量极低，确认是否计划为恢复日？';
+        hintBox.className = 'edit-summary-hint info';
+      } else if (inol >= 1.2) {
+        hintBox.textContent = '单日 INOL 偏高，建议控制辅助项训练量或调整 RPE';
+        hintBox.className = 'edit-summary-hint warn';
+      } else if (rpe && rpe >= 9) {
+        hintBox.textContent = 'RPE 较高，确保训练前充分恢复与碳水摄入';
+        hintBox.className = 'edit-summary-hint warn';
+      } else if (pressure === '高') {
+        hintBox.textContent = '训练压力较高，注意恢复与营养补充';
+        hintBox.className = 'edit-summary-hint info';
+      } else {
+        hintBox.textContent = '当前训练参数合理，按计划执行即可';
+        hintBox.className = 'edit-summary-hint success';
+      }
+    }
+
+    // ========== RPE 选择器 ==========
+    function generateRPESelector() {
+      const selector = document.getElementById('rpeSelector');
+      let html = '';
+      for (let rpe = 6; rpe <= 10; rpe++) {
+        const level = rpe <= 7 ? 'low' : rpe <= 8.5 ? 'medium' : 'high';
+        html += `
+          <div class="rpe-btn ${level}" data-rpe="${rpe}" onclick="selectRPE(${rpe}, this)">
+            ${rpe}
+          </div>
+        `;
+      }
+      selector.innerHTML = html;
+    }
+
+    function selectRPE(rpe, el) {
+      document.querySelectorAll('.rpe-btn').forEach(b => b.classList.remove('active'));
+      el.classList.add('active');
+      state.currentRPE = rpe;
+    }
+
+    // ========== 日期选择 ==========
+    function selectDay(dayIndex) {
+      state.currentEditingDay = dayIndex;
+
+      // 更新 UI
+      document.querySelectorAll('.day-card').forEach(card => {
+        card.style.borderColor = card.dataset.day == dayIndex ? 'var(--accent)' : 'var(--border)';
+      });
+
+      const today = new Date();
+      const monday = new Date(today);
+      const currentDay = toMondayIndex(today);
+      monday.setDate(today.getDate() - currentDay + dayIndex);
+
+      const month = monday.getMonth() + 1;
+      const day = monday.getDate();
+
+      document.getElementById('currentDayTitle').textContent = `${dayNames[dayIndex]}训练日`;
+      document.getElementById('currentDayDate').textContent = `${month}月${day}日`;
+
+      const plan = state.weekPlan[dayIndex];
+
+      if (plan) {
+        // 有数据，显示编辑面板并填充
+        document.getElementById('dayEditor').style.display = 'block';
+        document.getElementById('restDayMessage').style.display = 'none';
+
+        // 填充数据
+        document.querySelectorAll('.lift-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.lift === plan.lift);
+        });
+
+        document.getElementById('workingWeight').value = plan.weight || '';
+        document.getElementById('sets').value = plan.sets || 5;
+        document.getElementById('reps').value = plan.reps || 5;
+        document.getElementById('duration').value = plan.duration || 90;
+        document.getElementById('startTime').value = plan.startTime || '18:00';
+        document.getElementById('durationMins').value = plan.duration || 90;
+        document.getElementById('sleepTime').value = plan.sleepTime || '23:00';
+
+        // RPE
+        if (plan.rpe) {
+          const rpeBtn = document.querySelector(`.rpe-btn[data-rpe="${plan.rpe}"]`);
+          if (rpeBtn) {
+            document.querySelectorAll('.rpe-btn').forEach(b => b.classList.remove('active'));
+            rpeBtn.classList.add('active');
+          }
+        }
+
+        calculatePercent();
+        updateEditSummary();
+      } else {
+        // 无数据，显示空白编辑面板让用户输入
+        document.getElementById('dayEditor').style.display = 'block';
+        document.getElementById('restDayMessage').style.display = 'none';
+
+        // 清空表单
+        document.querySelectorAll('.lift-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById('workingWeight').value = '';
+        document.getElementById('sets').value = 5;
+        document.getElementById('reps').value = 5;
+        document.getElementById('duration').value = 90;
+        document.getElementById('startTime').value = '18:00';
+        document.getElementById('sleepTime').value = '23:00';
+        document.querySelectorAll('.rpe-btn').forEach(b => b.classList.remove('active'));
+
+        document.getElementById('percentValue').textContent = '--%';
+        document.getElementById('percentageDisplay').className = 'percentage-display';
+
+        document.getElementById('editSummary').style.display = 'none';
+        document.getElementById('comboHint').style.display = 'none';
+      }
+      renderWeekOverview();
+    }
+
+    function selectLift(lift, el) {
+      document.querySelectorAll('.lift-btn').forEach(btn => btn.classList.remove('active'));
+      el.classList.add('active');
+      calculatePercent();
+    }
+
+    function calculatePercent() {
+      if (!state.userProfile) return;
+
+      const lift = document.querySelector('.lift-btn.active')?.dataset.lift || 'squat';
+      const weight = parseFloat(document.getElementById('workingWeight').value) || 0;
+
+      let max;
+      switch (lift) {
+        case 'squat': max = state.userProfile.squat; break;
+        case 'bench': max = state.userProfile.bench; break;
+        case 'deadlift': max = state.userProfile.deadlift; break;
+        default: max = 100;
+      }
+
+      if (!max || !weight) {
+        document.getElementById('percentValue').textContent = '--%';
+        return;
+      }
+
+      const percent = Math.round((weight / max) * 100);
+      const display = document.getElementById('percentageDisplay');
+      const valueEl = document.getElementById('percentValue');
+      const tagEl = document.getElementById('intensityTag');
+
+      valueEl.textContent = percent + '%';
+
+      // 更新强度标签
+      display.classList.remove('low', 'medium', 'high');
+      if (percent <= 70) {
+        display.classList.add('low');
+        tagEl.className = 'intensity-tag low';
+        tagEl.textContent = '轻度';
+      } else if (percent <= 82) {
+        display.classList.add('medium');
+        tagEl.className = 'intensity-tag medium';
+        tagEl.textContent = '中度';
+      } else if (percent <= 90) {
+        display.classList.add('medium');
+        tagEl.className = 'intensity-tag medium';
+        tagEl.textContent = '强度';
+      } else {
+        display.classList.add('high');
+        tagEl.className = 'intensity-tag high';
+        tagEl.textContent = '极限';
+      }
+      updateEditSummary();
+    }
+
+    function clearDay() {
+      if (state.currentEditingDay === null) return;
+      state.weekPlan[state.currentEditingDay] = null;
+      // 清空表单但不隐藏编辑器，让用户可以重新输入
+      document.querySelectorAll('.lift-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('workingWeight').value = '';
+      document.getElementById('sets').value = 5;
+      document.getElementById('reps').value = 5;
+      document.getElementById('duration').value = 90;
+      document.querySelectorAll('.rpe-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('percentValue').textContent = '--%';
+      document.getElementById('percentageDisplay').className = 'percentage-display';
+      updateDayBadges();
+      updateSummary();
+      saveToStorage();
+    }
+
+    function saveDay() {
+      const dayIndex = state.currentEditingDay;
+      if (dayIndex === null) return;
+
+      const activeLift = document.querySelector('.lift-btn.active');
+      if (!activeLift) {
+        alert('请选择主项');
+        return;
+      }
+
+      const weight = parseFloat(document.getElementById('workingWeight').value);
+      if (!weight) {
+        alert('请输入训练重量');
+        return;
+      }
+
+      const plan = {
+        lift: activeLift.dataset.lift,
+        dayIndex: dayIndex,
+        weight: weight,
+        sets: parseInt(document.getElementById('sets').value) || 5,
+        reps: parseInt(document.getElementById('reps').value) || 5,
+        duration: parseInt(document.getElementById('duration').value) || 90,
+        startTime: document.getElementById('startTime').value || '18:00',
+        sleepTime: document.getElementById('sleepTime').value || '23:00',
+        rpe: parseFloat(document.querySelector('.rpe-btn.active')?.dataset.rpe) || null
+      };
+
+      // 计算百分比
+      let max;
+      switch (plan.lift) {
+        case 'squat': max = state.userProfile.squat; break;
+        case 'bench': max = state.userProfile.bench; break;
+        case 'deadlift': max = state.userProfile.deadlift; break;
+        default: max = 100;
+      }
+      plan.percent = Math.round((plan.weight / max) * 100);
+      plan.percent1RM = plan.percent;
+      if (plan.lift === 'accessory') {
+        plan.inol = 0;
+        plan.type = 'light';
+      } else {
+        plan.inol = calculateINOL(plan.sets, plan.reps, plan.percent);
+        const rpe = plan.rpe || 7;
+        plan.type = rpe <= 6 ? 'light' : rpe <= 8 ? 'medium' : 'heavy';
+      }
+
+      state.weekPlan[dayIndex] = plan;
+
+      updateDayBadges();
+      updateSummary();
+      saveToStorage();
+      syncDayTypesToModule2();
+    }
+
+    function updateDayBadges() {
+      for (let i = 0; i < 7; i++) {
+        const plan = state.weekPlan[i];
+        const badge = document.getElementById('badge' + i);
+        const card = document.querySelector(`.day-card[data-day="${i}"]`);
+
+        if (plan) {
+          badge.style.background = liftColors[plan.lift];
+          badge.textContent = liftNames[plan.lift]?.[0] || '🏋';
+          card.classList.add('active');
+        } else {
+          badge.style.background = 'transparent';
+          badge.textContent = '';
+          card.classList.remove('active');
+        }
+      }
+    }
+
+    function updateSummary() {
+      const trainingDays = Object.values(state.weekPlan).filter(p => p !== null).length;
+      const restDays = 7 - trainingDays;
+
+      document.getElementById('summaryTrainingDays').textContent = trainingDays + '天';
+      document.getElementById('summaryRestDays').textContent = restDays + '天';
+
+      // 计算平均强度
+      const plans = Object.values(state.weekPlan).filter(p => p !== null);
+      if (plans.length > 0) {
+        const avgPercent = Math.round(plans.reduce((sum, p) => sum + (p.percent || 0), 0) / plans.length);
+        document.getElementById('summaryAvgIntensity').textContent = avgPercent + '%';
+
+        const totalSets = plans.reduce((sum, p) => sum + (p.sets || 0), 0);
+        document.getElementById('summaryVolume').textContent = totalSets + ' 组';
+      } else {
+        document.getElementById('summaryAvgIntensity').textContent = '--';
+        document.getElementById('summaryVolume').textContent = '-- 组';
+      }
+
+      // 更新总览
+      renderWeekOverview();
+    }
+
+    function renderWeekOverview() {
+      var container = document.getElementById('weekOverview');
+      var html = '';
+      for (var i = 0; i < 7; i++) {
+        var plan = state.weekPlan[i];
+        if (plan) {
+          var inol = (plan.inol !== undefined && plan.inol !== null) ? plan.inol : calculateINOL(plan.sets, plan.reps, plan.percent);
+          var pressure = getINOLPressureLabel(inol);
+          var pressureClass = inol >= 1.2 ? 'extreme' : inol >= 0.8 ? 'high' : inol >= 0.4 ? 'medium' : 'low';
+          var typeLabels = { rest: '休息', light: '轻训', medium: '常规', heavy: '重训' };
+          var type = plan.type || 'medium';
+          var typeColors = { rest: 'var(--rest)', light: '#5ac8fa', medium: '#ffd700', heavy: '#ff6b6b' };
+          var rpeText = plan.rpe ? 'RPE ' + plan.rpe : 'RPE --';
+          html += '<div class="overview-card" data-day="' + i + '" onclick="selectDay(' + i + ')">';
+          html += '  <div class="overview-top">';
+          html += '    <span class="overview-day">周' + dayNames[i] + '</span>';
+          html += '    <span class="overview-type-badge" style="background: ' + typeColors[type] + '20; color: ' + typeColors[type] + ';">' + typeLabels[type] + '</span>';
+          html += '  </div>';
+          html += '  <div class="overview-mid">';
+          html += '    <span class="overview-lift" style="color: ' + liftColors[plan.lift] + ';">' + liftNames[plan.lift] + '</span>';
+          html += '    <span class="overview-weight">' + plan.weight + 'kg × ' + plan.sets + '×' + plan.reps + '</span>';
+          html += '  </div>';
+          html += '  <div class="overview-bottom">';
+          html += '    <div class="overview-stat"><div class="overview-stat-value">' + (plan.percent || '--') + '%</div><div class="overview-stat-label">%1RM</div></div>';
+          html += '    <div class="overview-stat"><div class="overview-stat-value">' + rpeText + '</div><div class="overview-stat-label">RPE</div></div>';
+          html += '    <div class="overview-stat"><div class="overview-stat-value">' + inol + '</div><div class="overview-stat-label">INOL</div></div>';
+          html += '    <div class="overview-pressure-tag ' + pressureClass + '">' + pressure + '</div>';
+          html += '  </div>';
+          html += '</div>';
+        } else {
+          html += '<div class="overview-card rest" data-day="' + i + '" onclick="selectDay(' + i + ')">';
+          html += '  <div class="overview-top">';
+          html += '    <span class="overview-day">周' + dayNames[i] + '</span>';
+          html += '    <span class="overview-type-badge" style="background: rgba(102,102,102,0.15); color: var(--rest);">休息</span>';
+          html += '  </div>';
+          html += '  <div class="overview-mid">';
+          html += '    <span style="color: var(--text-dim); font-size: 12px;">恢复日 · 无主项训练</span>';
+          html += '  </div>';
+          html += '  <div class="overview-bottom">';
+          html += '    <div class="overview-stat"><div class="overview-stat-value" style="color: var(--rest);">0</div><div class="overview-stat-label">INOL</div></div>';
+          html += '  </div>';
+          html += '</div>';
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    // ========== 存储管理 ==========
+    function saveToStorage() {
+      const days = Array.from({ length: 7 }, (_, dayIndex) => {
+        const plan = state.weekPlan[dayIndex];
+        return plan ? Object.assign({ dayIndex }, plan) : null;
+      });
+      const payload = {
+        generatedAt: new Date().toISOString(),
+        dayIndexStandard: '0=Monday,6=Sunday',
+        days: days,
+        byDayIndex: days.reduce((acc, plan, dayIndex) => {
+          acc[dayIndex] = plan;
+          return acc;
+        }, {})
+      };
+      localStorage.setItem('weeklyTrainingPlan', JSON.stringify(payload));
+      localStorage.removeItem('weeklyTrainingPlan_userProfile');
+    }
+
+    function loadFromStorage() {
+      const savedPlan = localStorage.getItem('weeklyTrainingPlan');
+      if (savedPlan) {
+        const parsed = JSON.parse(savedPlan);
+        if (parsed.days && Array.isArray(parsed.days)) {
+          state.weekPlan = parsed.days.reduce((acc, plan, dayIndex) => {
+            // Old data compat: fill missing fields
+            if (plan) {
+              if (plan.percent && !plan.percent1RM) plan.percent1RM = plan.percent;
+              if (!plan.percent && plan.percent1RM) plan.percent = plan.percent1RM;
+              if (plan.inol === undefined || plan.inol === null) {
+                plan.inol = calculateINOL(plan.sets, plan.reps, plan.percent);
+              }
+              if (plan.lift === 'accessory' && (plan.inol === undefined || plan.inol === null)) {
+                plan.inol = 0;
+              }
+            }
+            acc[dayIndex] = plan;
+            return acc;
+          }, { 0: null, 1: null, 2: null, 3: null, 4: null, 5: null, 6: null });
+        } else {
+          state.weekPlan = parsed;
+        }
+        updateDayBadges();
+        updateSummary();
+        renderWeekOverview();
+      }
+    }
+
+    function saveWeekPlan() {
+      saveToStorage();
+
+      // 同步到模块二的日历
+      syncDayTypesToModule2();
+
+      localStorage.removeItem('fullTrainingPlan');
+
+      alert('✅ 周训练计划已保存！\n\n已同步到模块二碳水预算引擎。');
+    }
+
+    // ========== 同步到模块二 ==========
+    function syncDayTypesToModule2() {
+      // 从训练计划推断 dayTypes
+      const dayTypes = ['rest', 'rest', 'rest', 'rest', 'rest', 'rest', 'rest'];
+
+      for (let i = 0; i < 7; i++) {
+        const dayPlan = state.weekPlan[i];
+        if (dayPlan && dayPlan.lift) {
+          dayTypes[i] = dayPlan.type || ((dayPlan.rpe || 7) <= 6 ? 'light' : (dayPlan.rpe || 7) <= 8 ? 'medium' : 'heavy');
+        }
+      }
+
+      // 直接写入独立 key
+      localStorage.setItem('module3_dayTypes', JSON.stringify(dayTypes));
+    }
+
+    function goToSupplement() {
+      window.location.href = '补剂时序生成器.html';
+    }
+
+    function navigateTo(module) {
+      const modules = {
+        module1: '模块一_用户档案.html',
+        module2: '模块二_碳水预算引擎.html',
+        module3: '模块三_每周训练安排.html',
+        module4: '模块四_单日仪表盘.html',
+        module5: '补剂时序生成器.html'
+      };
+
+      if (modules[module]) {
+        window.location.href = modules[module];
+      } else {
+        alert(`跳转至${module}（开发中）`);
+      }
+    }
+
+    // ========== INOL Explanation Toggle ==========
+    function toggleINOLExplanation() {
+      var toggle = document.querySelector('.inol-explanation-toggle');
+      var content = document.getElementById('inolExplanationContent');
+      content.classList.toggle('open');
+      toggle.classList.toggle('open');
+    }
+  </script>
+</body>
+</html>
+
