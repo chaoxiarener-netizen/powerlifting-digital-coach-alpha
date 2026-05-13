@@ -1,21 +1,21 @@
 <view class="page index-page">
   <view class="hero">
     <view class="accent-bar"></view>
-    <text class="eyebrow">Alpha 小程序迁移验证版</text>
+    <text class="hero-eyebrow">今日总控台</text>
     <text class="page-title">力量举全景数字教练</text>
-    <text class="page-subtitle">Phase 1 先验证总控台、轻量单日计划和今日作战图闭环。</text>
+    <text class="page-subtitle">Alpha 小程序迁移验证版 · 总控台、轻量单日计划和今日作战图闭环。</text>
   </view>
 
-  <view class="panel action-panel panel-elevated">
+  <view class="action-panel">
     <text class="panel-title">现在该做什么？</text>
     <view class="now-row">
       <text class="now-time">{{nextAction.nowTime}}</text>
-      <text class="pill">{{nextAction.currentLabel}}</text>
+      <text class="now-label">{{nextAction.currentLabel}}</text>
     </view>
 
     <block wx:if="{{nextAction.hasData && nextAction.nextEvent}}">
       <view class="next-block">
-        <text class="next-eyebrow">下一步 · 还有 {{nextAction.nextEvent.minutesUntil}} 分钟</text>
+        <text class="next-countdown">下一步 · 还有 {{nextAction.nextEvent.minutesUntil}} 分钟</text>
         <text class="next-title">{{nextAction.nextEvent.time}} {{nextAction.nextEvent.title}}</text>
         <text class="next-meta">{{nextAction.nextEvent.meta}}</text>
       </view>
@@ -27,7 +27,7 @@
     </block>
 
     <block wx:elif="{{nextAction.status === 'done_for_day'}}">
-      <text class="empty-title">今日关键事件已完成</text>
+      <view class="done-badge">✓ 今日执行完成</view>
       <text class="empty-desc">{{nextAction.message}}</text>
     </block>
 
@@ -70,4 +70,6 @@
       </view>
     </view>
   </view>
+
+  <text class="footer-note">本地数据 · 仅供训练规划参考</text>
 </view>

@@ -1,14 +1,15 @@
 <view class="page single-day-page">
   <view class="hero">
     <view class="accent-bar"></view>
-    <text class="pill">Phase 1</text>
     <text class="page-title">轻量单日计划</text>
     <text class="page-subtitle">只规划今天 · 保存后生成今日作战图</text>
   </view>
 
+  <!-- ─── 今日训练 ─── -->
   <view class="panel">
     <view class="panel-head">
-      <text class="panel-title">今日训练</text>
+      <text class="section-title">今日训练</text>
+      <text class="section-desc">设置今天的训练类型和强度</text>
     </view>
 
     <view class="switch-row">
@@ -19,29 +20,33 @@
       <switch checked="{{form.isTrainingDay}}" color="#00ff88" bindchange="handleTrainingToggle" />
     </view>
 
-    <view class="field">
-      <text class="field-label">训练类型</text>
-      <picker range="{{dayTypeOptions}}" range-key="label" value="{{dayTypeIndex}}" bindchange="handleDayTypeChange">
-        <view class="picker-value {{!form.isTrainingDay ? 'muted' : ''}}">{{dayTypeOptions[dayTypeIndex].label}}</view>
-      </picker>
-    </view>
+    <view class="field-group {{!form.isTrainingDay ? 'field-dimmed' : ''}}">
+      <view class="field">
+        <text class="field-label">训练类型</text>
+        <picker range="{{dayTypeOptions}}" range-key="label" value="{{dayTypeIndex}}" bindchange="handleDayTypeChange">
+          <view class="picker-value {{!form.isTrainingDay ? 'op-muted' : ''}}">{{dayTypeOptions[dayTypeIndex].label}}</view>
+        </picker>
+      </view>
 
-    <view class="field">
-      <text class="field-label">主项</text>
-      <picker range="{{liftOptions}}" range-key="label" value="{{liftIndex}}" bindchange="handleLiftChange">
-        <view class="picker-value {{!form.isTrainingDay ? 'muted' : ''}}">{{liftOptions[liftIndex].label}}</view>
-      </picker>
-    </view>
+      <view class="field">
+        <text class="field-label">主项</text>
+        <picker range="{{liftOptions}}" range-key="label" value="{{liftIndex}}" bindchange="handleLiftChange">
+          <view class="picker-value {{!form.isTrainingDay ? 'op-muted' : ''}}">{{liftOptions[liftIndex].label}}</view>
+        </picker>
+      </view>
 
-    <view class="field">
-      <text class="field-label">RPE</text>
-      <input class="input {{!form.isTrainingDay ? 'muted' : ''}}" type="digit" value="{{form.rpe}}" placeholder="例如 8" bindinput="handleInput" data-field="rpe" />
+      <view class="field">
+        <text class="field-label">RPE</text>
+        <input class="input {{!form.isTrainingDay ? 'op-muted' : ''}}" type="digit" value="{{form.rpe}}" placeholder="例如 8" bindinput="handleInput" data-field="rpe" />
+      </view>
     </view>
   </view>
 
+  <!-- ─── 今日时间 ─── -->
   <view class="panel">
     <view class="panel-head">
-      <text class="panel-title">今日时间</text>
+      <text class="section-title">今日时间</text>
+      <text class="section-desc">起床、训练和入睡时间安排</text>
     </view>
 
     <view class="field">
@@ -51,16 +56,18 @@
       </picker>
     </view>
 
-    <view class="field">
-      <text class="field-label">训练开始时间</text>
-      <picker mode="time" value="{{form.workoutStartTime}}" bindchange="handleTimeChange" data-field="workoutStartTime">
-        <view class="picker-value {{!form.isTrainingDay ? 'muted' : ''}}">{{form.workoutStartTime}}</view>
-      </picker>
-    </view>
+    <view class="field-group {{!form.isTrainingDay ? 'field-dimmed' : ''}}">
+      <view class="field">
+        <text class="field-label">训练开始时间</text>
+        <picker mode="time" value="{{form.workoutStartTime}}" bindchange="handleTimeChange" data-field="workoutStartTime">
+          <view class="picker-value {{!form.isTrainingDay ? 'op-muted' : ''}}">{{form.workoutStartTime}}</view>
+        </picker>
+      </view>
 
-    <view class="field">
-      <text class="field-label">训练时长（分钟）</text>
-      <input class="input {{!form.isTrainingDay ? 'muted' : ''}}" type="number" value="{{form.workoutDurationMinutes}}" placeholder="90" bindinput="handleInput" data-field="workoutDurationMinutes" />
+      <view class="field">
+        <text class="field-label">训练时长（分钟）</text>
+        <input class="input {{!form.isTrainingDay ? 'op-muted' : ''}}" type="number" value="{{form.workoutDurationMinutes}}" placeholder="90" bindinput="handleInput" data-field="workoutDurationMinutes" />
+      </view>
     </view>
 
     <view class="field">
@@ -71,14 +78,16 @@
     </view>
   </view>
 
+  <!-- ─── 补剂清单 ─── -->
   <view class="panel">
     <view class="panel-head">
-      <text class="panel-title">补剂清单</text>
+      <text class="section-title">补剂清单</text>
+      <text class="section-desc">选择今天想补充的营养补剂</text>
     </view>
     <checkbox-group bindchange="handleSupplementChange">
       <label class="checkbox-row" wx:for="{{supplementOptions}}" wx:key="value">
         <checkbox value="{{item.value}}" checked="{{item.checked}}" color="#00ff88" />
-        <view>
+        <view class="checkbox-info">
           <text class="checkbox-title">{{item.label}}</text>
           <text class="checkbox-desc">{{item.desc}}</text>
         </view>
@@ -86,8 +95,9 @@
     </checkbox-group>
   </view>
 
+  <!-- ─── 操作按钮 ─── -->
   <view class="actions">
-    <view class="btn btn-primary smooth" bindtap="savePlan">保存并生成今日作战图</view>
-    <view class="btn btn-secondary smooth" bindtap="goHome">返回总控台</view>
+    <view class="btn btn-primary" bindtap="savePlan">保存并生成今日作战图</view>
+    <view class="btn btn-secondary" bindtap="goHome">返回总控台</view>
   </view>
 </view>

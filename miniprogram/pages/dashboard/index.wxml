@@ -3,38 +3,39 @@
     <view class="accent-bar"></view>
     <text class="pill">训练来源：轻量单日计划</text>
     <text class="page-title">今日作战图</text>
-    <text class="page-subtitle">Phase 1 从 singleDayPlan 生成今日摘要和关键时间流。</text>
+    <text class="page-subtitle">从 singleDayPlan 生成今日摘要和关键时间流。</text>
   </view>
 
   <block wx:if="{{hasPlan}}">
-    <view class="panel summary-panel panel-elevated">
+    <!-- 今日摘要 -->
+    <view class="card card-accent">
       <view class="panel-head">
         <text class="panel-title">今日摘要</text>
       </view>
       <view class="summary-grid">
         <view class="summary-item">
-          <view class="summary-icon-wrap accent-icon"><text class="summary-icon">◈</text></view>
+          <view class="summary-icon-wrap type-bg-training"><text class="summary-icon">◈</text></view>
           <view class="summary-body">
             <text class="summary-label">今日训练</text>
             <text class="summary-value">{{summary.training}}</text>
           </view>
         </view>
         <view class="summary-item">
-          <view class="summary-icon-wrap info-icon"><text class="summary-icon">◆</text></view>
+          <view class="summary-icon-wrap type-bg-supplement"><text class="summary-icon">◆</text></view>
           <view class="summary-body">
             <text class="summary-label">今日补剂</text>
             <text class="summary-value">{{summary.supplements}}</text>
           </view>
         </view>
         <view class="summary-item">
-          <view class="summary-icon-wrap"><text class="summary-icon">○</text></view>
+          <view class="summary-icon-wrap type-bg-sleep"><text class="summary-icon">○</text></view>
           <view class="summary-body">
             <text class="summary-label">计划入睡</text>
             <text class="summary-value">{{summary.sleep}}</text>
           </view>
         </view>
         <view class="summary-item">
-          <view class="summary-icon-wrap warning-icon"><text class="summary-icon">△</text></view>
+          <view class="summary-icon-wrap type-bg-warning"><text class="summary-icon">△</text></view>
           <view class="summary-body">
             <text class="summary-label">关键提醒</text>
             <text class="summary-value warning-text">{{summary.warning}}</text>
@@ -43,7 +44,8 @@
       </view>
     </view>
 
-    <view class="panel">
+    <!-- 单日时间流 -->
+    <view class="card">
       <view class="panel-head">
         <text class="panel-title">单日时间流</text>
       </view>
@@ -53,14 +55,14 @@
           <view class="timeline-content">
             <view class="time-row">
               <text class="time-text">{{item.displayTime}}</text>
-              <view class="type-tag type-{{item.type}}" wx:if="{{item.type}}">
+              <view class="type-tag {{item.type}}" wx:if="{{item.type}}">
                 <text>{{item.type}}</text>
               </view>
             </view>
             <text class="event-title">{{item.title}}</text>
             <text class="event-meta">{{item.meta}}</text>
             <view class="tags" wx:if="{{item.tags.length}}">
-              <text class="tag" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
+              <text class="tag tag-{{item.type}}" wx:for="{{item.tags}}" wx:key="*this">{{item}}</text>
             </view>
             <text class="event-detail">{{item.detail}}</text>
           </view>
@@ -70,17 +72,17 @@
   </block>
 
   <block wx:else>
-    <view class="panel empty-panel text-center">
+    <view class="card empty-panel text-center">
       <view class="empty-icon-wrap">
         <text class="empty-icon">◈</text>
       </view>
       <text class="empty-panel-title">还没有轻量单日计划</text>
       <text class="empty-desc">先创建今天的训练、作息和补剂清单，再查看今日作战图。</text>
-      <view class="btn btn-primary smooth" bindtap="goCreate">去创建</view>
+      <view class="btn btn-primary" bindtap="goCreate">去创建</view>
     </view>
   </block>
 
   <view class="actions">
-    <view class="btn btn-secondary smooth" bindtap="goHome">返回总控台</view>
+    <view class="btn btn-secondary" bindtap="goHome">返回总控台</view>
   </view>
 </view>

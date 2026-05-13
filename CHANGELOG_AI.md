@@ -1,39 +1,44 @@
 # CHANGELOG_AI
 
-## 2026-05-13 小程序 Phase 2 — UI 收口
+## 2026-05-13 小程序 Phase 2.1 — 视觉重设计
 
 ### 本轮修改
 - `miniprogram/app.wxss`
-  - 新增 `.smooth` / `.gap-*` / `.text-warning` / `.text-danger` 等布局和色彩工具类。
-  - 新增 `.btn:active` 按压态，优化按钮反馈。
-  - 新增 `.accent-bar` / `.divider` / `.panel-elevated` 装饰与层级组件。
+  - 重构为小程序设计系统：新增 `.card` / `.card-strong` / `.card-accent` 卡片体系。
+  - 新增 `.section-title` / `.section-desc` 区块标题与说明。
+  - 新增 `.badge` / `.badge-sm` 徽章组件和 `.tag-*` 六种事件类型配色标签。
+  - 新增 `.btn-small` 按钮变体，`.btn-primary` 增加渐变 + 外层光晕。
+  - 新增 `.type-*` / `.type-bg-*` 全局事件类型配色（training/supplement/sleep/warning/recovery/wake）。
+  - 新增 `.op-muted` 透明度工具类，取代页面级 `.muted`。
+  - 统一表单控件 `.input` / `.picker-value` 高度为 88rpx，圆角 16rpx。
+  - 页面背景加入微渐变 `#0a0a0a → #0e0e0e`。
 - `miniprogram/pages/index/index.wxml`
-  - 首页英雄区新增 `.accent-bar` 装饰条。
-  - 作战卡片控制台添加 `.panel-elevated` 提升层级感。
-  - 功能入口卡改为图标 + 文本 + 箭头三栏布局，使用 `.entry-icon` / `.entry-body` / `.entry-arrow` 结构。
-  - 随后事件改为独立卡片结构，增加 `following-label` / `following-text` / `following-meta` 层级。
+  - Hero 区域重构：新增 `.hero-eyebrow` 大标签"今日总控台"，去除旧 Phase 标识文案。
+  - 作战卡结构优化：`.next-block` 增加绿色左边框 `border-left: 4rpx`，倒计时标签改为 `.next-countdown`。
+  - 随后事件改为左侧灰色边栏卡片。
+  - 空状态新增 ".done-badge" 绿色已完成标记。
+  - 页面底部新增 `.footer-note` 版权说明"本地数据 · 仅供训练规划参考"。
 - `miniprogram/pages/index/index.wxss`
-  - 完全重写入口卡样式：圆形图标区、flex 三栏布局、按压缩放。
-  - 时间显示从 `64rpx` 加大至 `72rpx`，倒计时卡片加深背景。
-  - 新增 `.next-eyebrow` 小标题样式和 `.next-following` 卡片结构。
+  - 时间显示从 72rpx 加大至 80rpx，使用 `font-variant-numeric: tabular-nums` 等宽数字。
+  - 作战卡 `border-radius` 升级至 24rpx，背景加深至 `#181818`。
+  - 入口卡圆角统一为 20rpx，按压缩放 `scale(0.98)`。
 - `miniprogram/pages/single-day/index.wxml`
-  - 各表单区块增加 `.panel-head` 带底部分割线。
-  - 按钮添加 `.smooth` 过渡类。
-  - 训练时长 input 添加 `placeholder="90"` 提升输入引导。
+  - 表单区块增加 `.section-desc` 说明文案（如"设置今天的训练类型和强度"）。
+  - 训练相关字段使用 `.field-group` 包裹，休息日添加 `.field-dimmed` 整体半透明淡化。
+  - checkbox 区域增加 `.checkbox-info` 容器优化图文布局。
 - `miniprogram/pages/single-day/index.wxss`
-  - 新增 `.panel-head` 带 `border-bottom` 的分割标题样式。
-  - 优化 `.field:last-child` 去除多余间距。
-  - 调整整体 `gap` 从 `24rpx` 到 `28rpx`。
+  - 移除页面内 `.muted`（迁移至 app.wxss 全局 `.op-muted`）。
+  - 新增 `.field-group` / `.field-dimmed` 实现休息日字段组整体淡化。
+  - 表单间距和圆角与设计系统对齐。
 - `miniprogram/pages/dashboard/index.wxml`
-  - 从 H5 风格改为原生小程序时间轴：新增 `.timeline-dot` + `.timeline-content` 结构。
-  - 摘要卡新增 `.summary-icon-wrap` 图标区，按训练/补剂/睡眠/提醒分类着色。
-  - 时间流每条事件新增 `.type-tag` 类型徽章和 `.time-row` 行布局。
-  - 空状态改为居中布局，新增 `.empty-icon-wrap` 装饰圆和 `.empty-panel-title`。
+  - Summary 卡改用 `.card-accent` 组件类。
+  - 时间轴标签使用共享 `.type-tag {{item.type}}` 类名。
+  - Tags 改用共享 `.tag-{{item.type}}` 配色标签。
 - `miniprogram/pages/dashboard/index.wxss`
-  - 时间轴改为带竖线连接线的 `.timeline::before` + 圆点指示器 `.timeline-dot`，按事件类型着色（training=绿 / wake=蓝 / sleep=紫 / warning=黄 / recovery=青 / supplement=粉）。
-  - 新增 `.type-tag` / `.type-*` 六种类型标签。
-  - Summary 可视化：每个字段前增加带边框背景的图标区。
-  - 空状态居中卡片，带圆形图标容器。
+  - 时间轴圆点加大至 22rpx，增加 3rpx 外环边框和发光 `box-shadow`。
+  - 时间轴条目间增加底部分割线 `.timeline-item:last-child` 无分割线。
+  - Summary 图标区使用共享 `.type-bg-*` 配色类。
+  - 删除页面内重复的 `.tag` 和 `.type-*` 定义（已迁移至 app.wxss 共享）。
 
 ### 保持不变
 - 未迁移完整 H5。

@@ -1,30 +1,35 @@
+/* ═══════════════════════════════════════
+   轻量单日计划
+   ═══════════════════════════════════════ */
+
 .single-day-page {
   display: flex;
   flex-direction: column;
-  gap: 28rpx;
+  gap: 24rpx;
 }
 
 .hero {
   display: flex;
   flex-direction: column;
-  gap: 14rpx;
-  padding-top: 20rpx;
-}
-
-.hero .pill {
-  margin-top: 4rpx;
+  gap: 12rpx;
+  padding-top: 24rpx;
 }
 
 /* ─── Panel header ─── */
 
 .panel-head {
-  margin-bottom: 20rpx;
+  margin-bottom: 24rpx;
   padding-bottom: 20rpx;
-  border-bottom: 1rpx solid #242424;
+  border-bottom: 1rpx solid #262626;
 }
 
-.panel-head .panel-title {
+.panel-head .section-title {
   margin-bottom: 0;
+}
+
+.panel-head .section-desc {
+  margin-bottom: 0;
+  margin-top: 4rpx;
 }
 
 /* ─── Switch row ─── */
@@ -34,10 +39,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 24rpx;
-  margin-bottom: 28rpx;
+  margin-bottom: 24rpx;
   padding: 24rpx;
   border-radius: 16rpx;
-  background: #101010;
+  background: #111111;
   border: 1rpx solid #2a2a2a;
 }
 
@@ -53,8 +58,7 @@
   font-weight: 800;
 }
 
-.switch-desc,
-.checkbox-desc {
+.switch-desc {
   display: block;
   color: #888888;
   font-size: 24rpx;
@@ -62,18 +66,14 @@
   margin-top: 4rpx;
 }
 
-/* ─── Field refinements ─── */
+/* ─── Dimmed field group (rest day) ─── */
 
-.field {
-  margin-bottom: 24rpx;
+.field-group {
+  transition: opacity 0.2s ease-out;
 }
 
-.field:last-child {
-  margin-bottom: 0;
-}
-
-.muted {
-  opacity: 0.58;
+.field-dimmed {
+  opacity: 0.45;
 }
 
 /* ─── Checkbox list ─── */
@@ -82,12 +82,17 @@
   display: flex;
   align-items: flex-start;
   gap: 18rpx;
-  padding: 24rpx 0;
-  border-bottom: 1rpx solid #242424;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #262626;
 }
 
 .checkbox-row:last-child {
   border-bottom: none;
+}
+
+.checkbox-info {
+  flex: 1;
+  min-width: 0;
 }
 
 .checkbox-title {
@@ -98,6 +103,10 @@
 }
 
 .checkbox-desc {
+  display: block;
+  color: #888888;
+  font-size: 23rpx;
+  line-height: 1.5;
   margin-top: 4rpx;
 }
 
@@ -106,6 +115,7 @@
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 18rpx;
+  gap: 16rpx;
   padding-bottom: 32rpx;
+  margin-top: 8rpx;
 }
